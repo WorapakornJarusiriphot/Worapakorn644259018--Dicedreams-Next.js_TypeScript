@@ -52,7 +52,7 @@ import dynamic from 'next/dynamic';
 //   suspense: true,
 // });
 
-export default function MealsPage() {
+export default function Admin() {
   return (
     <>
       {/* <header className={classes.header}>

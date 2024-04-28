@@ -1,13 +1,13 @@
-// 'use client';
+'use client';
 
-// import Image from 'next/image';
+import Image from 'next/image';
 
 // import mealIcon from '@/assets/icons/meal.png';
 // import communityIcon from '@/assets/icons/community.png';
 // import eventsIcon from '@/assets/icons/events.png';
 // import classes from './page.module.css';
 
-export default function index2() {
+export default function ManagePostPlay() {
   return (
     <>
       {/* <header className={classes.header}>
