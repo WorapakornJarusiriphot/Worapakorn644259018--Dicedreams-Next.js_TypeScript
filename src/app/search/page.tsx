@@ -5,7 +5,7 @@ import Image from 'next/image';
 // import eventsIcon from '@/assets/icons/events.png';
 // import classes from './page.module.css';
 
-export default function CommunityPage() {
+export default function Search() {
   return (
     <>
       {/* <header className={classes.header}>

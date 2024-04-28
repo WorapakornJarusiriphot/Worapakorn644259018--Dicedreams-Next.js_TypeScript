@@ -1,5 +1,3 @@
-'use client';
-
 import Image from 'next/image';
 
 // import mealIcon from '@/assets/icons/meal.png';
@@ -7,7 +5,7 @@ import Image from 'next/image';
 // import eventsIcon from '@/assets/icons/events.png';
 // import classes from './page.module.css';
 
-export default function CommunityPage() {
+export default function Participating() {
   return (
     <>
       {/* <header className={classes.header}>
