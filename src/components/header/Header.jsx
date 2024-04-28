@@ -19,25 +19,27 @@ function Header() {
   };
   return (
     <div className="font-bold w-full fixed top-0">
-      <AppBar sx={{ background: "#FFFFFF" }}>
+      <AppBar position="fixed" sx={{ zIndex: 1500, background: "#FFFFFF" }}>  {/* ปรับค่า z-index ให้สูง */}
       {/* <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }} sx={{ background: "#FFFFFF" }}> */}
         <Toolbar>
-          <IconButton
+          {/* <IconButton
             size="medium"
             edge="start"
             color="black"
             aria-label="menu"
             onClick={handleDrawerOpen}
             sx={{ mr: 2 }}
-          >
-            <DrawerMobileNavigation />
-          </IconButton>
+          > */}
+            <DrawerMobileNavigation handleDrawerOpen={handleDrawerOpen} />
+          {/* </IconButton> */}
           <Typography
             variant="h6"
             component="div"
             sx={{ flexGrow: 1, textAlign: "left", color: "black" }}
           >
+            <Link href="/" passHref>
             DiceDreams
+            </Link>
           </Typography>
           <Button
             variant="contained"
