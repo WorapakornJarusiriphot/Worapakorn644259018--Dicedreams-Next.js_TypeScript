@@ -30,6 +30,15 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 
 import { TextFieldProps } from '@mui/material/TextField';
 
+import Alert from '@mui/material/Alert';
+
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
+
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+
 // function Copyright(props: any) {
 //   return (
 //     <Typography variant="body2" color="text.secondary" align="center" {...props}>
@@ -92,14 +101,8 @@ const Label = styled(({ className, componentName, valueType }: { className?: str
 const renderTextField = (params: TextFieldProps) => (
   <TextField
     {...params}
-    InputLabelProps={{ style: { color: 'white' } }}
-    InputProps={{ style: { color: 'white', borderColor: 'white' } }}
-    sx={{
-      '& .MuiOutlinedInput-root': {
-        '&:hover fieldset': { borderColor: 'white' },
-        '&.Mui-focused fieldset': { borderColor: 'white' },
-      },
-    }}
+    fullWidth  // กำหนดให้เต็มความกว้าง
+    sx={{ width: '100%' }} // กำหนดความกว้างให้เท่ากันกับ TextField อื่น
   />
 );
 
@@ -127,6 +130,19 @@ export default function SignUp() {
       password: data.get('password'),
     });
   };
+
+  const [cleared, setCleared] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (cleared) {
+      const timeout = setTimeout(() => {
+        setCleared(false);
+      }, 1500);
+
+      return () => clearTimeout(timeout);
+    }
+    return () => { };
+  }, [cleared]);
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -173,16 +189,6 @@ export default function SignUp() {
                   autoComplete="family-name"
                 />
               </Grid>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <ThemeProvider theme={darkTheme}>
-                  <Grid item xs={12}>
-                    <DatePicker
-                      renderInput={renderTextField}
-                      label="วันเกิด *"
-                    />
-                  </Grid>
-                </ThemeProvider>
-              </LocalizationProvider>
               <Grid item xs={12}>
                 <TextField
                   required
@@ -225,6 +231,42 @@ export default function SignUp() {
                   autoComplete="new-password"
                 />
               </Grid>
+
+              <Grid item xs={12}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DemoContainer
+                    components={['DateTimePicker']}
+                  >
+                    <DemoItem
+                      label={'วันเกิด *'}
+                    >
+                      <DatePicker />
+                    </DemoItem>
+                    {cleared && (
+                      <Alert
+                        sx={{ position: 'absolute', bottom: 0, right: 0 }}
+                        severity="success"
+                      >
+                        Field cleared!
+                      </Alert>
+                    )}
+                  </DemoContainer>
+                </LocalizationProvider>
+              </Grid>
+
+              <Grid item xs={12}>
+                <FormControl>
+                  <FormLabel id="demo-row-radio-buttons-group-label">เพศ</FormLabel>
+                  <RadioGroup
+                    row
+                    aria-labelledby="demo-row-radio-buttons-group-label"
+                    name="row-radio-buttons-group"
+                  >
+                    <FormControlLabel value="female" control={<Radio />} label="ชาย" />
+                    <FormControlLabel value="male" control={<Radio />} label="หญิง" />
+                  </RadioGroup>
+                </FormControl>
+              </Grid>
               {/* <Grid item xs={12}>
                 <FormControlLabel
                   control={<Checkbox value="allowExtraEmails" color="primary" />}
@@ -250,7 +292,7 @@ export default function SignUp() {
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link href="/sign-in" variant="body2">
                   มีบัญชีอยู่แล้วใช่ไหม? เข้าสู่ระบบ
                 </Link>
               </Grid>
