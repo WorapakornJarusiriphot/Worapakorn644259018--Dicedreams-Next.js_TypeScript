@@ -93,10 +93,10 @@ export default function SignIn() {
     } catch (error: any) {
       console.log('Login failed:', error);
       if (axios.isAxiosError(error)) {
-        setErrorMessage('ชื่อผู้ใช้หรืออีเมลหรือรหัสผ่านไม่ถูกต้อง');
+        setErrorMessage('Invalid login credentials');
         console.log('Server response:', error.response?.data);
       } else {
-        setErrorMessage('เกิดข้อผิดพลาดที่ไม่คาดคิด');
+        setErrorMessage('An unexpected error occurred');
         console.log('Unexpected error:', error);
       }
     }
@@ -148,12 +148,6 @@ export default function SignIn() {
               control={<Checkbox value="remember" color="primary" />}
               label="จดจำฉัน"
             />
-            {/* เพิ่มองค์ประกอบนี้ */}
-            {errorMessage && (
-              <Typography color="error" sx={{ mt: 1, mb: 2 }}>
-                {errorMessage}
-              </Typography>
-            )}
             <Button
               type="submit"
               fullWidth

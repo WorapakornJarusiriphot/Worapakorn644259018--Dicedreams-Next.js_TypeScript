@@ -39,18 +39,11 @@ import FormLabel from '@mui/material/FormLabel';
 
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 
+import { useState } from 'react';
+import { Snackbar } from '@mui/material';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/firebaseConfig"; // ตรวจสอบว่า path ถูกต้อง
 
-// import Button from '@mui/material/Button';
-import Snackbar from '@mui/material/Snackbar';
-// import Alert from '@mui/material/Alert';
-
-import { useRouter } from 'next/navigation'; // Import useRouter from next/router
-
-import axios, { AxiosError } from 'axios';
-
-import { useState } from 'react';
 
 // function Copyright(props: any) {
 //   return (
@@ -134,87 +127,40 @@ const renderInput = (params: TextFieldProps) => (
   />
 );
 
-interface UserData {
-  first_name: string;
-  last_name: string;
-  username: string;
-  password: string;
-  email: string;
-  birthday?: string;
-  phone_number?: string;
-  gender?: string;
-  role: string;
+interface AlertState {
+  open: boolean;
+  message: string;
+  severity: 'success' | 'error';
 }
 
 export default function SignUp() {
-  const router = useRouter(); // Initialize the router
-  const [openSnackbar, setOpenSnackbar] = React.useState(false);
-  const [alertMessage, setAlertMessage] = React.useState('');
-  const [alertSeverity, setAlertSeverity] = React.useState<'success' | 'error'>('success');
+  const [alertState, setAlertState] = useState<AlertState>({ open: false, message: '', severity: 'success' });
 
-  const [message, setMessage] = useState('');
-
-  const [alert, setAlert] = React.useState<{ open: boolean; message: string; severity: string }>({ open: false, message: '', severity: '' });
-
-  const [birthday, setBirthday] = React.useState<string | null>(null);
-
-  // Capture the date selected in the DatePicker
-  const handleBirthdayChange = (date: dayjs.Dayjs | null) => {
-    // Change the format to MM-DD-YYYY
-    setBirthday(date ? date.format('MM-DD-YYYY') : null);
+  const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setAlertState(prev => ({ ...prev, open: false }));
   };
 
-  // อัพเดตส่วนของ handleSubmit เพื่อจัดการการแจ้งเตือน
+  const handleAlertClose = (event: React.SyntheticEvent<Element, Event>) => {
+    setAlertState(prev => ({ ...prev, open: false }));
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-
-    // Construct userData with the birthday in the correct format
-    const userData = {
-      first_name: data.get('firstName') as string,
-      last_name: data.get('lastName') as string,
-      username: data.get('username') as string,
-      password: data.get('password') as string,
-      email: data.get('email') as string,
-      birthday: birthday || undefined, // Birthday directly from state
-      phone_number: data.get('phoneNumber') as string || undefined,
-      gender: data.get('gender') as string || undefined,
-      role: 'user',
-    };
-
-    console.log('User data being sent:', userData);
+    const email = data.get('email') as string;
+    const password = data.get('password') as string;
 
     try {
-      // Create user in Firebase Auth
-      const firebaseUser = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
-      console.log('Firebase user created:', firebaseUser);
-
-      // Save user data in MySQL
-      const response = await axios.post('http://localhost:8080/api/users', userData);
-      console.log('Response from server:', response.data);
-
-      setAlertMessage('สมัครสมาชิกสำเร็จ!');
-      setAlertSeverity('success');
-      router.push('/sign-in'); // Navigate to the sign-in page after successful registration
-    } catch (error: any) {
-      if (axios.isAxiosError(error)) {
-        console.error('Error response:', error.response);
-      } else {
-        console.error('Unknown error:', error);
-      }
-
-      setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.response?.data.message || 'เกิดข้อผิดพลาด'));
-      setAlertSeverity('error');
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("User created: ", userCredential.user);
+      setAlertState({ open: true, message: 'User registration successful!', severity: 'success' });
+    } catch (error) {
+      console.error("Error signing up: ", error);
+      setAlertState({ open: true, message: 'Failed to register. Please check your details and try again.', severity: 'error' });
     }
-    setOpenSnackbar(true); // เปิดการแจ้งเตือน
-  };
-
-
-
-
-  const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') return;
-    setOpenSnackbar(false);
   };
 
   const [cleared, setCleared] = React.useState<boolean>(false);
@@ -230,25 +176,25 @@ export default function SignUp() {
     return () => { };
   }, [cleared]);
 
-  const [open, setOpen] = React.useState(false);
+  // const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+  //   if (reason === 'clickaway') {
+  //     return;
+  //   }
+  //   setAlertState(prev => ({ ...prev, open: false }));
+  // };
 
-  const handleClick = () => {
-    setOpen(true);
-  };
-
-  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    setOpen(false);
-  };
 
   return (
     <ThemeProvider theme={darkTheme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
+        <Snackbar open={alertState.open} autoHideDuration={6000} onClose={handleClose}>
+          <Alert onClose={handleClose} severity={alertState.severity} sx={{ width: '100%' }}>
+            {alertState.message}
+          </Alert>
+        </Snackbar>
         <Box
+          component="form" noValidate onSubmit={handleSubmit}
           sx={{
             marginTop: 8,
             display: 'flex',
@@ -340,11 +286,7 @@ export default function SignUp() {
                     <DemoItem
                       label={'วันเกิด *'}
                     >
-                      <DatePicker
-                        // label="Birthday"
-                        value={birthday ? dayjs(birthday, 'MM-DD-YYYY') : null}
-                        onChange={handleBirthdayChange}
-                      />
+                      <DatePicker />
                     </DemoItem>
                     {cleared && (
                       <Alert
@@ -364,11 +306,10 @@ export default function SignUp() {
                   <RadioGroup
                     row
                     aria-labelledby="demo-row-radio-buttons-group-label"
-                    // name="row-radio-buttons-group"
-                    name="gender"
+                    name="row-radio-buttons-group"
                   >
-                    <FormControlLabel value="male" control={<Radio />} label="ชาย" />
-                    <FormControlLabel value="female" control={<Radio />} label="หญิง" />
+                    <FormControlLabel value="female" control={<Radio />} label="ชาย" />
+                    <FormControlLabel value="male" control={<Radio />} label="หญิง" />
                   </RadioGroup>
                 </FormControl>
               </Grid>
@@ -395,11 +336,6 @@ export default function SignUp() {
             >
               สมัครสมาชิก
             </Button>
-            <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbarClose}>
-              <Alert onClose={handleSnackbarClose} severity={alertSeverity} sx={{ width: '100%' }}>
-                {alertMessage}
-              </Alert>
-            </Snackbar>
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link href="/sign-in" variant="body2">

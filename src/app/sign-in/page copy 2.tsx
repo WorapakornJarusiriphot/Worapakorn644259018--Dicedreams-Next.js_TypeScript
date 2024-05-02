@@ -15,21 +15,19 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, Theme, ThemeProvider } from '@mui/material/styles';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
 
-// function Copyright(props: any) {
-//   return (
-//     <Typography variant="body2" color="text.secondary" align="center" {...props}>
-//       {'Copyright © '}
-//       <Link color="inherit" href="https://mui.com/">
-//         Your Website
-//       </Link>{' '}
-//       {new Date().getFullYear()}
-//       {'.'}
-//     </Typography>
-//   );
-// }
+function Copyright(props: any) {
+  return (
+    <Typography variant="body2" color="text.secondary" align="center" {...props}>
+      {'Copyright © '}
+      <Link color="inherit" href="https://mui.com/">
+        Your Website
+      </Link>{' '}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
+  );
+}
 
 const darkTheme = createTheme({
   palette: {
@@ -66,40 +64,20 @@ const darkTheme = createTheme({
 });
 
 export default function SignIn() {
-  const router = useRouter();
   const [defaultTheme, setDefaultTheme] = useState<Theme | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    // ธีมจะถูกสร้างบนไคลเอนต์เท่านั้น
     setDefaultTheme(createTheme());
   }, []);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const identifier = data.get('identifier');
-    const password = data.get('password');
-
-    const credentials = {
-      identifier,
-      password
-    };
-
-    try {
-      console.log('Attempting login with:', credentials);
-      const response = await axios.post('http://localhost:8080/api/auth', credentials);
-      console.log('Access token:', response.data.access_token);
-      router.push('/sign-up'); // Update the redirect URL as needed
-    } catch (error: any) {
-      console.log('Login failed:', error);
-      if (axios.isAxiosError(error)) {
-        setErrorMessage('ชื่อผู้ใช้หรืออีเมลหรือรหัสผ่านไม่ถูกต้อง');
-        console.log('Server response:', error.response?.data);
-      } else {
-        setErrorMessage('เกิดข้อผิดพลาดที่ไม่คาดคิด');
-        console.log('Unexpected error:', error);
-      }
-    }
+    console.log({
+      email: data.get('email'),
+      password: data.get('password'),
+    });
   };
 
   // ใช้ธีมเริ่มต้นถ้ามี หรือใช้ธีมมาตรฐานถ้ายังไม่ได้ถูกสร้าง
@@ -128,10 +106,10 @@ export default function SignIn() {
               margin="normal"
               required
               fullWidth
-              id="identifier"
-              label="อีเมลหรือชื่อผู้ใช้"
-              name="identifier"
-              autoComplete="username"
+              id="email"
+              label="อีเมล"
+              name="email"
+              autoComplete="email"
               autoFocus
             />
             <TextField
@@ -148,12 +126,6 @@ export default function SignIn() {
               control={<Checkbox value="remember" color="primary" />}
               label="จดจำฉัน"
             />
-            {/* เพิ่มองค์ประกอบนี้ */}
-            {errorMessage && (
-              <Typography color="error" sx={{ mt: 1, mb: 2 }}>
-                {errorMessage}
-              </Typography>
-            )}
             <Button
               type="submit"
               fullWidth

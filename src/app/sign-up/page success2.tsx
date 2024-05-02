@@ -164,50 +164,44 @@ export default function SignUp() {
     setBirthday(date ? date.format('MM-DD-YYYY') : null);
   };
 
-  // อัพเดตส่วนของ handleSubmit เพื่อจัดการการแจ้งเตือน
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
+// อัพเดตส่วนของ handleSubmit เพื่อจัดการการแจ้งเตือน
+const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  const data = new FormData(event.currentTarget);
 
-    // Construct userData with the birthday in the correct format
-    const userData = {
-      first_name: data.get('firstName') as string,
-      last_name: data.get('lastName') as string,
-      username: data.get('username') as string,
-      password: data.get('password') as string,
-      email: data.get('email') as string,
-      birthday: birthday || undefined, // Birthday directly from state
-      phone_number: data.get('phoneNumber') as string || undefined,
-      gender: data.get('gender') as string || undefined,
-      role: 'user',
-    };
-
-    console.log('User data being sent:', userData);
-
-    try {
-      // Create user in Firebase Auth
-      const firebaseUser = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
-      console.log('Firebase user created:', firebaseUser);
-
-      // Save user data in MySQL
-      const response = await axios.post('http://localhost:8080/api/users', userData);
-      console.log('Response from server:', response.data);
-
-      setAlertMessage('สมัครสมาชิกสำเร็จ!');
-      setAlertSeverity('success');
-      router.push('/sign-in'); // Navigate to the sign-in page after successful registration
-    } catch (error: any) {
-      if (axios.isAxiosError(error)) {
-        console.error('Error response:', error.response);
-      } else {
-        console.error('Unknown error:', error);
-      }
-
-      setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.response?.data.message || 'เกิดข้อผิดพลาด'));
-      setAlertSeverity('error');
-    }
-    setOpenSnackbar(true); // เปิดการแจ้งเตือน
+  // Construct userData with the birthday in the correct format
+  const userData = {
+    first_name: data.get('firstName') as string,
+    last_name: data.get('lastName') as string,
+    username: data.get('username') as string,
+    password: data.get('password') as string,
+    email: data.get('email') as string,
+    birthday: birthday || undefined, // Birthday directly from state
+    phone_number: data.get('phoneNumber') as string || undefined,
+    gender: data.get('gender') as string || undefined,
+    role: 'user',
   };
+
+  console.log('User data being sent:', userData);
+
+  try {
+    const response = await axios.post('http://localhost:8080/api/users', userData);
+    console.log('Response from server:', response.data);
+
+    setAlertMessage('สมัครสมาชิกสำเร็จ!');
+    setAlertSeverity('success');
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error response:', error.response);
+    } else {
+      console.error('Unknown error:', error);
+    }
+
+    setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.response?.data.message || 'เกิดข้อผิดพลาด'));
+    setAlertSeverity('error');
+  }
+  setOpenSnackbar(true); // เปิดการแจ้งเตือน
+};
 
 
 
@@ -341,7 +335,7 @@ export default function SignUp() {
                       label={'วันเกิด *'}
                     >
                       <DatePicker
-                        // label="Birthday"
+                        label="Birthday"
                         value={birthday ? dayjs(birthday, 'MM-DD-YYYY') : null}
                         onChange={handleBirthdayChange}
                       />
@@ -364,11 +358,10 @@ export default function SignUp() {
                   <RadioGroup
                     row
                     aria-labelledby="demo-row-radio-buttons-group-label"
-                    // name="row-radio-buttons-group"
-                    name="gender"
+                    name="row-radio-buttons-group"
                   >
-                    <FormControlLabel value="male" control={<Radio />} label="ชาย" />
-                    <FormControlLabel value="female" control={<Radio />} label="หญิง" />
+                    <FormControlLabel value="female" control={<Radio />} label="ชาย" />
+                    <FormControlLabel value="male" control={<Radio />} label="หญิง" />
                   </RadioGroup>
                 </FormControl>
               </Grid>

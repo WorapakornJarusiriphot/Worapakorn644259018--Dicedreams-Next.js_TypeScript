@@ -1,3 +1,4 @@
+// next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -7,6 +8,15 @@ const nextConfig = {
       "live.staticflickr.com",
       "whatsericplaying.files.wordpress.com",
     ],
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        fs: false,
+        // ปิดการใช้งานโมดูลอื่นๆที่เกี่ยวข้อง (หากมี)
+      };
+    }
+    return config;
   },
 };
 
