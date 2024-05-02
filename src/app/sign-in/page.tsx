@@ -82,14 +82,20 @@ export default function SignIn() {
 
     const credentials = {
       identifier,
-      password
+      password,
     };
 
     try {
       console.log('Attempting login with:', credentials);
       const response = await axios.post('http://localhost:8080/api/auth', credentials);
+
       console.log('Access token:', response.data.access_token);
-      router.push('/sign-up'); // Update the redirect URL as needed
+
+      // จัดเก็บ token ใน local storage
+      localStorage.setItem('access_token', response.data.access_token);
+
+      // เปลี่ยนเส้นทางไปยังหน้าแรกหรือหน้าอื่น ๆ หลังจากล็อกอินสำเร็จ
+      router.push('/');
     } catch (error: any) {
       console.log('Login failed:', error);
       if (axios.isAxiosError(error)) {
