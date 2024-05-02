@@ -185,17 +185,11 @@ export default function SignUp() {
     console.log('User data being sent:', userData);
 
     try {
-      // Create user in Firebase Auth
-      const firebaseUser = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
-      console.log('Firebase user created:', firebaseUser);
-
-      // Save user data in MySQL
       const response = await axios.post('http://localhost:8080/api/users', userData);
       console.log('Response from server:', response.data);
 
       setAlertMessage('สมัครสมาชิกสำเร็จ!');
       setAlertSeverity('success');
-      router.push('/sign-in'); // Navigate to the sign-in page after successful registration
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
         console.error('Error response:', error.response);

@@ -195,7 +195,6 @@ export default function SignUp() {
 
       setAlertMessage('สมัครสมาชิกสำเร็จ!');
       setAlertSeverity('success');
-      router.push('/sign-in'); // Navigate to the sign-in page after successful registration
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
         console.error('Error response:', error.response);

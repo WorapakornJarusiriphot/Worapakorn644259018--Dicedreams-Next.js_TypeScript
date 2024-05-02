@@ -48,9 +48,11 @@ import Snackbar from '@mui/material/Snackbar';
 
 import { useRouter } from 'next/navigation'; // Import useRouter from next/router
 
-import axios, { AxiosError } from 'axios';
-
 import { useState } from 'react';
+import axios from 'axios';
+
+import bcrypt from 'bcrypt';
+import User from '../api/models/user';
 
 // function Copyright(props: any) {
 //   return (
@@ -134,82 +136,74 @@ const renderInput = (params: TextFieldProps) => (
   />
 );
 
-interface UserData {
-  first_name: string;
-  last_name: string;
-  username: string;
-  password: string;
-  email: string;
-  birthday?: string;
-  phone_number?: string;
-  gender?: string;
-  role: string;
-}
-
 export default function SignUp() {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    username: '',
+    birthday: '',
+    phoneNumber: '',
+    gender: '',
+    // เพิ่มฟิลด์อื่น ๆ ที่คุณต้องการเก็บ
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const [birthday, setBirthday] = React.useState<dayjs.Dayjs | null>(null);
+
   const router = useRouter(); // Initialize the router
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState('');
   const [alertSeverity, setAlertSeverity] = React.useState<'success' | 'error'>('success');
 
-  const [message, setMessage] = useState('');
+const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  const data = new FormData(event.currentTarget);
 
-  const [alert, setAlert] = React.useState<{ open: boolean; message: string; severity: string }>({ open: false, message: '', severity: '' });
-
-  const [birthday, setBirthday] = React.useState<string | null>(null);
-
-  // Capture the date selected in the DatePicker
-  const handleBirthdayChange = (date: dayjs.Dayjs | null) => {
-    // Change the format to MM-DD-YYYY
-    setBirthday(date ? date.format('MM-DD-YYYY') : null);
+  // กำหนดข้อมูลให้ตรงกับ API
+  const userData = {
+    first_name: data.get('firstName'),
+    last_name: data.get('lastName'),
+    username: data.get('username'),
+    email: data.get('email'),
+    password: data.get('password'),
+    phone_number: data.get('phoneNumber'),
+    gender: data.get('row-radio-buttons-group'),
+    birthday: data.get('birthday')  // ตรวจสอบให้แน่ใจว่าฟิลด์ 'birthday' ส่งข้อมูลวันที่ถูกต้อง
   };
 
-  // อัพเดตส่วนของ handleSubmit เพื่อจัดการการแจ้งเตือน
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
+  try {
+    const response = await fetch('/api/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData)
+    });
 
-    // Construct userData with the birthday in the correct format
-    const userData = {
-      first_name: data.get('firstName') as string,
-      last_name: data.get('lastName') as string,
-      username: data.get('username') as string,
-      password: data.get('password') as string,
-      email: data.get('email') as string,
-      birthday: birthday || undefined, // Birthday directly from state
-      phone_number: data.get('phoneNumber') as string || undefined,
-      gender: data.get('gender') as string || undefined,
-      role: 'user',
-    };
+    await User.create(userData);
 
-    console.log('User data being sent:', userData);
-
-    try {
-      // Create user in Firebase Auth
-      const firebaseUser = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
-      console.log('Firebase user created:', firebaseUser);
-
-      // Save user data in MySQL
-      const response = await axios.post('http://localhost:8080/api/users', userData);
-      console.log('Response from server:', response.data);
-
-      setAlertMessage('สมัครสมาชิกสำเร็จ!');
+    if (response.ok) {
+      setAlertMessage('สมัครสมาชิกสำเร็จแล้ว');
       setAlertSeverity('success');
       router.push('/sign-in'); // Navigate to the sign-in page after successful registration
-    } catch (error: any) {
-      if (axios.isAxiosError(error)) {
-        console.error('Error response:', error.response);
-      } else {
-        console.error('Unknown error:', error);
-      }
-
-      setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.response?.data.message || 'เกิดข้อผิดพลาด'));
+    } else {
+      const errorResponse = await response.json();
+      setAlertMessage(`สมัครสมาชิกไม่สำเร็จ: ${errorResponse.message}`);
       setAlertSeverity('error');
     }
-    setOpenSnackbar(true); // เปิดการแจ้งเตือน
-  };
+  } catch (error) {
+    setAlertMessage('เกิดข้อผิดพลาดในการสมัครสมาชิก');
+    setAlertSeverity('error');
+  }
 
-
+  setOpenSnackbar(true);
+};
 
 
   const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -340,11 +334,7 @@ export default function SignUp() {
                     <DemoItem
                       label={'วันเกิด *'}
                     >
-                      <DatePicker
-                        // label="Birthday"
-                        value={birthday ? dayjs(birthday, 'MM-DD-YYYY') : null}
-                        onChange={handleBirthdayChange}
-                      />
+                      <DatePicker />
                     </DemoItem>
                     {cleared && (
                       <Alert
@@ -364,11 +354,10 @@ export default function SignUp() {
                   <RadioGroup
                     row
                     aria-labelledby="demo-row-radio-buttons-group-label"
-                    // name="row-radio-buttons-group"
-                    name="gender"
+                    name="row-radio-buttons-group"
                   >
-                    <FormControlLabel value="male" control={<Radio />} label="ชาย" />
-                    <FormControlLabel value="female" control={<Radio />} label="หญิง" />
+                    <FormControlLabel value="female" control={<Radio />} label="ชาย" />
+                    <FormControlLabel value="male" control={<Radio />} label="หญิง" />
                   </RadioGroup>
                 </FormControl>
               </Grid>

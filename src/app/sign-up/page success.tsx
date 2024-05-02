@@ -48,10 +48,6 @@ import Snackbar from '@mui/material/Snackbar';
 
 import { useRouter } from 'next/navigation'; // Import useRouter from next/router
 
-import axios, { AxiosError } from 'axios';
-
-import { useState } from 'react';
-
 // function Copyright(props: any) {
 //   return (
 //     <Typography variant="body2" color="text.secondary" align="center" {...props}>
@@ -134,83 +130,29 @@ const renderInput = (params: TextFieldProps) => (
   />
 );
 
-interface UserData {
-  first_name: string;
-  last_name: string;
-  username: string;
-  password: string;
-  email: string;
-  birthday?: string;
-  phone_number?: string;
-  gender?: string;
-  role: string;
-}
-
 export default function SignUp() {
   const router = useRouter(); // Initialize the router
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState('');
   const [alertSeverity, setAlertSeverity] = React.useState<'success' | 'error'>('success');
 
-  const [message, setMessage] = useState('');
-
-  const [alert, setAlert] = React.useState<{ open: boolean; message: string; severity: string }>({ open: false, message: '', severity: '' });
-
-  const [birthday, setBirthday] = React.useState<string | null>(null);
-
-  // Capture the date selected in the DatePicker
-  const handleBirthdayChange = (date: dayjs.Dayjs | null) => {
-    // Change the format to MM-DD-YYYY
-    setBirthday(date ? date.format('MM-DD-YYYY') : null);
-  };
-
-  // อัพเดตส่วนของ handleSubmit เพื่อจัดการการแจ้งเตือน
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-
-    // Construct userData with the birthday in the correct format
-    const userData = {
-      first_name: data.get('firstName') as string,
-      last_name: data.get('lastName') as string,
-      username: data.get('username') as string,
-      password: data.get('password') as string,
-      email: data.get('email') as string,
-      birthday: birthday || undefined, // Birthday directly from state
-      phone_number: data.get('phoneNumber') as string || undefined,
-      gender: data.get('gender') as string || undefined,
-      role: 'user',
-    };
-
-    console.log('User data being sent:', userData);
+    const email = data.get('email') as string;
+    const password = data.get('password') as string;
 
     try {
-      // Create user in Firebase Auth
-      const firebaseUser = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
-      console.log('Firebase user created:', firebaseUser);
-
-      // Save user data in MySQL
-      const response = await axios.post('http://localhost:8080/api/users', userData);
-      console.log('Response from server:', response.data);
-
-      setAlertMessage('สมัครสมาชิกสำเร็จ!');
+      await createUserWithEmailAndPassword(auth, email, password);
+      setAlertMessage('สมัครสมาชิกสำเร็จแล้ว');
       setAlertSeverity('success');
       router.push('/sign-in'); // Navigate to the sign-in page after successful registration
-    } catch (error: any) {
-      if (axios.isAxiosError(error)) {
-        console.error('Error response:', error.response);
-      } else {
-        console.error('Unknown error:', error);
-      }
-
-      setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.response?.data.message || 'เกิดข้อผิดพลาด'));
+    } catch (error) {
+      setAlertMessage('สมัครสมาชิกไม่สำเร็จ');
       setAlertSeverity('error');
     }
-    setOpenSnackbar(true); // เปิดการแจ้งเตือน
+    setOpenSnackbar(true);
   };
-
-
-
 
   const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') return;
@@ -340,11 +282,7 @@ export default function SignUp() {
                     <DemoItem
                       label={'วันเกิด *'}
                     >
-                      <DatePicker
-                        // label="Birthday"
-                        value={birthday ? dayjs(birthday, 'MM-DD-YYYY') : null}
-                        onChange={handleBirthdayChange}
-                      />
+                      <DatePicker />
                     </DemoItem>
                     {cleared && (
                       <Alert
@@ -364,11 +302,10 @@ export default function SignUp() {
                   <RadioGroup
                     row
                     aria-labelledby="demo-row-radio-buttons-group-label"
-                    // name="row-radio-buttons-group"
-                    name="gender"
+                    name="row-radio-buttons-group"
                   >
-                    <FormControlLabel value="male" control={<Radio />} label="ชาย" />
-                    <FormControlLabel value="female" control={<Radio />} label="หญิง" />
+                    <FormControlLabel value="female" control={<Radio />} label="ชาย" />
+                    <FormControlLabel value="male" control={<Radio />} label="หญิง" />
                   </RadioGroup>
                 </FormControl>
               </Grid>
