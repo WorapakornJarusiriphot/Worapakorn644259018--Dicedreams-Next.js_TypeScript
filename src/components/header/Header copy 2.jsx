@@ -143,7 +143,7 @@ function Header() {
                   color: "white",
                   marginRight: "10px",
                 }}
-                href="/post-play"
+                href="/create-post"
                 replace="true"
               >
                 สร้างโพสต์
