@@ -61,10 +61,8 @@ import { useState } from 'react';
 
 // import React from 'react';
 import { FileUpload, FileUploadProps } from '@/components/FileUpload/FileUpload';
+import { DropzoneAreaBase } from 'material-ui-dropzone';
 
-import App from "./App";
-
-import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 
 
 // TODO remove, this demo shouldn't need to reset the theme.
@@ -213,7 +211,7 @@ export default function PostPlay() {
       const response = await axios.post('http://localhost:8080/api/users', userData);
       console.log('Response from server:', response.data);
 
-      setAlertMessage('สร้างโพสต์สำเร็จ!');
+      setAlertMessage('สมัครสมาชิกสำเร็จ!');
       setAlertSeverity('success');
       router.push('/sign-in'); // Navigate to the sign-in page after successful registration
     } catch (error: any) {
@@ -223,7 +221,7 @@ export default function PostPlay() {
         console.error('Unknown error:', error);
       }
 
-      setAlertMessage('สร้างโพสต์ไม่สำเร็จ: ' + (error.response?.data.message || 'เกิดข้อผิดพลาด'));
+      setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.response?.data.message || 'เกิดข้อผิดพลาด'));
       setAlertSeverity('error');
     }
     setOpenSnackbar(true); // เปิดการแจ้งเตือน
@@ -267,209 +265,191 @@ export default function PostPlay() {
   return (
     <>
       <ThemeProvider theme={darkTheme}>
-        <Container component="main" maxWidth="xs">
-          <CssBaseline />
-          <Box
-            sx={{
-              marginTop: 8,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              position: 'relative',  // Ensure this is positioned relative to its container
-              zIndex: 2,  // Lower z-index than Header
-            }}
-          >
-            <br />
-            <br />
-            {/* <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            position: 'relative',  // Ensure this is positioned relative to its container
+            zIndex: 2,  // Lower z-index than Header
+          }}
+        >
+          <br />
+          <br />
+          {/* <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
             <LockOutlinedIcon />
           </Avatar> */}
-            <Typography component="h1" variant="h5">
-              สร้างโพสต์นัดเล่น
-            </Typography>
-            <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-              <Grid container spacing={2}>
-                {/* <Grid item xs={12} sm={6}>
-                  <TextField
-                    autoComplete="given-name"
-                    name="firstName"
-                    required
-                    fullWidth
-                    id="firstName"
-                    label="ชื่อจริง"
-                    autoFocus
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="lastName"
-                    label="นามสกุล"
-                    name="lastName"
-                    autoComplete="family-name"
-                  />
-                </Grid> */}
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="username"
-                    label="ชื่อโพสต์"
-                    name="username"
-                    autoComplete="username"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    // required
-                    fullWidth
-                    name="phoneNumber"
-                    label="รายละเอียดของโพสต์"
-                    type="tel"
-                    id="phoneNumber"
-                    autoComplete="tel"
-                    multiline
-                    rows={4}
-                    helperText="0 / 100"
-                  // defaultValue="Default Value"
-                  />
-                </Grid>
-                {/* <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="email"
-                    label="อีเมล"
-                    name="email"
-                    autoComplete="email"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    name="password"
-                    label="รหัสผ่าน"
-                    type="password"
-                    id="password"
-                    autoComplete="new-password"
-                  />
-                </Grid> */}
+          <Typography component="h1" variant="h5">
+            สมัครสมาชิก
+          </Typography>
+          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  autoComplete="given-name"
+                  name="firstName"
+                  required
+                  fullWidth
+                  id="firstName"
+                  label="ชื่อจริง"
+                  autoFocus
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  id="lastName"
+                  label="นามสกุล"
+                  name="lastName"
+                  autoComplete="family-name"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  id="username"
+                  label="ชื่อผู้ใช้"
+                  name="username"
+                  autoComplete="username"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  name="phoneNumber"
+                  label="หมายเลขโทรศัพท์"
+                  type="tel"
+                  id="phoneNumber"
+                  autoComplete="tel"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  id="email"
+                  label="อีเมล"
+                  name="email"
+                  autoComplete="email"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  name="password"
+                  label="รหัสผ่าน"
+                  type="password"
+                  id="password"
+                  autoComplete="new-password"
+                />
+              </Grid>
 
-                <Grid item xs={12}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DemoContainer
-                      components={['DateTimePicker', 'TimePicker']}
-                    >
-                      <DemoItem
-                        label={'เลือกวันที่เจอกัน *'}
-                      >
-                        <DatePicker
-                          // label="Birthday"
-                          value={birthday ? dayjs(birthday, 'MM-DD-YYYY') : null}
-                          onChange={handleBirthdayChange}
-                        />
-                      </DemoItem>
-                      {cleared && (
-                        <Alert
-                          sx={{ position: 'absolute', bottom: 0, right: 0 }}
-                          severity="success"
-                        >
-                          Field cleared!
-                        </Alert>
-                      )}
-                      <DemoItem
-                        label={'เลือกเวลาที่เจอกัน *'}
-                      >
-                        <TimePicker
-                          // label="Birthday"
-                          value={birthday ? dayjs(birthday, 'MM-DD-YYYY') : null}
-                          onChange={handleBirthdayChange}
-                          viewRenderers={{
-                            hours: renderTimeViewClock,
-                            minutes: renderTimeViewClock,
-                            seconds: renderTimeViewClock,
-                          }}
-                        />
-                      </DemoItem>
-                      {cleared && (
-                        <Alert
-                          sx={{ position: 'absolute', bottom: 0, right: 0 }}
-                          severity="success"
-                        >
-                          Field cleared!
-                        </Alert>
-                      )}
-                    </DemoContainer>
-                  </LocalizationProvider>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <DemoItem
-                    label={'รูปภาพ *'}
+              <Grid item xs={12}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DemoContainer
+                    components={['DateTimePicker']}
                   >
-                    <App />
-                  </DemoItem>
-                </Grid>
-
-                {/* <Grid item xs={12}>
-                  <FormControl>
-                    <FormLabel id="demo-row-radio-buttons-group-label">เพศ</FormLabel>
-                    <RadioGroup
-                      row
-                      aria-labelledby="demo-row-radio-buttons-group-label"
-                      // name="row-radio-buttons-group"
-                      name="gender"
+                    <DemoItem
+                      label={'วันเกิด *'}
                     >
-                      <FormControlLabel value="male" control={<Radio />} label="ชาย" />
-                      <FormControlLabel value="female" control={<Radio />} label="หญิง" />
-                    </RadioGroup>
-                  </FormControl>
-                </Grid> */}
-                {/* <Grid item xs={12}>
+                      <DatePicker
+                        // label="Birthday"
+                        value={birthday ? dayjs(birthday, 'MM-DD-YYYY') : null}
+                        onChange={handleBirthdayChange}
+                      />
+                    </DemoItem>
+                    {cleared && (
+                      <Alert
+                        sx={{ position: 'absolute', bottom: 0, right: 0 }}
+                        severity="success"
+                      >
+                        Field cleared!
+                      </Alert>
+                    )}
+                  </DemoContainer>
+                </LocalizationProvider>
+              </Grid>
+
+              <Grid item xs={12}>
+              <DropzoneAreaBase
+        acceptedFiles={['image/*']}
+        dropzoneText={"Drag and drop an image here or click"}
+        onDrop={(files) => console.log('Files:', files)}
+        onAlert={(message, variant) => console.log(`${variant}: ${message}`)} fileObjects={[]}      
+      />
+              </Grid>
+
+              <Grid item xs={12}>
+                <FormControl>
+                  <FormLabel id="demo-row-radio-buttons-group-label">เพศ</FormLabel>
+                  <RadioGroup
+                    row
+                    aria-labelledby="demo-row-radio-buttons-group-label"
+                    // name="row-radio-buttons-group"
+                    name="gender"
+                  >
+                    <FormControlLabel value="male" control={<Radio />} label="ชาย" />
+                    <FormControlLabel value="female" control={<Radio />} label="หญิง" />
+                  </RadioGroup>
+                </FormControl>
+              </Grid>
+              {/* <Grid item xs={12}>
                 <FormControlLabel
                   control={<Checkbox value="allowExtraEmails" color="primary" />}
                   label="I want to receive inspiration, marketing promotions and updates via email."
                 />
               </Grid> */}
+            </Grid>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 3,
+                mb: 2,
+                color: 'white',  // ตั้งค่าตัวอักษรเป็นสีขาว
+                backgroundColor: 'red',  // ตั้งค่าพื้นหลังเป็นสีแดง
+                '&:hover': {
+                  backgroundColor: 'darkred',  // ตั้งค่าพื้นหลังของปุ่มเมื่อ hover เป็นสีแดงเข้ม
+                }
+              }}
+            >
+              สมัครสมาชิก
+            </Button>
+            <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbarClose}>
+              <Alert onClose={handleSnackbarClose} severity={alertSeverity} sx={{ width: '100%' }}>
+                {alertMessage}
+              </Alert>
+            </Snackbar>
+            <Grid container justifyContent="flex-end">
+              <Grid item>
+                <Link href="/sign-in" variant="body2">
+                  มีบัญชีอยู่แล้วใช่ไหม? เข้าสู่ระบบ
+                </Link>
               </Grid>
-
-              <br />
-
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{
-                  mt: 3,
-                  mb: 2,
-                  color: 'white',  // ตั้งค่าตัวอักษรเป็นสีขาว
-                  backgroundColor: 'blue',  // ตั้งค่าพื้นหลังเป็นสีแดง
-                  '&:hover': {
-                    backgroundColor: 'darkred',  // ตั้งค่าพื้นหลังของปุ่มเมื่อ hover เป็นสีแดงเข้ม
-                  }
-                }}
-              >
-                สร้างโพสต์นัดเล่น
-              </Button>
-              <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbarClose}>
-                <Alert onClose={handleSnackbarClose} severity={alertSeverity} sx={{ width: '100%' }}>
-                  {alertMessage}
-                </Alert>
-              </Snackbar>
-              {/* <Grid container justifyContent="flex-end">
-                <Grid item>
-                  <Link href="/sign-in" variant="body2">
-                    มีบัญชีอยู่แล้วใช่ไหม? เข้าสู่ระบบ
-                  </Link>
-                </Grid>
-              </Grid> */}
-            </Box>
+            </Grid>
           </Box>
-          {/* <Copyright sx={{ mt: 5 }} /> */}
-        </Container>
-      </ThemeProvider>
+        </Box>
+        {/* <Copyright sx={{ mt: 5 }} /> */}
+      </Container>
+    </ThemeProvider>
+      <div className="App">
+        {/* <FileUpload {...fileUploadProp} imageButton/> */}
+        <FileUpload {...fileUploadProp} />
+      </div>
+      <DropzoneAreaBase
+        acceptedFiles={['image/*']}
+        dropzoneText={"Drag and drop an image here or click"}
+        onDrop={(files) => console.log('Files:', files)}
+        onAlert={(message, variant) => console.log(`${variant}: ${message}`)} fileObjects={[]}      
+      />
     </>
   );
 }
