@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   FormControl,
@@ -24,7 +24,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { InputLabel, MenuItem, Select } from "@mui/material";
-import { useState } from "react";
+import { useState } from 'react';
 import InputAdornment from "@mui/material/InputAdornment";
 import { styled } from "@mui/material/styles";
 import Tooltip from "@mui/material/Tooltip";
@@ -241,15 +241,13 @@ function Filter() {
                 }
               >
                 <DatePicker
-                  slots={{
-                    textField: (params) => (
-                      <TextField
-                        {...params}
-                        InputLabelProps={{ style: { color: "white" } }}
-                        InputProps={{ style: { color: "white" } }}
-                      />
-                    ),
-                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      InputLabelProps={{ style: { color: "white" } }}
+                      InputProps={{ style: { color: "white" } }}
+                    />
+                  )}
                 />
               </DemoItem>
               <DemoItem
@@ -257,16 +255,14 @@ function Filter() {
                   <Label componentName="ค้นหาเวลาที่เล่น" valueType="time" />
                 }
               >
-                <DatePicker
-                  slots={{
-                    textField: (params) => (
-                      <TextField
-                        {...params}
-                        InputLabelProps={{ style: { color: "white" } }}
-                        InputProps={{ style: { color: "white" } }}
-                      />
-                    ),
-                  }}
+                <TimePicker
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      InputLabelProps={{ style: { color: "white" } }}
+                      InputProps={{ style: { color: "white" } }}
+                    />
+                  )}
                 />
               </DemoItem>
               {/* <DemoItem
@@ -274,18 +270,15 @@ function Filter() {
                   <Label componentName="ค้นหาวันและเวลาที่เล่น" valueType="date time" />
                 }
               >
-<DatePicker
-  slots={{
-    textField: (params) => (
-      <TextField
-        {...params}
-        InputLabelProps={{ style: { color: "white" } }}
-        InputProps={{ style: { color: "white" } }}
-      />
-    ),
-  }}
-/>
-
+                <DateTimePicker
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      InputLabelProps={{ style: { color: "white" } }}
+                      InputProps={{ style: { color: "white" } }}
+                    />
+                  )}
+                />
               </DemoItem> */}
             </DemoContainer>
           </ThemeProvider>
