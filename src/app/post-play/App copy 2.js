@@ -9,11 +9,9 @@ export default function App({ onImageUpload }) {
 
   const updateFiles = (incomingFiles) => {
     setFiles(incomingFiles);
-    if (incomingFiles.length > 0 && incomingFiles[0].file instanceof File) {
+    if (incomingFiles.length > 0) {
       // ส่งข้อมูลรูปภาพกลับไปที่ component หลัก
-      onImageUpload(incomingFiles[0].file);
-    } else {
-      console.error("The uploaded file is not a valid File instance.");
+      onImageUpload(incomingFiles[0]);
     }
   };
 

@@ -66,7 +66,7 @@ import App from "./App";
 
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 
-import locationImage from './location.png';
+
 
 // import {
 //   FormControl,
@@ -91,7 +91,7 @@ import DirectionsIcon from "@mui/icons-material/Directions";
 // import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 // import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 // import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { InputLabel, MenuItem, Modal, Select } from "@mui/material";
+import { InputLabel, MenuItem, Select } from "@mui/material";
 // import { useState } from 'react';
 import InputAdornment from "@mui/material/InputAdornment";
 // import { styled } from "@mui/material/styles";
@@ -223,9 +223,6 @@ export default function PostPlay() {
   const [gamesImage, setGamesImage] = React.useState(''); // Base64 image
   const [userId, setUserId] = React.useState(''); // Set userId dynamically
 
-  const [googleMapLink, setGoogleMapLink] = useState('');
-
-  const [fullImageOpen, setFullImageOpen] = useState(false); // State for the modal
 
   // React.useEffect(() => {
   //   // ดึงข้อมูลผู้ใช้จากฐานข้อมูลหลังจากที่ผู้ใช้เข้าสู่ระบบ
@@ -277,13 +274,6 @@ export default function PostPlay() {
       console.error('JWT Token is missing');
     }
   }, []);
-
-
-  React.useEffect(() => {
-    if (location) {
-      setGoogleMapLink(`https://www.google.com/maps/place/Outcast+Gaming/@13.819525,99.9742148,12z/data=!4m19!1m12!4m11!1m3!2m2!1d100.0641653!2d13.8180247!1m6!1m2!1s0x30e2e58a2b199583:0x4cac0a358181f29!2zNDMgNSDguJYuIOC4o-C4suC4iuC4lOC4s-C5gOC4meC4tOC4mSDguJXguLPguJrguKXguJ7guKPguLDguJvguJDguKHguYDguIjguJTguLXguKLguYwg4LmA4Lih4Li34Lit4LiHIOC4meC4hOC4o-C4m-C4kOC4oSA3MzAwMA!2m2!1d100.0566166!2d13.8195387!3m5!1s0x30e2e58a2b199583:0x4cac0a358181f29!8m2!3d13.8195387!4d100.0566166!16s%2Fg%2F11tt2sj6yd?entry=ttu`);
-    }
-  }, [location]);
 
 
 
@@ -627,9 +617,7 @@ export default function PostPlay() {
       if (response.status === 201) {
         setAlertMessage('สร้างโพสต์สำเร็จ!');
         setAlertSeverity('success');
-        console.log('Navigating to the homepage'); // บันทึกข้อมูลการนำทาง
         router.push('/'); // เปลี่ยนเส้นทางเมื่อโพสต์สำเร็จ
-        // router.replace('/'); // เปลี่ยนเส้นทางเมื่อโพสต์สำเร็จ
       } else {
         setAlertMessage(`การสร้างโพสต์ไม่สำเร็จ: ได้รับสถานะ ${response.status}`);
         setAlertSeverity('error');
@@ -800,14 +788,6 @@ export default function PostPlay() {
   //   setNumPeople(event.target.value);
   // };
 
-  const handleImageClick = () => {
-    setFullImageOpen(true); // Open the modal
-  };
-
-  const handleModalClose = () => {
-    setFullImageOpen(false); // Close the modal
-  };
-
   return (
     <>
       <ThemeProvider theme={darkTheme}>
@@ -930,7 +910,7 @@ export default function PostPlay() {
                 <Grid item xs={12}>
                   <FormControl fullWidth>
                     <InputLabel id="number-select-label">
-                      จำนวนผู้เล่นที่จะนัดเจอกัน *
+                      จำนวนผู้เล่นที่ว่างตั้งแต่
                     </InputLabel>
                     <Select
                       labelId="number-select-label"
@@ -997,7 +977,6 @@ export default function PostPlay() {
                           }}
                         />
                       </DemoItem>
-
                       {cleared && (
                         <Alert
                           sx={{ position: 'absolute', bottom: 0, right: 0 }}
@@ -1015,27 +994,6 @@ export default function PostPlay() {
                     label={'รูปภาพ *'}
                   >
                     <App onImageUpload={handleImageUpload} />
-                  </DemoItem>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <DemoItem
-                    label={'สถานที่ *'}
-                  >
-                    <img src={locationImage.src} alt="Location" style={{ width: '100%', cursor: 'pointer', marginTop: '10px' }} onClick={handleImageClick} />
-
-                    {/* Modal เพื่อขยายภาพ */}
-                    <Modal open={fullImageOpen} onClose={handleModalClose} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                      <Box sx={{ width: '80%', height: '80%' }}>
-                        <img src={locationImage.src} alt="Location" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                      </Box>
-                    </Modal>
-
-                    {googleMapLink && (
-                      <Link href={googleMapLink} target="_blank" rel="noopener noreferrer">
-                        ดูลิงค์แผนที่จาก Google Maps
-                      </Link>
-                    )}
                   </DemoItem>
                 </Grid>
 
