@@ -32,6 +32,9 @@ db.store = require("./store")(sequelize, Sequelize);
 db.notification = require("./notification")(sequelize, Sequelize);
 
 
+// กำหนดความสัมพันธ์
+db.user.hasOne(db.store, { foreignKey: 'users_id', as: 'store' });
+db.store.belongsTo(db.user, { foreignKey: 'users_id' });
 
 
 module.exports = db;

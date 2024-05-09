@@ -52,14 +52,54 @@ function Header() {
   }, []);
 
   const [user, setUser] = useState({
+    username: "",
+    userType: "",
     firstName: "",
     lastName: "",
     profilePictureUrl: "",
   });
 
+  // ประกาศฟังก์ชัน fetchUserProfile ก่อนใช้งานใน useEffect
+  const fetchUserProfile = async (userId, accessToken, decodedToken) => {
+    try {
+      console.log(`Requesting URL: http://localhost:8080/api/users/${userId}`);
+      const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      console.log("API Response Status:", response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Profile Data:", data);
+        setUser({
+          username: decodedToken.username,
+          userType: data.role, // ตรวจสอบและอัปเดต userType จาก API response
+          firstName: data.first_name,
+          lastName: data.last_name,
+          profilePictureUrl: data.user_image || "",
+        });
+      } else {
+        console.error(`API Error: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    }
+  };
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access_token");
+    if (accessToken) {
+      const decodedToken = JSON.parse(atob(accessToken.split(".")[1]));
+      const userId = decodedToken.users_id;
+      fetchUserProfile(userId, accessToken, decodedToken);
+    }
+  }, []);
+
   // Example code in Header.jsx
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    const fetchUserProfile = async (userId, accessToken, decodedToken) => {
       try {
         const accessToken = localStorage.getItem("access_token");
         if (accessToken) {
@@ -87,6 +127,8 @@ function Header() {
 
             // ตั้งค่า profile image path และข้อมูลอื่นๆ
             setUser({
+              username: decodedToken.username,
+              userType: data.role, // ตรวจสอบและอัปเดต userType จาก API response
               firstName: data.first_name,
               lastName: data.last_name,
               profilePictureUrl: data.user_image || "",
@@ -133,21 +175,36 @@ function Header() {
               DiceDreams
             </Link>
           </Typography>
+
           {username ? (
             <>
-              {/* แสดงรูปโปรไฟล์เมื่อเข้าสู่ระบบแล้ว */}
-              <Button
-                variant="contained"
-                sx={{
-                  background: "black",
-                  color: "white",
-                  marginRight: "10px",
-                }}
-                href="/post-play"
-                replace="true"
-              >
-                สร้างโพสต์
-              </Button>
+              {user.userType === "store" ? (
+                <Button
+                  variant="contained"
+                  sx={{
+                    background: "black",
+                    color: "white",
+                    marginRight: "10px",
+                  }}
+                  href="/post-activity"
+                  replace="true"
+                >
+                  สร้างโพสต์กิจกรรม
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  sx={{
+                    background: "black",
+                    color: "white",
+                    marginRight: "10px",
+                  }}
+                  href="/post-play"
+                  replace="true"
+                >
+                  สร้างโพสต์
+                </Button>
+              )}
               <Button
                 variant="contained"
                 sx={{
