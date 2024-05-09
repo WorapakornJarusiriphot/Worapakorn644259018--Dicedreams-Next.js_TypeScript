@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const config = require("../configs/auth.config");
 const db = require("../models");
 const User = db.user;
+const Store = db.store; // ต้องมีการอ้างอิงไปยัง model Store
 
 // login route
 router.post("/", async (req, res) => {
@@ -19,6 +20,12 @@ router.post("/", async (req, res) => {
           { email: identifier }, // ค้นหาโดย `email`
         ],
       },
+      include: [
+        {
+          model: Store,
+          as: "store", // อ้างอิงตามชื่อ alias ที่คุณใช้ในการผูกกับ User model
+        },
+      ],
     });
 
     if (!user) {
@@ -30,13 +37,22 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "Incorrect Password !" });
     }
 
-    const token = await jwt.sign(
+    // สมมติว่าคุณมีการเข้าถึง store_id จากผู้ใช้ที่ login
+    // เพิ่ม store_id ลงใน payload ของ JWT ถ้ามี
+    const token = jwt.sign(
       {
         users_id: user.users_id,
+        store_id: user.store?.store_id, // ต้องตรวจสอบว่า store object มีอยู่จริงหรือไม่
       },
       config.secret,
-      { expiresIn: 3600 } // 1 hour
+      { expiresIn: 86400 }
     );
+
+    console.log("JWT Payload:", {
+      users_id: user.users_id,
+      store_id: user.store_id,
+    });
+    console.log("JWT Token:", token);
 
     const expires_in = jwt.decode(token);
 
