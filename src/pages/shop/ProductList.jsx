@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Card from "../../components/Card";
+// import Card from "../../components/Card";
 import useAxiosPublic from "../../hook/useAxiosPublic";
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -131,6 +131,7 @@ const ProductList = () => {
           {/**Product Card */}
           <div className="grid md:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-4">
             {currentItems.map((item, index) => (
+              // eslint-disable-next-line react/jsx-no-undef
               <Card key={index} item={item} />
             ))}
           </div>
