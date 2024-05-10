@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import Card from "../../components/Card";
+// import Card from "../../components/Card";
 
 const SampleNextArrow = (props) => {
   const { className, style, onClick } = props;
@@ -125,6 +125,7 @@ const SpecialProducts = () => {
           className="overflow-hidden mt-10 space-x-5"
         >
           {products.map((item, i) => (
+            // eslint-disable-next-line react/jsx-no-undef
             <Card item={item} key={i} />
           ))}
         </Slider>

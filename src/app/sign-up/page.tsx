@@ -52,6 +52,21 @@ import axios, { AxiosError } from 'axios';
 
 import { useState } from 'react';
 
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { alpha, useTheme } from '@mui/material/styles';
+import InputAdornment from '@mui/material/InputAdornment';
+
+
+import { bgGradient } from '@/theme/css';
+
+import Logo from '@/components/logo';
+import Iconify from '@/components/iconify';
+
+
 // function Copyright(props: any) {
 //   return (
 //     <Typography variant="body2" color="text.secondary" align="center" {...props}>
@@ -147,6 +162,15 @@ interface UserData {
 }
 
 export default function SignUp() {
+  const theme = useTheme();
+
+  // const router = useRouter();
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  // const handleClick = () => {
+  //   router.push('/dashboard');
+  // };
   const router = useRouter(); // Initialize the router
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState('');
@@ -400,6 +424,47 @@ export default function SignUp() {
                 {alertMessage}
               </Alert>
             </Snackbar>
+            <Divider sx={{ my: 3 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                OR
+              </Typography>
+            </Divider>
+
+            <Stack direction="row" spacing={2}>
+            <Button
+              fullWidth
+              size="large"
+              color="inherit"
+              variant="outlined"
+              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
+            >
+              <Iconify icon="eva:google-fill" color="#DF3E30" />
+            </Button>
+
+            <Button
+              fullWidth
+              size="large"
+              color="inherit"
+              variant="outlined"
+              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
+            >
+              <Iconify icon="eva:facebook-fill" color="#1877F2" />
+            </Button>
+
+            {/* <Button
+              fullWidth
+              size="large"
+              color="inherit"
+              variant="outlined"
+              sx={{ borderColor: alpha(theme.palette.grey[500], 0.16) }}
+            >
+              <Iconify icon="eva:twitter-fill" color="#1C9CEA" />
+            </Button> */}
+          </Stack>
+
+          <br />
+          <br />
+          
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Link href="/sign-in" variant="body2">

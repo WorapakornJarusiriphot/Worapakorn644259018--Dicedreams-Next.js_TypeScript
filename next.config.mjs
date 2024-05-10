@@ -13,7 +13,9 @@ const nextConfig = {
     if (!isServer) {
       config.resolve.fallback = {
         fs: false,
-        // ปิดการใช้งานโมดูลอื่นๆที่เกี่ยวข้อง (หากมี)
+        path: false, // ตัวอย่างเพิ่ม path เป็น false หากไม่ใช้งาน
+        crypto: false, // ปิดการใช้งาน crypto หากไม่จำเป็น
+        // เพิ่มโมดูลอื่นๆที่ไม่ต้องการใช้งาน
       };
     }
     return config;

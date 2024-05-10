@@ -1,5 +1,5 @@
 import React from "react";
-import Banner from "../../components/Banner";
+// import Banner from "../../components/Banner";
 import Categories from "./Categories";
 import OurServices from "./OurServices";
 import SpecialProducts from "./SpecialProduct";
@@ -8,7 +8,7 @@ import Testimonials from "./Testimonials";
 const Home = () => {
   return (
     <div>
-      <Banner />
+      {/* <Banner /> */}
       <Categories />
       <SpecialProducts />
       <Testimonials />

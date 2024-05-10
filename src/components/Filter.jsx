@@ -241,14 +241,12 @@ function Filter() {
                 }
               >
                 <DatePicker
-                  slots={{
-                    textField: (params) => (
-                      <TextField
-                        {...params}
-                        InputLabelProps={{ style: { color: "white" } }}
-                        InputProps={{ style: { color: "white" } }}
-                      />
-                    ),
+                  slotProps={{
+                    textField: {
+                      variant: "outlined",
+                      InputLabelProps: { style: { color: "white" } },
+                      InputProps: { style: { color: "white" } },
+                    },
                   }}
                 />
               </DemoItem>
@@ -257,15 +255,13 @@ function Filter() {
                   <Label componentName="ค้นหาเวลาที่เล่น" valueType="time" />
                 }
               >
-                <DatePicker
-                  slots={{
-                    textField: (params) => (
-                      <TextField
-                        {...params}
-                        InputLabelProps={{ style: { color: "white" } }}
-                        InputProps={{ style: { color: "white" } }}
-                      />
-                    ),
+                <TimePicker
+                  slotProps={{
+                    textField: {
+                      variant: "outlined",
+                      InputLabelProps: { style: { color: "white" } },
+                      InputProps: { style: { color: "white" } },
+                    },
                   }}
                 />
               </DemoItem>
