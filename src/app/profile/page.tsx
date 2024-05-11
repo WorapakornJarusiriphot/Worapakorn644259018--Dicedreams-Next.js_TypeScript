@@ -7,101 +7,93 @@ import Image from 'next/image';
 // import eventsIcon from '@/assets/icons/events.png';
 // import classes from './page.module.css';
 
-import React from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBoxOpen, faCartArrowDown, faChartPie, faChevronDown, faClipboard, faCommentDots, faFileAlt, faPlus, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
-import { Col, Row, Button, Dropdown } from '@themesberg/react-bootstrap';
-import { ChoosePhotoWidget, ProfileCardWidget } from "@/components/Widgets";
-import { GeneralInfoForm } from "@/components/Forms";
+import * as React from 'react';
+import type { Metadata } from 'next';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Unstable_Grid2';
 
-import Profile3 from "./profile-picture-3.jpg";
+// import { config } from '@/config';
+import { AccountDetailsForm } from '@/components/dashboard/account/account-details-form';
+import { AccountInfo } from '@/components/dashboard/account/account-info';
 
-import 'bootstrap/dist/css/bootstrap.min.css'; // ตรวจสอบการนำเข้า CSS
+// export const metadata = { title: `Account | Dashboard | ${config.site.name}` } satisfies Metadata;
 
-// core styles
-import "@/scss/volt.scss";
 
-// vendor styles
-import "react-datetime/css/react-datetime.css";
+// import Box from '@mui/material/Box';
+// import Tabs from '@mui/material/Tabs';
+// import Tab from '@mui/material/Tab';
+
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+import TabsProfile from './TabsProfile';
+
+// TODO remove, this demo shouldn't need to reset the theme.
+// กำหนดธีมสีเข้ม
+const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#fff",
+    },
+  },
+  components: {
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          "& label": {
+            color: "white",
+          },
+          "& .MuiInputBase-root": {
+            color: "white",
+            "& fieldset": {
+              borderColor: "white",
+            },
+          },
+          "& .MuiOutlinedInput-root": {
+            "&:hover fieldset": {
+              borderColor: "white",
+            },
+            "&.Mui-focused fieldset": {
+              borderColor: "white",
+            },
+          },
+        },
+      },
+    },
+  },
+});
 
 export default function Profile() {
 
   return (
     <>
-      <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
-        <Dropdown>
-          <Dropdown.Toggle as={Button} variant="secondary" className="text-dark me-2">
-            <FontAwesomeIcon icon={faPlus} className="me-2" />
-            <span>New</span>
-          </Dropdown.Toggle>
-          <Dropdown.Menu className="dashboard-dropdown dropdown-menu-left mt-2">
-            <Dropdown.Item>
-              <FontAwesomeIcon icon={faFileAlt} className="me-2" /> Document
-            </Dropdown.Item>
-            <Dropdown.Item>
-              <FontAwesomeIcon icon={faCommentDots} className="me-2" /> Message
-            </Dropdown.Item>
-            <Dropdown.Item>
-              <FontAwesomeIcon icon={faBoxOpen} className="me-2" /> Product
-            </Dropdown.Item>
+      <ThemeProvider theme={darkTheme}>
+        <br />
+        <br />
+        <br />
+        <br />
+        <Stack spacing={3}>
+          {/* <div>
+            <Typography variant="h4" style={{ color: 'white', textAlign: 'center' }}>โปรไฟล์</Typography>
+          </div> */}
+          <Grid container spacing={3}>
+            {/* <Grid lg={4} md={6} xs={12}> */}
+            <Grid xs={12}>
+              <AccountInfo />
+            </Grid>
 
-            <Dropdown.Divider />
+            <Grid xs={12}>
+              <TabsProfile />
+            </Grid>
 
-            <Dropdown.Item>
-              <FontAwesomeIcon icon={faRocket} className="text-danger me-2" /> Subscription Plan
-              </Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
-
-        <div className="d-flex">
-          <Dropdown>
-            <Dropdown.Toggle as={Button} variant="primary">
-              <FontAwesomeIcon icon={faClipboard} className="me-2" /> Reports
-              <span className="icon icon-small ms-1"><FontAwesomeIcon icon={faChevronDown} /></span>
-            </Dropdown.Toggle>
-            <Dropdown.Menu className="dashboard-dropdown dropdown-menu-left mt-1">
-              <Dropdown.Item>
-                <FontAwesomeIcon icon={faBoxOpen} className="me-2" /> Products
-              </Dropdown.Item>
-              <Dropdown.Item>
-                <FontAwesomeIcon icon={faStore} className="me-2" /> Customers
-              </Dropdown.Item>
-              <Dropdown.Item>
-                <FontAwesomeIcon icon={faCartArrowDown} className="me-2" /> Orders
-              </Dropdown.Item>
-              <Dropdown.Item>
-                <FontAwesomeIcon icon={faChartPie} className="me-2" /> Console
-              </Dropdown.Item>
-
-              <Dropdown.Divider />
-
-              <Dropdown.Item>
-                <FontAwesomeIcon icon={faRocket} className="text-success me-2" /> All Reports
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
-      </div>
-
-      <Row>
-        <Col xs={12} xl={8}>
-          <GeneralInfoForm />
-        </Col>
-
-        <Col xs={12} xl={4}>
-          <Row>
-            <Col xs={12}>
-              <ProfileCardWidget />
-            </Col>
-            <Col xs={12}>
-              <ChoosePhotoWidget
-                title="Select profile photo"
-                photo={Profile3}
-              />
-            </Col>
-          </Row>
-        </Col>
-      </Row>
+            {/* <Grid lg={8} md={6} xs={12}> */}
+            {/* <Grid xs={12}>
+              <AccountDetailsForm />
+            </Grid> */}
+          </Grid>
+        </Stack>
+      </ThemeProvider>
     </>
   );
 }
