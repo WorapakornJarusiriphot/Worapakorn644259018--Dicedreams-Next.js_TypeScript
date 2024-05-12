@@ -1,15 +1,5 @@
 'use client';
 
-import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import Divider from '@mui/material/Divider';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-
 import Image from 'next/image';
 
 // import mealIcon from '@/assets/icons/meal.png';
@@ -17,11 +7,16 @@ import Image from 'next/image';
 // import eventsIcon from '@/assets/icons/events.png';
 // import classes from './page.module.css';
 
+import * as React from 'react';
 import type { Metadata } from 'next';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 
 // import { config } from '@/config';
 // import { AccountDetailsForm } from '@/components/dashboard/account/account-details-form';
+import { AccountInfo } from '@/components/dashboard/account/account-info';
+
 // export const metadata = { title: `Account | Dashboard | ${config.site.name}` } satisfies Metadata;
 
 
@@ -31,14 +26,18 @@ import Grid from '@mui/material/Unstable_Grid2';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
+import TabsProfile from './TabsProfile';
+
 import { usePopover } from "@/hook/use-popover";
 import CircleNotificationsIcon from "@mui/icons-material/CircleNotifications";
 import MenuIcon from "@mui/icons-material/Menu";
 import AppBar from "@mui/material/AppBar";
+import Avatar from "@mui/material/Avatar"; // ใช้สำหรับโปรไฟล์
 
 import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 
+import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
@@ -58,16 +57,43 @@ import { jwtDecode } from "jwt-decode";
 // import { JwtPayload } from 'jsonwebtoken';
 import { JwtPayload } from 'jwt-decode';
 
-// const user = {
-//   name: 'Sofia Rivers',
-//   avatar: '/assets/avatar.png',
-//   jobTitle: 'Senior Developer',
-//   country: 'USA',
-//   city: 'Los Angeles',
-//   timezone: 'GTM-7',
-// } as const;
+// TODO remove, this demo shouldn't need to reset the theme.
+// กำหนดธีมสีเข้ม
+const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#fff",
+    },
+  },
+  components: {
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          "& label": {
+            color: "white",
+          },
+          "& .MuiInputBase-root": {
+            color: "white",
+            "& fieldset": {
+              borderColor: "white",
+            },
+          },
+          "& .MuiOutlinedInput-root": {
+            "&:hover fieldset": {
+              borderColor: "white",
+            },
+            "&.Mui-focused fieldset": {
+              borderColor: "white",
+            },
+          },
+        },
+      },
+    },
+  },
+});
 
-export function AccountInfo(): React.JSX.Element {
+export default function Profile() {
   const [user, setUser] = useState({
     firstName: '',
     lastName: '',
@@ -101,20 +127,20 @@ export function AccountInfo(): React.JSX.Element {
   //   }
   // }, []);
 
-  // ...
+      // ...
 
-  useEffect(() => {
-    const accessToken = localStorage.getItem("access_token");
-    if (accessToken) {
-      const decoded: JwtPayload & { userId: string; lastName: string; email: string } = jwtDecode(accessToken);
-      if (decoded && decoded.userId) {
-        setUser(prev => ({
-          ...prev,
-          userId: decoded.userId
-        }));
-      }
-    }
-  }, []);
+      useEffect(() => {
+        const accessToken = localStorage.getItem("access_token");
+        if (accessToken) {
+          const decoded: JwtPayload & { userId: string; lastName: string; email: string } = jwtDecode(accessToken);
+          if (decoded && decoded.userId) {
+            setUser(prev => ({
+              ...prev,
+              userId: decoded.userId
+            }));
+          }
+        }
+      }, []);
 
   const [openNav, setOpenNav] = useState(false);
 
@@ -188,11 +214,8 @@ export function AccountInfo(): React.JSX.Element {
           userType: data.role,
           firstName: data.first_name,
           lastName: data.last_name,
-          email: data.email, // Add the missing 'email' property
-          gender: data.gender,
-          PhoneNumber: data.phone_number,
-          birthday: data.birthday,
-          userId: data.users_id, // Add the missing 'userId' property
+          email: "", // Add the missing 'email' property
+          userId: "", // Add the missing 'userId' property
           profilePictureUrl: data.user_image || "",
         }));
       } else {
@@ -246,11 +269,8 @@ export function AccountInfo(): React.JSX.Element {
               userType: data.role, // ตรวจสอบและอัปเดต userType จาก API response
               firstName: data.first_name,
               lastName: data.last_name,
-              email: data.email, // Add the missing 'email' property
-              gender: data.gender, // Add the missing 'gender' property
-              PhoneNumber: data.phone_number,
-              birthday: data.birthday,
-              userId: data.users_id, // Add the missing 'userId' property
+              email: "", // Add the missing 'email' property
+              userId: "", // Add the missing 'userId' property
               profilePictureUrl: data.user_image || "",
             });
           } else {
@@ -269,40 +289,34 @@ export function AccountInfo(): React.JSX.Element {
   }, []);
 
   const altText = `${user.firstName || "User"} ${user.lastName || ""}`;
-
   return (
-    <Card>
-      <CardContent>
-        <Stack spacing={2} sx={{ alignItems: 'center' }}>
-          <div>
-            <Avatar src={user.profilePictureUrl} sx={{ height: '80px', width: '80px' }} >
-              {!user.profilePictureUrl &&
-                `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`}
-            </Avatar>
-          </div>
-          <Stack spacing={1} sx={{ textAlign: 'center' }}>
-            <Typography variant="h5">{user.firstName} {user.lastName}</Typography>
-            <Typography color="text.secondary" variant="body2">
-              {user.email}
-            </Typography>
-            <Typography color="text.secondary" variant="body2">
-              {user.PhoneNumber}
-            </Typography>
-            <Typography color="text.secondary" variant="body2">
-              {user.birthday}
-            </Typography>
-            <Typography color="text.secondary" variant="body2">
-              {user.gender}
-            </Typography>
-          </Stack>
+    <>
+      <ThemeProvider theme={darkTheme}>
+        <br />
+        <br />
+        <br />
+        <br />
+        <Stack spacing={3}>
+          {/* <div>
+            <Typography variant="h4" style={{ color: 'white', textAlign: 'center' }}>โปรไฟล์</Typography>
+          </div> */}
+          <Grid container spacing={3}>
+            {/* <Grid lg={4} md={6} xs={12}> */}
+            <Grid xs={12}>
+              <AccountInfo />
+            </Grid>
+
+            <Grid xs={12}>
+              <TabsProfile />
+            </Grid>
+
+            {/* <Grid lg={8} md={6} xs={12}> */}
+            {/* <Grid xs={12}>
+              <AccountDetailsForm />
+            </Grid> */}
+          </Grid>
         </Stack>
-      </CardContent>
-      <Divider />
-      <CardActions>
-        <Button fullWidth variant="text">
-          อัพโหลดรูปภาพ
-        </Button>
-      </CardActions>
-    </Card>
+      </ThemeProvider>
+    </>
   );
 }
