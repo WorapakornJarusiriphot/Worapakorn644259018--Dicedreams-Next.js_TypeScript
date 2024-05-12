@@ -9,6 +9,7 @@ import Iconify from '../iconify';
 
 // ----------------------------------------------------------------------
 
+// eslint-disable-next-line react/display-name
 const ColorPicker = forwardRef(
   ({ colors, selected, onSelectColor, limit = 'auto', sx, ...other }, ref) => {
     const singleSelect = typeof selected === 'string';
@@ -108,4 +109,5 @@ ColorPicker.propTypes = {
   sx: PropTypes.object,
 };
 
+ColorPicker.displayName = 'ColorPicker';
 export default ColorPicker;
