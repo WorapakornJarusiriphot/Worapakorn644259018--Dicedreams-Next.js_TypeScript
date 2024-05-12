@@ -9,6 +9,7 @@ import { RouterLink } from 'src/routes/components';
 
 // ----------------------------------------------------------------------
 
+// eslint-disable-next-line react/display-name
 const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
   const theme = useTheme();
 
@@ -92,4 +93,5 @@ Logo.propTypes = {
   sx: PropTypes.object,
 };
 
+Logo.displayName = 'Logo';
 export default Logo;

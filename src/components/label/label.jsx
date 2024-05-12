@@ -8,6 +8,7 @@ import { StyledLabel } from './styles';
 
 // ----------------------------------------------------------------------
 
+// eslint-disable-next-line react/display-name
 const Label = forwardRef(
   ({ children, color = 'default', variant = 'soft', startIcon, endIcon, sx, ...other }, ref) => {
     const theme = useTheme();
@@ -58,4 +59,5 @@ Label.propTypes = {
   ]),
 };
 
+Label.displayName = 'Label';
 export default Label;

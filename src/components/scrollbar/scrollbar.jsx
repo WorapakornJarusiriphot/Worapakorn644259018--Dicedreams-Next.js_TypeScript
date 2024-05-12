@@ -7,6 +7,7 @@ import { StyledScrollbar, StyledRootScrollbar } from './styles';
 
 // ----------------------------------------------------------------------
 
+// eslint-disable-next-line react/display-name
 const Scrollbar = forwardRef(({ children, sx, ...other }, ref) => {
   const userAgent = typeof navigator === 'undefined' ? 'SSR' : navigator.userAgent;
 
@@ -41,4 +42,5 @@ Scrollbar.propTypes = {
   sx: PropTypes.object,
 };
 
+Scrollbar.displayName = 'Scrollbar';
 export default memo(Scrollbar);
