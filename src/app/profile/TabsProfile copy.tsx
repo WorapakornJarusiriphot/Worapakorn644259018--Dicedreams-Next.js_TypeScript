@@ -3,7 +3,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import AccountDetailsForm from '@/components/dashboard/account/account-details-form';
+import AccountDetailsFormWrapper from '@/components/dashboard/account/AccountDetailsFormWrapper';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -62,7 +62,7 @@ export default function TabsProfile() {
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
         {/* แทนที่ข้อความด้วยคอมโพเนนต์ AccountDetailsForm */}
-        <AccountDetailsForm />
+        <AccountDetailsFormWrapper />
       </CustomTabPanel>
     </Box>
   );

@@ -2,6 +2,10 @@ npm install --legacy-peer-deps
 
 set NODE_OPTIONS=--openssl-legacy-provider
 
+การใช้งาน npm audit และ npm outdated
+เรียกใช้ npm audit เพื่อตรวจสอบปัญหาความปลอดภัยในโปรเจ็กต์ของคุณ
+ใช้ npm outdated เพื่อดูแพ็กเกจใดที่ต้องการอัพเกรด
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
