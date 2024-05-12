@@ -19,4 +19,5 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+export default app;  // ส่งออก app เป็น default export
 export { auth };
