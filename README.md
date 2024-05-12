@@ -37,6 +37,20 @@ npm install react-chartist@compatible-version --save
 
 
 
+
+
+หากต้องการค้นหาเวอร์ชั่นของ react-chartist ที่อาจรองรับ React 18, คุณสามารถใช้คำสั่งนี้:
+
+npm info react-chartist versions
+
+
+
+เปลี่ยนไปใช้แพ็คเกจอื่น
+หากมีแพ็คเกจอื่นที่มีความสามารถเหมือนกับ react-chartist แต่รองรับ React 18, คุณอาจต้องการพิจารณาเปลี่ยนไปใช้แพ็คเกจนั้นแทน เช่น react-vis หรือ recharts ที่เป็นที่นิยมและมักจะได้รับการอัพเดตอย่างต่อเนื่อง
+
+
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
