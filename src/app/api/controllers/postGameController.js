@@ -232,6 +232,29 @@ exports.findAll = (req, res) => {
     });
 };
 
+// ดึงโพสต์ทั้งหมดของผู้ใช้เฉพาะ
+exports.findAllUserPosts = (req, res) => {
+  const userId = req.params.userId; // รับ ID ผู้ใช้จากพารามิเตอร์
+
+  PostGames.findAll({
+      where: { users_id: userId } // ค้นหาโพสต์ที่มี users_id ตรงกับ ID ที่ส่งมา
+  })
+  .then(data => {
+      data.forEach(post => {
+          if (post.games_image) {
+              post.games_image = `${req.protocol}://${req.get("host")}/images/${post.games_image}`;
+          }
+      });
+      res.send(data);
+  })
+  .catch(err => {
+      res.status(500).send({
+          message: err.message || "มีข้อผิดพลาดเกิดขึ้นขณะดึงข้อมูลโพสต์"
+      });
+  });
+};
+
+
 // Find a single game with an id
 exports.findOne = (req, res) => {
   const id = req.params.id;

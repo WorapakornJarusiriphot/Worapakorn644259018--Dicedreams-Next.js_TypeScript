@@ -12,6 +12,9 @@ router.post("/",[passportJWT.isLogin,authentication.isUser], postGameController.
 // Retrieve all games
 router.get("/",[passportJWT.isLogin,authentication.isUser], postGameController.findAll);
 
+// Retrieve all games by a specific user
+router.get("/user/:userId",[passportJWT.isLogin, authentication.isUser], postGameController.findAllUserPosts);
+
 // Retrieve a single game with id
 router.get("/:id",[passportJWT.isLogin,authentication.isUser], postGameController.findOne);
 
