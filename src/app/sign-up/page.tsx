@@ -250,6 +250,14 @@ export default function SignUp() {
       return;
     }
 
+    // Validate gender
+    if (!userData.gender) {
+      setAlertMessage('กรุณาเลือกเพศด้วย');
+      setAlertSeverity('error');
+      setOpenSnackbar(true);
+      return;
+    }
+
     // Continue with the existing user creation logic
     try {
       // Client-side validations
@@ -413,7 +421,7 @@ export default function SignUp() {
                   type="tel"
                   id="phoneNumber"
                   autoComplete="tel"
-                  helperText="หมายเลขโทรศัพท์เท่านั้น"
+                  helperText="หมายเลขโทรศัพท์จริงๆเท่านั้น"
                 />
               </Grid>
               <Grid item xs={12}>
@@ -435,6 +443,7 @@ export default function SignUp() {
                   type="password"
                   id="password"
                   autoComplete="new-password"
+                  helperText="รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร , มีอักษรพิมพ์ใหญ่ , มีอักษรพิมพ์เล็ก , มีตัวเลข , มีสัญลักษณ์พิเศษ"
                 />
               </Grid>
 
@@ -473,8 +482,8 @@ export default function SignUp() {
                     // name="row-radio-buttons-group"
                     name="gender"
                   >
-                    <FormControlLabel value="male" control={<Radio />} label="ชาย" />
-                    <FormControlLabel value="female" control={<Radio />} label="หญิง" />
+                    <FormControlLabel value="ชาย" control={<Radio />} label="ชาย" />
+                    <FormControlLabel value="หญิง" control={<Radio />} label="หญิง" />
                   </RadioGroup>
                 </FormControl>
               </Grid>

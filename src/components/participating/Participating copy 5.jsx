@@ -121,12 +121,12 @@ function Participating() {
 
           console.log('Post data:', post);
 
-          if (!post.users_id) {
-            console.error("Post does not have users_id", post);
-            throw new Error("Post does not have users_id");
+          if (!post.user_id) {
+            console.error("Post does not have user_id", post);
+            throw new Error("Post does not have user_id");
           }
 
-          const userResponse = await fetch(`http://localhost:8080/api/users/${post.users_id}`, {
+          const userResponse = await fetch(`http://localhost:8080/api/users/${post.user_id}`, {
             headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" }
           });
           if (!userResponse.ok) throw new Error("Failed to fetch user");
