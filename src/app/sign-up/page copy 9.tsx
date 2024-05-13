@@ -291,11 +291,7 @@ export default function SignUp() {
 
       setAlertMessage('สมัครสมาชิกสำเร็จ!');
       setAlertSeverity('success');
-      setOpenSnackbar(true);
-      // Delay navigation to show success message
-      setTimeout(() => {
-        router.push('/sign-in');
-      }, 3000); // Change page after 3 seconds
+      router.push('/sign-in');
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
         console.error('Axios error:', error.response?.data);
@@ -310,6 +306,7 @@ export default function SignUp() {
       setOpenSnackbar(true);
     }
   };
+
 
 
 
