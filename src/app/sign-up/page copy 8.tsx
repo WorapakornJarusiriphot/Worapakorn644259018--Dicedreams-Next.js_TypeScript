@@ -202,27 +202,6 @@ export default function SignUp() {
     }
   };
 
-  const validatePassword = (password: string): string | null => {
-    const specialCharacters = /[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/;
-
-    if (password.length < 8) {
-      return 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร';
-    }
-    if (!/[A-Z]/.test(password)) {
-      return 'รหัสผ่านต้องมีอักษรพิมพ์ใหญ่';
-    }
-    if (!/[a-z]/.test(password)) {
-      return 'รหัสผ่านต้องมีอักษรพิมพ์เล็ก';
-    }
-    if (!/[0-9]/.test(password)) {
-      return 'รหัสผ่านต้องมีตัวเลข';
-    }
-    if (!specialCharacters.test(password)) {
-      return 'รหัสผ่านต้องมีสัญลักษณ์พิเศษ';
-    }
-    return null;
-  };
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -241,16 +220,6 @@ export default function SignUp() {
 
     console.log('User data being sent:', userData);
 
-    // Validate password
-    const passwordError = validatePassword(userData.password);
-    if (passwordError) {
-      setAlertMessage(passwordError);
-      setAlertSeverity('error');
-      setOpenSnackbar(true);
-      return;
-    }
-
-    // Continue with the existing user creation logic
     try {
       // Client-side validations
       if (!/^[a-zA-Z0-9]+$/.test(userData.username)) {
@@ -291,15 +260,15 @@ export default function SignUp() {
 
       setAlertMessage('สมัครสมาชิกสำเร็จ!');
       setAlertSeverity('success');
-      setOpenSnackbar(true);
-      // Delay navigation to show success message
-      setTimeout(() => {
-        router.push('/sign-in');
-      }, 3000); // Change page after 3 seconds
+      router.push('/sign-in');
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
         console.error('Axios error:', error.response?.data);
-        setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.response?.data.message || 'เกิดข้อผิดพลาดที่ฝั่งเซิร์ฟเวอร์'));
+        if (error.response?.status === 401) {
+          setAlertMessage('Unauthorized: กรุณาลงชื่อเข้าใช้ก่อนทำการสมัครสมาชิก');
+        } else {
+          setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.response?.data.message || 'เกิดข้อผิดพลาดที่ฝั่งเซิร์ฟเวอร์'));
+        }
       } else if (error instanceof FirebaseError && error.code === 'auth/email-already-in-use') {
         setAlertMessage('อีเมลนี้ได้ถูกใช้งานแล้วในระบบ');
       } else {

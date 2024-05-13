@@ -193,41 +193,19 @@ export default function SignUp() {
     try {
       const usersResponse = await axios.get('http://localhost:8080/api/users');
       const users = usersResponse.data;
-      const usernameExists = users.some((user: { username: string; }) => user.username === username);
-      const emailExists = users.some((user: { email: string; }) => user.email === email);
-      return { usernameExists, emailExists };
+      return users.some((user: { username: any; email: any; }) => user.username === username || user.email === email);
     } catch (error) {
       console.error('Error fetching users:', error);
-      throw error; // โยนข้อผิดพลาดออกไปเพื่อจัดการใน handleSubmit
+      return false;
     }
   };
 
-  const validatePassword = (password: string): string | null => {
-    const specialCharacters = /[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/;
-
-    if (password.length < 8) {
-      return 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร';
-    }
-    if (!/[A-Z]/.test(password)) {
-      return 'รหัสผ่านต้องมีอักษรพิมพ์ใหญ่';
-    }
-    if (!/[a-z]/.test(password)) {
-      return 'รหัสผ่านต้องมีอักษรพิมพ์เล็ก';
-    }
-    if (!/[0-9]/.test(password)) {
-      return 'รหัสผ่านต้องมีตัวเลข';
-    }
-    if (!specialCharacters.test(password)) {
-      return 'รหัสผ่านต้องมีสัญลักษณ์พิเศษ';
-    }
-    return null;
-  };
-
+  // อัพเดตส่วนของ handleSubmit เพื่อจัดการการแจ้งเตือน
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
-    const userData: UserData = {
+    const userData = {
       first_name: data.get('firstName') as string,
       last_name: data.get('lastName') as string,
       username: data.get('username') as string,
@@ -241,16 +219,6 @@ export default function SignUp() {
 
     console.log('User data being sent:', userData);
 
-    // Validate password
-    const passwordError = validatePassword(userData.password);
-    if (passwordError) {
-      setAlertMessage(passwordError);
-      setAlertSeverity('error');
-      setOpenSnackbar(true);
-      return;
-    }
-
-    // Continue with the existing user creation logic
     try {
       // Client-side validations
       if (!/^[a-zA-Z0-9]+$/.test(userData.username)) {
@@ -267,48 +235,29 @@ export default function SignUp() {
       }
 
       // Check for existing username or email
-      const { usernameExists, emailExists } = await checkUserExists(userData.username, userData.email);
-      if (usernameExists) {
-        setAlertMessage('Username นี้มีคนใช้แล้ว');
-        setAlertSeverity('error');
-        setOpenSnackbar(true);
-        return;
-      }
-      if (emailExists) {
-        setAlertMessage('Email นี้มีคนใช้แล้ว');
-        setAlertSeverity('error');
-        setOpenSnackbar(true);
-        return;
+      const exists = await checkUserExists(userData.username, userData.email);
+      if (exists) {
+        throw new Error('Username หรือ Email นี้มีคนใช้แล้ว');
       }
 
       // Create user in Firebase Auth
       const firebaseUser = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
       console.log('Firebase user created:', firebaseUser);
 
-      // Save user data in MySQL
-      const response = await axios.post('http://localhost:8080/api/users', userData);
-      console.log('Response from server:', response.data);
-
+      // Additional user data logic here, like saving the user profile in your own database
       setAlertMessage('สมัครสมาชิกสำเร็จ!');
       setAlertSeverity('success');
-      setOpenSnackbar(true);
-      // Delay navigation to show success message
-      setTimeout(() => {
-        router.push('/sign-in');
-      }, 3000); // Change page after 3 seconds
+      router.push('/sign-in');
     } catch (error: any) {
-      if (axios.isAxiosError(error)) {
-        console.error('Axios error:', error.response?.data);
-        setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.response?.data.message || 'เกิดข้อผิดพลาดที่ฝั่งเซิร์ฟเวอร์'));
-      } else if (error instanceof FirebaseError && error.code === 'auth/email-already-in-use') {
+      if (error instanceof FirebaseError && error.code === 'auth/email-already-in-use') {
         setAlertMessage('อีเมลนี้ได้ถูกใช้งานแล้วในระบบ');
       } else {
         console.error('Error:', error);
         setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.message || 'เกิดข้อผิดพลาด'));
       }
       setAlertSeverity('error');
-      setOpenSnackbar(true);
     }
+    setOpenSnackbar(true);
   };
 
 

@@ -65,7 +65,6 @@ import { bgGradient } from '@/theme/css';
 
 import Logo from '@/components/logo';
 import Iconify from '@/components/iconify';
-import { FirebaseError } from 'firebase/app';
 
 
 // function Copyright(props: any) {
@@ -189,45 +188,12 @@ export default function SignUp() {
     setBirthday(date ? date.format('MM-DD-YYYY') : null);
   };
 
-  const checkUserExists = async (username: string, email: string) => {
-    try {
-      const usersResponse = await axios.get('http://localhost:8080/api/users');
-      const users = usersResponse.data;
-      const usernameExists = users.some((user: { username: string; }) => user.username === username);
-      const emailExists = users.some((user: { email: string; }) => user.email === email);
-      return { usernameExists, emailExists };
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      throw error; // โยนข้อผิดพลาดออกไปเพื่อจัดการใน handleSubmit
-    }
-  };
-
-  const validatePassword = (password: string): string | null => {
-    const specialCharacters = /[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/;
-
-    if (password.length < 8) {
-      return 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร';
-    }
-    if (!/[A-Z]/.test(password)) {
-      return 'รหัสผ่านต้องมีอักษรพิมพ์ใหญ่';
-    }
-    if (!/[a-z]/.test(password)) {
-      return 'รหัสผ่านต้องมีอักษรพิมพ์เล็ก';
-    }
-    if (!/[0-9]/.test(password)) {
-      return 'รหัสผ่านต้องมีตัวเลข';
-    }
-    if (!specialCharacters.test(password)) {
-      return 'รหัสผ่านต้องมีสัญลักษณ์พิเศษ';
-    }
-    return null;
-  };
-
+  // อัพเดตส่วนของ handleSubmit เพื่อจัดการการแจ้งเตือน
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
-    const userData: UserData = {
+    const userData = {
       first_name: data.get('firstName') as string,
       last_name: data.get('lastName') as string,
       username: data.get('username') as string,
@@ -239,77 +205,55 @@ export default function SignUp() {
       role: 'user',
     };
 
-    console.log('User data being sent:', userData);
-
-    // Validate password
-    const passwordError = validatePassword(userData.password);
-    if (passwordError) {
-      setAlertMessage(passwordError);
-      setAlertSeverity('error');
-      setOpenSnackbar(true);
+    // ตรวจสอบความถูกต้องของ username ภาษาอังกฤษเท่านั้น
+    if (!/^[a-zA-Z0-9_.-]*$/.test(userData.username)) {
+      setAlert({ open: true, message: 'Username ต้องกรอกเป็นภาษาอังกฤษเท่านั้น', severity: 'error' });
       return;
     }
 
-    // Continue with the existing user creation logic
+    // ตรวจสอบความถูกต้องของอีเมล
+    if (!userData.email.match(/^\S+@\S+\.\S+$/)) {
+      setAlert({ open: true, message: 'กรุณากรอกอีเมลให้มีเครื่องหมาย @', severity: 'error' });
+      return;
+    }
+
+    // ตรวจสอบวันเกิด
+    const today = dayjs();
+    const minAge = 10;
+    const birthdayDayjs = dayjs(userData.birthday);
+    if (today.diff(birthdayDayjs, 'year') < minAge) {
+      setAlert({ open: true, message: 'วันเกิดต้องไม่ต่ำกว่า 10 ปี', severity: 'error' });
+      return;
+    }
+
+    // ตรวจสอบหมายเลขโทรศัพท์
+    if (!/^\d+$/.test(userData.phone_number ?? '')) {
+      setAlert({ open: true, message: 'หมายเลขโทรศัพท์ต้องเป็นตัวเลขเท่านั้น', severity: 'error' });
+      return;
+    }
+
     try {
-      // Client-side validations
-      if (!/^[a-zA-Z0-9]+$/.test(userData.username)) {
-        throw new Error('Username ต้องเป็นภาษาอังกฤษเท่านั้นและไม่มีช่องว่าง');
-      }
-      if (!userData.email.includes('@')) {
-        throw new Error('Email ต้องมี "@"');
-      }
-      if (!/^\+?\d+$/.test(userData.phone_number ?? '')) {
-        throw new Error('เบอร์โทรศัพท์ต้องเป็นหมายเลขเบอร์โทรศัพท์จริงๆเท่านั้น ห้ามเอาเบอร์ปลอมหรือเบอร์ที่ไม่มีอยู่จริงมาหลอก');
-      }
-      if (dayjs().diff(dayjs(userData.birthday, 'MM-DD-YYYY'), 'year') < 10) {
-        throw new Error('วันเกิดต้องไม่ต่ำกว่า 10 ปีจากวันปัจจุบัน');
-      }
-
-      // Check for existing username or email
-      const { usernameExists, emailExists } = await checkUserExists(userData.username, userData.email);
-      if (usernameExists) {
-        setAlertMessage('Username นี้มีคนใช้แล้ว');
-        setAlertSeverity('error');
-        setOpenSnackbar(true);
-        return;
-      }
-      if (emailExists) {
-        setAlertMessage('Email นี้มีคนใช้แล้ว');
-        setAlertSeverity('error');
-        setOpenSnackbar(true);
-        return;
-      }
-
-      // Create user in Firebase Auth
-      const firebaseUser = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
-      console.log('Firebase user created:', firebaseUser);
-
       // Save user data in MySQL
       const response = await axios.post('http://localhost:8080/api/users', userData);
       console.log('Response from server:', response.data);
 
-      setAlertMessage('สมัครสมาชิกสำเร็จ!');
-      setAlertSeverity('success');
-      setOpenSnackbar(true);
-      // Delay navigation to show success message
-      setTimeout(() => {
-        router.push('/sign-in');
-      }, 3000); // Change page after 3 seconds
+      setAlert({ open: true, message: 'สมัครสมาชิกสำเร็จ!', severity: 'success' });
+      router.push('/sign-in');
     } catch (error: any) {
-      if (axios.isAxiosError(error)) {
-        console.error('Axios error:', error.response?.data);
-        setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.response?.data.message || 'เกิดข้อผิดพลาดที่ฝั่งเซิร์ฟเวอร์'));
-      } else if (error instanceof FirebaseError && error.code === 'auth/email-already-in-use') {
-        setAlertMessage('อีเมลนี้ได้ถูกใช้งานแล้วในระบบ');
+      // จัดการกับข้อผิดพลาดเกี่ยวกับข้อมูลที่ซ้ำในฐานข้อมูล
+      if (error.response && (error.response.data.includes('duplicate key error'))) {
+        if (error.response.data.includes('username')) {
+          setAlert({ open: true, message: 'ชื่อผู้ใช้นี้มีคนใช้แล้ว', severity: 'error' });
+        } else if (error.response.data.includes('email')) {
+          setAlert({ open: true, message: 'อีเมลนี้มีคนใช้แล้ว', severity: 'error' });
+        }
       } else {
-        console.error('Error:', error);
-        setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.message || 'เกิดข้อผิดพลาด'));
+        console.error('Unknown error:', error);
+        setAlert({ open: true, message: 'สมัครสมาชิกไม่สำเร็จ: ' + (error.message || 'เกิดข้อผิดพลาด'), severity: 'error' });
       }
-      setAlertSeverity('error');
-      setOpenSnackbar(true);
     }
   };
+
 
 
 

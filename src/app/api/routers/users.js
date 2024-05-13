@@ -9,7 +9,7 @@ const passportJWT = require('../middleware/passportJWT');
 router.post('/', userController.create);
 
 // Retrieve all users
-router.get('/',[passportJWT.isLogin], userController.findAll);
+router.get('/', userController.findAll);
 
 // Retrieve a single user with id
 router.get('/:id',[passportJWT.isLogin], userController.findOne);
