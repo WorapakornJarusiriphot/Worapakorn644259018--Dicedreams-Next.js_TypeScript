@@ -100,71 +100,51 @@ function PostGames() {
         setLoading(false);
         return;
       }
-
+  
       try {
         const decoded = jwtDecode(accessToken);
         setUserId(decoded.users_id);
-
-        const userResponse = await fetch(
-          `http://localhost:8080/api/users/${decoded.users_id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+  
+        const userResponse = await fetch(`http://localhost:8080/api/users/${decoded.users_id}`, {
+          headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" }
+        });
         if (!userResponse.ok) throw new Error("Failed to fetch user details");
         const userData = await userResponse.json();
-
-        const postsResponse = await fetch(
-          `http://localhost:8080/api/postGame/user/${decoded.users_id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+  
+        const postsResponse = await fetch(`http://localhost:8080/api/postGame/user/${decoded.users_id}`, {
+          headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" }
+        });
         if (!postsResponse.ok) throw new Error("Failed to fetch posts");
         const postsData = await postsResponse.json();
-
-        const participantsResponse = await fetch(
-          `http://localhost:8080/api/participate`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (!participantsResponse.ok)
-          throw new Error("Failed to fetch participants");
-        const participantsData = await participantsResponse.json();
-
-        const postsWithParticipants = postsData.map((post) => {
-          const postParticipants = participantsData.filter(
-            (participant) => participant.post_games_id === post.post_games_id
-          );
-          return {
-            ...post,
-            participants: postParticipants.length + 1, // Adding 1 to the count of participants
-            userFirstName: userData.first_name,
-            userLastName: userData.last_name,
-            userProfileImage: userData.user_image,
-          };
-        });
-
-        setItems(postsWithParticipants);
+  
+        // Fetch participants for each post
+        const postsWithParticipants = await Promise.all(postsData.map(async post => {
+          const participantsResponse = await fetch(`http://localhost:8080/api/participate/${post.post_games_id}`, {
+            headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" }
+          });
+          if (!participantsResponse.ok) throw new Error(`Failed to fetch participants for post ${post.post_games_id}`);
+          const participantsData = await participantsResponse.json();
+          return { ...post, participants: participantsData };
+        }));
+  
+        const enrichedPosts = postsWithParticipants.map(post => ({
+          ...post,
+          userFirstName: userData.first_name,
+          userLastName: userData.last_name,
+          userProfileImage: userData.user_image,
+        }));
+  
+        setItems(enrichedPosts);
       } catch (error) {
         setError("Failed to load data: " + error.message);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchUserAndPosts();
   }, []);
+  
 
   if (loading)
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
@@ -262,7 +242,7 @@ function PostGames() {
             {/* num_people
                   participant */}
             <Typography sx={{ color: "white" }}>
-              จำนวนคนจะไป : {item.participants}/{item.num_people}
+              จำนวนคนจะไป : {item.participant}/{item.num_people}
             </Typography>
 
             <br />
