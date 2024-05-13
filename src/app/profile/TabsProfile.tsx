@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import AccountDetailsForm from '@/components/dashboard/account/account-details-form';
 import PostGames from '@/components/post-play/PostGames';
+import Participating from '@/components/participating/Participating'
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -59,7 +60,7 @@ export default function TabsProfile() {
         <PostGames />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
-        ประวัติการเข้าร่วม
+        <Participating />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
         {/* แทนที่ข้อความด้วยคอมโพเนนต์ AccountDetailsForm */}
