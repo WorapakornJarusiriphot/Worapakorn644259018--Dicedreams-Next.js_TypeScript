@@ -93,7 +93,7 @@ function PostGames() {
   const [userId, setUserId] = useState("");
 
   useEffect(() => {
-    const fetchUserAndPosts = async () => {
+    const fetchUserDetails = async () => {
       const accessToken = localStorage.getItem("access_token");
       if (!accessToken) {
         setError("Access token is not available.");
@@ -101,10 +101,10 @@ function PostGames() {
         return;
       }
 
-      try {
-        const decoded = jwtDecode(accessToken);
-        setUserId(decoded.users_id);
+      const decoded = jwtDecode(accessToken);
+      setUserId(decoded.users_id); // Save logged in user ID
 
+      try {
         const userResponse = await fetch(
           `http://localhost:8080/api/users/${decoded.users_id}`,
           {
@@ -114,7 +114,11 @@ function PostGames() {
             },
           }
         );
-        if (!userResponse.ok) throw new Error("Failed to fetch user details");
+
+        if (!userResponse.ok) {
+          throw new Error("Failed to fetch user details");
+        }
+
         const userData = await userResponse.json();
 
         const postsResponse = await fetch(
@@ -126,36 +130,47 @@ function PostGames() {
             },
           }
         );
-        if (!postsResponse.ok) throw new Error("Failed to fetch posts");
+
+        if (!postsResponse.ok) {
+          throw new Error("Failed to fetch posts");
+        }
+
         const postsData = await postsResponse.json();
 
-        const participantsResponse = await fetch(
-          `http://localhost:8080/api/participate`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          }
+        const enrichedPosts = postsData.map((post) => ({
+          ...post,
+          userFirstName: userData.first_name,
+          userLastName: userData.last_name,
+          userProfileImage: userData.user_image,
+        }));
+
+        if (!postsResponse.ok) {
+          throw new Error("Failed to fetch posts");
+        }
+
+        // Fetch participants for each post
+        const postsWithParticipants = await Promise.all(
+          postsData.map(async post => {
+            const participantsResponse = await fetch(
+              `http://localhost:8080/api/participate/${post.post_games_id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            const participantsData = await participantsResponse.json();
+
+            return {
+              ...post,
+              participants: participantsData
+            };
+          })
         );
-        if (!participantsResponse.ok)
-          throw new Error("Failed to fetch participants");
-        const participantsData = await participantsResponse.json();
 
-        const postsWithParticipants = postsData.map((post) => {
-          const postParticipants = participantsData.filter(
-            (participant) => participant.post_games_id === post.post_games_id
-          );
-          return {
-            ...post,
-            participants: postParticipants.length + 1, // Adding 1 to the count of participants
-            userFirstName: userData.first_name,
-            userLastName: userData.last_name,
-            userProfileImage: userData.user_image,
-          };
-        });
-
-        setItems(postsWithParticipants);
+        setItems(enrichedPosts);
       } catch (error) {
         setError("Failed to load data: " + error.message);
       } finally {
@@ -163,7 +178,7 @@ function PostGames() {
       }
     };
 
-    fetchUserAndPosts();
+    fetchUserDetails();
   }, []);
 
   if (loading)
@@ -262,7 +277,7 @@ function PostGames() {
             {/* num_people
                   participant */}
             <Typography sx={{ color: "white" }}>
-              จำนวนคนจะไป : {item.participants}/{item.num_people}
+              จำนวนคนจะไป : {item.participant}/{item.num_people}
             </Typography>
 
             <br />
