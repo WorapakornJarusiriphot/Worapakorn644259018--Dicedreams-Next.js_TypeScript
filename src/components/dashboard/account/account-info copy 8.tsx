@@ -9,54 +9,11 @@ import CardContent from '@mui/material/CardContent';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-
-import Image from 'next/image';
-
-// import mealIcon from '@/assets/icons/meal.png';
-// import communityIcon from '@/assets/icons/community.png';
-// import eventsIcon from '@/assets/icons/events.png';
-// import classes from './page.module.css';
-
-import type { Metadata } from 'next';
-import Grid from '@mui/material/Unstable_Grid2';
-
-// import { config } from '@/config';
-// import { AccountDetailsForm } from '@/components/dashboard/account/account-details-form';
-// export const metadata = { title: `Account | Dashboard | ${config.site.name}` } satisfies Metadata;
-
-
-// import Box from '@mui/material/Box';
-// import Tabs from '@mui/material/Tabs';
-// import Tab from '@mui/material/Tab';
-
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-
-import { usePopover } from "@/hook/use-popover";
-import CircleNotificationsIcon from "@mui/icons-material/CircleNotifications";
-import MenuIcon from "@mui/icons-material/Menu";
-import AppBar from "@mui/material/AppBar";
-
-import Badge from "@mui/material/Badge";
-import Box from "@mui/material/Box";
-
-import IconButton from "@mui/material/IconButton";
-import Toolbar from "@mui/material/Toolbar";
-import Tooltip from "@mui/material/Tooltip";
-import { Bell as BellIcon } from "@phosphor-icons/react/dist/ssr/Bell";
-import { List as ListIcon } from "@phosphor-icons/react/dist/ssr/List";
-import { MagnifyingGlass as MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
-import { Users as UsersIcon } from "@phosphor-icons/react/dist/ssr/Users";
-import Link from "next/link";
-
-import { useRouter } from "next/navigation"; // แก้ไขจาก next/navigation
-import { useEffect, useState } from "react";
-// import { MobileNav } from "@/layout/MobileNav";
-import { UserPopover } from "@/layout/user-popover";
-
-// import jwtDecode from 'jwt-decode';
-import { jwtDecode } from "jwt-decode";
-// import { JwtPayload } from 'jsonwebtoken';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import { JwtPayload } from 'jwt-decode';
+import Box from '@mui/material/Box';
 
 export function AccountInfo(): React.JSX.Element {
   const [user, setUser] = useState({
@@ -70,6 +27,7 @@ export function AccountInfo(): React.JSX.Element {
     PhoneNumber: '',
     birthday: '',
     gender: '',
+    password: '111111', // Temporary password for upload request
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -79,20 +37,17 @@ export function AccountInfo(): React.JSX.Element {
   useEffect(() => {
     const accessToken = localStorage.getItem('access_token');
     if (accessToken) {
-      const decoded = jwtDecode(accessToken) as JwtPayload & { userId: string; username: string; email: string };
+      const decoded: JwtPayload & { userId: string; lastName: string; email: string } = jwtDecode(accessToken);
       if (decoded && decoded.userId) {
         setUser((prev) => ({
           ...prev,
           userId: decoded.userId,
-          username: decoded.username,
-          email: decoded.email,
         }));
-        fetchUserProfile(decoded.userId, accessToken);
       }
     }
   }, []);
 
-  const fetchUserProfile = async (userId: string, accessToken: string) => {
+  const fetchUserProfile = async (userId: string, accessToken: string, decodedToken: { username: string }) => {
     try {
       const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -101,6 +56,7 @@ export function AccountInfo(): React.JSX.Element {
         const data = await response.json();
         setUser((prev) => ({
           ...prev,
+          username: decodedToken.username,
           userType: data.role,
           firstName: data.first_name,
           lastName: data.last_name,
@@ -108,6 +64,7 @@ export function AccountInfo(): React.JSX.Element {
           gender: data.gender,
           PhoneNumber: data.phone_number,
           birthday: data.birthday,
+          userId: data.users_id,
           profilePictureUrl: data.user_image || '',
         }));
       } else {
@@ -117,6 +74,15 @@ export function AccountInfo(): React.JSX.Element {
       console.error('Error fetching user profile:', error);
     }
   };
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('access_token');
+    if (accessToken) {
+      const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
+      const userId = decodedToken.users_id;
+      fetchUserProfile(userId, accessToken, decodedToken);
+    }
+  }, []);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -140,6 +106,7 @@ export function AccountInfo(): React.JSX.Element {
         reader.readAsDataURL(selectedFile);
         reader.onload = async () => {
           const base64Image = reader.result as string;
+          console.log('Uploading image with base64 string:', base64Image);
 
           // Check if all necessary fields are not empty
           if (!user.username || !user.firstName || !user.lastName || !user.email || !user.birthday || !user.PhoneNumber || !user.gender || !base64Image) {
@@ -147,8 +114,8 @@ export function AccountInfo(): React.JSX.Element {
             return;
           }
 
-          const response = await fetch(`http://localhost:8080/api/users/${user.userId}`, {
-            method: 'PUT',
+          const response = await fetch('http://localhost:8080/api/users', {
+            method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${accessToken}`,
@@ -158,6 +125,7 @@ export function AccountInfo(): React.JSX.Element {
               username: user.username,
               first_name: user.firstName,
               last_name: user.lastName,
+              password: user.password, // Including password
               email: user.email,
               birthday: user.birthday,
               phone_number: user.PhoneNumber,

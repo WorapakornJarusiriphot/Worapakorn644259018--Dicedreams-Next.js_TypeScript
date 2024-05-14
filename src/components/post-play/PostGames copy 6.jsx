@@ -44,26 +44,10 @@ import { th } from "date-fns/locale";
 
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
-  const formattedDate = format(
-    date,
-    "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'",
-    {
-      locale: th,
-    }
-  );
+  const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'", {
+    locale: th,
+  });
   return formattedDate;
-};
-
-const formatThaiDate = (dateString) => {
-  const date = parseISO(dateString);
-  const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy", { locale: th });
-  return formattedDate;
-};
-
-const formatThaiTime = (timeString) => {
-  const [hours, minutes] = timeString.split(":");
-  const formattedTime = `เวลา ${hours}.${minutes} น.`;
-  return formattedTime;
 };
 
 // const items = [
@@ -180,8 +164,7 @@ function PostGames() {
             userLastName: userData.last_name,
             userProfileImage: userData.user_image,
             creation_date: formatDateTime(post.creation_date),
-            date_meet: formatThaiDate(post.date_meet),
-            time_meet: formatThaiTime(post.time_meet),
+            date_meet: formatDateTime(post.date_meet),
           };
         });
 
