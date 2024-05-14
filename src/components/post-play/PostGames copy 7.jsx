@@ -44,25 +44,21 @@ import { th } from "date-fns/locale";
 
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
-  const formattedDate = format(
-    date,
-    "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'",
-    {
-      locale: th,
-    }
-  );
+  const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'", {
+    locale: th,
+  });
   return formattedDate;
 };
 
 const formatThaiDate = (dateString) => {
   const date = parseISO(dateString);
-  const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy", { locale: th });
+  const formattedDate = format(date, "eeee ที่ d MMMM yyyy", { locale: th });
   return formattedDate;
 };
 
 const formatThaiTime = (timeString) => {
-  const [hours, minutes] = timeString.split(":");
-  const formattedTime = `เวลา ${hours}.${minutes} น.`;
+  const date = parseISO(timeString);
+  const formattedTime = format(date, "HH:mm 'น.'", { locale: th });
   return formattedTime;
 };
 
