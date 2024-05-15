@@ -18,7 +18,7 @@ import { useUser } from './UserContext';
 import axios from 'axios';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 
 export function AccountInfo(): React.JSX.Element {
   const { user, setUser } = useUser();
@@ -68,7 +68,7 @@ export function AccountInfo(): React.JSX.Element {
           email: data.email,
           gender: data.gender,
           phoneNumber: data.phone_number,
-          birthday: dayjs(data.birthday), // แปลงเป็น Dayjs
+          birthday: data.birthday,
           userId: data.users_id,
           profilePictureUrl: data.user_image || '',
         }));
@@ -111,13 +111,12 @@ export function AccountInfo(): React.JSX.Element {
         reader.readAsDataURL(selectedFile);
         reader.onload = async () => {
           const base64Image = reader.result as string;
-          const formattedBirthday = user.birthday ? dayjs(user.birthday).format('YYYY-MM-DD') : ''; // แปลงเป็นรูปแบบที่ถูกต้อง
           const updatedUser = {
             first_name: user.firstName,
             last_name: user.lastName,
             username: user.username,
             email: user.email,
-            birthday: formattedBirthday,
+            birthday: user.birthday ? dayjs(user.birthday).format('YYYY-MM-DD') : '', // แปลงเป็นรูปแบบที่ถูกต้อง
             phone_number: user.phoneNumber,
             gender: user.gender,
             user_image: base64Image,
@@ -138,7 +137,6 @@ export function AccountInfo(): React.JSX.Element {
             setUser((prev) => ({
               ...prev,
               profilePictureUrl: base64Image,
-              birthday: dayjs(formattedBirthday), // อัพเดทค่า birthday ใน state ให้ถูกต้อง
             }));
             setPreviewUrl(null);
             setSelectedFile(null);
@@ -188,12 +186,14 @@ export function AccountInfo(): React.JSX.Element {
 
   const altText = `${user.firstName || 'User'} ${user.lastName || ''}`;
 
-  const formatDate = (date: Dayjs) => {
-    if (!date) return 'ไม่ระบุวันเกิด';
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'ไม่ระบุวันเกิด';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'ไม่ระบุวันเกิด';
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const formattedDate = new Intl.DateTimeFormat('th-TH', options).format(date.toDate());
-    const yearBuddhistEra = date.year() + 543;
-    return formattedDate.replace(date.year().toString(), yearBuddhistEra.toString());
+    const formattedDate = new Intl.DateTimeFormat('th-TH', options).format(date);
+    const yearBuddhistEra = date.getFullYear() + 543;
+    return formattedDate.replace(date.getFullYear().toString(), yearBuddhistEra.toString());
   };
 
   return (
@@ -216,7 +216,7 @@ export function AccountInfo(): React.JSX.Element {
               เบอร์โทรศัพท์ : {user.phoneNumber} {/* แก้ไขชื่อคุณสมบัติ */}
             </Typography>
             <Typography color="text.secondary" variant="body2">
-              วันเกิด : {user.birthday ? formatDate(user.birthday) : 'ไม่ระบุวันเกิด'} {/* แก้ไขเพื่อแปลง Dayjs เป็น string */}
+              วันเกิด : {user.birthday ? formatDate(user.birthday.toString()) : 'ไม่ระบุวันเกิด'} {/* แก้ไขเพื่อแปลง Dayjs เป็น string */}
             </Typography>
             <Typography color="text.secondary" variant="body2">
               เพศ : {user.gender}

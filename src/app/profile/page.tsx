@@ -28,6 +28,8 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import TabsProfile from './TabsProfile';
 
+import { UserProvider } from '@/components/dashboard/account/UserContext'
+
 // TODO remove, this demo shouldn't need to reset the theme.
 // กำหนดธีมสีเข้ม
 const darkTheme = createTheme({
@@ -68,32 +70,34 @@ export default function Profile() {
 
   return (
     <>
-      <ThemeProvider theme={darkTheme}>
-        <br />
-        <br />
-        <br />
-        <br />
-        <Stack spacing={3}>
-          {/* <div>
+      <UserProvider>
+        <ThemeProvider theme={darkTheme}>
+          <br />
+          <br />
+          <br />
+          <br />
+          <Stack spacing={3}>
+            {/* <div>
             <Typography variant="h4" style={{ color: 'white', textAlign: 'center' }}>โปรไฟล์</Typography>
           </div> */}
-          <Grid container spacing={3}>
-            {/* <Grid lg={4} md={6} xs={12}> */}
-            <Grid xs={12}>
-              <AccountInfo />
-            </Grid>
+            <Grid container spacing={3}>
+              {/* <Grid lg={4} md={6} xs={12}> */}
+              <Grid xs={12}>
+                <AccountInfo />
+              </Grid>
 
-            <Grid xs={12}>
-              <TabsProfile />
-            </Grid>
+              <Grid xs={12}>
+                <TabsProfile />
+              </Grid>
 
-            {/* <Grid lg={8} md={6} xs={12}> */}
-            {/* <Grid xs={12}>
+              {/* <Grid lg={8} md={6} xs={12}> */}
+              {/* <Grid xs={12}>
               <AccountDetailsForm />
             </Grid> */}
-          </Grid>
-        </Stack>
-      </ThemeProvider>
+            </Grid>
+          </Stack>
+        </ThemeProvider>
+      </UserProvider>
     </>
   );
 }

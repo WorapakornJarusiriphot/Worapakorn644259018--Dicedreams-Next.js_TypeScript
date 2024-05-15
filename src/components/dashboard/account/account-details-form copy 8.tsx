@@ -22,10 +22,9 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormLabel from '@mui/material/FormLabel';
 import axios, { AxiosError } from 'axios';
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect } from 'react';
 import { Dayjs } from 'dayjs';
 import { useRouter } from 'next/navigation';
-import { useUser } from './UserContext';
 
 
 
@@ -79,11 +78,6 @@ import { jwtDecode } from "jwt-decode";
 // import { JwtPayload } from 'jsonwebtoken';
 import { JwtPayload } from 'jwt-decode';
 
-import {
-  Snackbar,
-  Alert,
-} from '@mui/material';
-
 
 // กำหนด interface สำหรับข้อมูลผู้ใช้
 interface UserData {
@@ -119,30 +113,37 @@ interface AccountDetailsFormProps {
   user: User;
 }
 
-const AccountDetailsForm: React.FC = () => {
-  const { user, setUser } = useUser();
-  const [userData, setUserData] = useState(user);
+const AccountDetailsForm: React.FC<AccountDetailsFormProps> = ({ user }) => {
+  const [userData, setUserData] = useState<User>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    username: '',
+    gender: '',
+    birthday: dayjs(),
+    userImage: '',
+    users_id: '',
+    userType: '',
+    profilePictureUrl: '',
+  });
 
-  const [cleared, setCleared] = React.useState<boolean>(false);
-
-  useEffect(() => {
-    if (cleared) {
-      const timeout = setTimeout(() => {
-        setCleared(false);
-      }, 1500);
-
-      return () => clearTimeout(timeout);
-    }
-    return () => { };
-  }, [cleared]);
-
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertSeverity, setAlertSeverity] = useState<'success' | 'error'>('success');
 
   useEffect(() => {
     if (user) {
-      setUserData(user);
+      setUserData({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        username: user.username,
+        gender: user.gender,
+        birthday: user.birthday,
+        userImage: user.userImage,
+        users_id: user.users_id,
+        userType: user.userType,
+        profilePictureUrl: user.profilePictureUrl,
+      });
     }
   }, [user]);
 
@@ -154,13 +155,6 @@ const AccountDetailsForm: React.FC = () => {
     }));
   };
 
-  const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpenSnackbar(false);
-  };
-
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
@@ -169,42 +163,26 @@ const AccountDetailsForm: React.FC = () => {
         throw new Error('Access token is missing');
       }
 
-      const userImage = userData.userImage.startsWith('http://') || userData.userImage.startsWith('https://')
-        ? userData.userImage.split('/').pop()!
-        : userData.userImage;
-
-      const updatedUser = {
-        ...userData,
-        userImage: userImage || '',
-      };
-
       await axios.put(`http://localhost:8080/api/users/${userData.users_id}`, {
-        first_name: updatedUser.firstName,
-        last_name: updatedUser.lastName,
-        username: updatedUser.username,
-        email: updatedUser.email,
-        birthday: updatedUser.birthday.format('MM/DD/YYYY'),
-        phone_number: updatedUser.phoneNumber,
-        gender: updatedUser.gender,
-        user_image: updatedUser.userImage,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        username: userData.username,
+        email: userData.email,
+        birthday: userData.birthday.format('MM/DD/YYYY'),
+        phone_number: userData.phoneNumber,
+        gender: userData.gender,
+        user_image: userData.userImage,
       }, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         }
       });
-
-      setUser(updatedUser); // อัปเดต context ทันทีหลังจากอัปเดตข้อมูลสำเร็จ
-      setAlertMessage('ข้อมูลถูกอัพเดทเรียบร้อยแล้ว');
-      setAlertSeverity('success');
-      setOpenSnackbar(true);
+      alert('ข้อมูลถูกอัพเดทเรียบร้อยแล้ว');
     } catch (error) {
       console.error('Error updating user data:', error);
-      setAlertMessage('เกิดข้อผิดพลาดในการอัพเดทข้อมูล');
-      setAlertSeverity('error');
-      setOpenSnackbar(true);
+      alert('เกิดข้อผิดพลาดในการอัพเดทข้อมูล');
     }
   };
-
   // const [user, setUserData] = useState({
   //   username: "",
   //   userType: "",
@@ -340,7 +318,6 @@ const AccountDetailsForm: React.FC = () => {
     }
   }, []);
 
-
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -458,17 +435,18 @@ const AccountDetailsForm: React.FC = () => {
                 </FormControl>
               </Grid>
               <Grid item md={6} xs={12}>
-              <FormControl fullWidth>
-                <InputLabel htmlFor="outlined-username" shrink>ชื่อผู้ใช้</InputLabel>
-                <OutlinedInput
-                  id="outlined-username"
-                  label="ชื่อผู้ใช้"
-                  name="username"
-                  value={userData.username}
-                  onChange={handleChange}
-                />
-              </FormControl>
-            </Grid>
+                <FormControl fullWidth>
+                  <InputLabel htmlFor="username">ชื่อผู้ใช้</InputLabel>
+                  <OutlinedInput
+                    id="username"
+                    label="ชื่อผู้ใช้"
+                    name="username"
+                    value={userData.username}
+                    onChange={handleChange}
+                  />
+                </FormControl>
+              </Grid>
+
               {/* <Grid item md={6} xs={12}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <Grid container spacing={2}>
@@ -495,7 +473,7 @@ const AccountDetailsForm: React.FC = () => {
                     value={userData.gender}
                     onChange={(event) => setUserData({ ...userData, gender: event.target.value })}
                   >
-                    <FormControlLabel value="ชาย" control={<Radio />} label="ชาย" />
+                    <FormControlLabel value="male" control={<Radio />} label="ชาย" />
                     <FormControlLabel value="หญิง" control={<Radio />} label="หญิง" />
                   </RadioGroup>
                 </FormControl>
@@ -507,11 +485,6 @@ const AccountDetailsForm: React.FC = () => {
             <Button type="submit" variant="contained">บันทึกข้อมูล</Button>
           </CardActions>
         </Card>
-        <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbarClose}>
-          <Alert onClose={handleSnackbarClose} severity={alertSeverity} sx={{ width: '100%' }}>
-            {alertMessage}
-          </Alert>
-        </Snackbar>
       </form>
     </>
   );
