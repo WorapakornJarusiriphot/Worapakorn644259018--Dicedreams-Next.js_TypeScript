@@ -14,40 +14,37 @@ import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { JwtPayload } from 'jwt-decode';
 import Box from '@mui/material/Box';
-import { useUser } from './UserContext';
-import axios from 'axios';
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
-import dayjs, { Dayjs } from 'dayjs';
 
 export function AccountInfo(): React.JSX.Element {
-  const { user, setUser } = useUser();
+  const [user, setUser] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    username: '',
+    userType: '',
+    profilePictureUrl: '',
+    userId: '',
+    PhoneNumber: '',
+    birthday: '',
+    gender: '',
+  });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [openNav, setOpenNav] = useState(false);
   const [open, setOpen] = useState(false);
   const [userLoggedIn, setUserLoggedIn] = useState(false);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertSeverity, setAlertSeverity] = useState<'success' | 'error'>('success');
   const router = useRouter();
-
-  const handleSnackbarClose = () => {
-    setOpenSnackbar(false);
-  };
 
   useEffect(() => {
     const accessToken = localStorage.getItem('access_token');
     if (accessToken) {
-      const decoded: JwtPayload & { users_id: string } = jwtDecode(accessToken);
-      if (decoded && decoded.users_id) {
+      const decoded: JwtPayload & { userId: string; lastName: string; email: string } = jwtDecode(accessToken);
+      if (decoded && decoded.userId) {
         setUser((prev) => ({
           ...prev,
-          users_id: decoded.users_id,
+          userId: decoded.userId,
         }));
-      } else {
-        console.error('User ID is missing in the token');
       }
     }
   }, []);
@@ -67,8 +64,8 @@ export function AccountInfo(): React.JSX.Element {
           lastName: data.last_name,
           email: data.email,
           gender: data.gender,
-          phoneNumber: data.phone_number,
-          birthday: dayjs(data.birthday), // แปลงเป็น Dayjs
+          PhoneNumber: data.phone_number,
+          birthday: data.birthday,
           userId: data.users_id,
           profilePictureUrl: data.user_image || '',
         }));
@@ -111,89 +108,66 @@ export function AccountInfo(): React.JSX.Element {
         reader.readAsDataURL(selectedFile);
         reader.onload = async () => {
           const base64Image = reader.result as string;
-          const formattedBirthday = user.birthday ? dayjs(user.birthday).format('YYYY-MM-DD') : ''; // แปลงเป็นรูปแบบที่ถูกต้อง
-          const updatedUser = {
-            first_name: user.firstName,
-            last_name: user.lastName,
-            username: user.username,
-            email: user.email,
-            birthday: formattedBirthday,
-            phone_number: user.phoneNumber,
-            gender: user.gender,
-            user_image: base64Image,
-          };
-
-          if (!user.users_id) {
-            console.error('User ID is missing.');
-            return;
-          }
-
-          const response = await axios.put(`http://localhost:8080/api/users/${user.users_id}`, updatedUser, {
+          const response = await fetch('http://localhost:8080/api/users', {
+            method: 'POST',
             headers: {
+              'Content-Type': 'application/json',
               Authorization: `Bearer ${accessToken}`,
             },
+            body: JSON.stringify({ user_image: base64Image }),
           });
 
-          if (response.status === 200) {
+          if (response.ok) {
+            const data = await response.json();
             setUser((prev) => ({
               ...prev,
-              profilePictureUrl: base64Image,
-              birthday: dayjs(formattedBirthday), // อัพเดทค่า birthday ใน state ให้ถูกต้อง
+              profilePictureUrl: data.user_image,
             }));
             setPreviewUrl(null);
             setSelectedFile(null);
-            setAlertMessage('อัพโหลดรูปภาพสำเร็จแล้ว');
-            setAlertSeverity('success');
-            setOpenSnackbar(true);
           } else {
             console.error(`API Error: ${response.status} ${response.statusText}`);
-            setAlertMessage('เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ');
-            setAlertSeverity('error');
-            setOpenSnackbar(true);
           }
         };
       } catch (error) {
         console.error('Error uploading image:', error);
-        setAlertMessage('เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ');
-        setAlertSeverity('error');
-        setOpenSnackbar(true);
       }
     }
   };
-
 
   const handleCancel = () => {
     setSelectedFile(null);
     setPreviewUrl(null);
   };
 
-  // const handleLogout = () => {
-  //   localStorage.removeItem('access_token');
-  //   setUserLoggedIn(false);
-  //   setUser({
-  //     firstName: '',
-  //     lastName: '',
-  //     email: '',
-  //     username: '',
-  //     userType: '',
-  //     profilePictureUrl: '',
-  //     users_id: '',
-  //     phoneNumber: '',
-  //     birthday: dayjs(),
-  //     gender: '',
-  //     userImage: '',
-  //   });
-  //   router.push('/sign-in');
-  // };
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    setUserLoggedIn(false);
+    setUser({
+      firstName: '',
+      lastName: '',
+      email: '',
+      username: '',
+      userType: '',
+      profilePictureUrl: '',
+      userId: '',
+      PhoneNumber: '',
+      birthday: '',
+      gender: '',
+    });
+    router.push('/sign-in');
+  };
 
   const altText = `${user.firstName || 'User'} ${user.lastName || ''}`;
 
-  const formatDate = (date: Dayjs) => {
-    if (!date) return 'ไม่ระบุวันเกิด';
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'ไม่ระบุวันเกิด';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'ไม่ระบุวันเกิด';
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const formattedDate = new Intl.DateTimeFormat('th-TH', options).format(date.toDate());
-    const yearBuddhistEra = date.year() + 543;
-    return formattedDate.replace(date.year().toString(), yearBuddhistEra.toString());
+    const formattedDate = new Intl.DateTimeFormat('th-TH', options).format(date);
+    const yearBuddhistEra = date.getFullYear() + 543;
+    return formattedDate.replace(date.getFullYear().toString(), yearBuddhistEra.toString());
   };
 
   return (
@@ -213,10 +187,10 @@ export function AccountInfo(): React.JSX.Element {
               อีเมล : {user.email}
             </Typography>
             <Typography color="text.secondary" variant="body2">
-              เบอร์โทรศัพท์ : {user.phoneNumber} {/* แก้ไขชื่อคุณสมบัติ */}
+              เบอร์โทรศัพท์ : {user.PhoneNumber}
             </Typography>
             <Typography color="text.secondary" variant="body2">
-              วันเกิด : {user.birthday ? formatDate(user.birthday) : 'ไม่ระบุวันเกิด'} {/* แก้ไขเพื่อแปลง Dayjs เป็น string */}
+              วันเกิด : {formatDate(user.birthday)}
             </Typography>
             <Typography color="text.secondary" variant="body2">
               เพศ : {user.gender}
@@ -252,11 +226,6 @@ export function AccountInfo(): React.JSX.Element {
           </Button>
         )}
       </CardActions>
-      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbarClose}>
-        <Alert onClose={handleSnackbarClose} severity={alertSeverity} sx={{ width: '100%' }}>
-          {alertMessage}
-        </Alert>
-      </Snackbar>
     </Card>
   );
 }

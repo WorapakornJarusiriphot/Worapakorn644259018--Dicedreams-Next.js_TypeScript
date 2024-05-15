@@ -25,7 +25,6 @@ import axios, { AxiosError } from 'axios';
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { Dayjs } from 'dayjs';
 import { useRouter } from 'next/navigation';
-import { useUser } from './UserContext';
 
 
 
@@ -119,9 +118,20 @@ interface AccountDetailsFormProps {
   user: User;
 }
 
-const AccountDetailsForm: React.FC = () => {
-  const { user, setUser } = useUser();
-  const [userData, setUserData] = useState(user);
+const AccountDetailsForm: React.FC<AccountDetailsFormProps> = ({ user }) => {
+  const [userData, setUserData] = useState<User>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    username: '',
+    gender: '',
+    birthday: dayjs(),
+    userImage: '',
+    users_id: '',
+    userType: '',
+    profilePictureUrl: '',
+  });
 
   const [cleared, setCleared] = React.useState<boolean>(false);
 
@@ -142,7 +152,19 @@ const AccountDetailsForm: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      setUserData(user);
+      setUserData({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        username: user.username,
+        gender: user.gender,
+        birthday: user.birthday,
+        userImage: user.userImage,
+        users_id: user.users_id,
+        userType: user.userType,
+        profilePictureUrl: user.profilePictureUrl,
+      });
     }
   }, [user]);
 
@@ -169,34 +191,32 @@ const AccountDetailsForm: React.FC = () => {
         throw new Error('Access token is missing');
       }
 
+      // ตรวจสอบ user_image
       const userImage = userData.userImage.startsWith('http://') || userData.userImage.startsWith('https://')
-        ? userData.userImage.split('/').pop()!
+        ? userData.userImage.split('/').pop()
         : userData.userImage;
 
-      const updatedUser = {
-        ...userData,
-        userImage: userImage || '',
-      };
-
       await axios.put(`http://localhost:8080/api/users/${userData.users_id}`, {
-        first_name: updatedUser.firstName,
-        last_name: updatedUser.lastName,
-        username: updatedUser.username,
-        email: updatedUser.email,
-        birthday: updatedUser.birthday.format('MM/DD/YYYY'),
-        phone_number: updatedUser.phoneNumber,
-        gender: updatedUser.gender,
-        user_image: updatedUser.userImage,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        username: userData.username,
+        email: userData.email,
+        birthday: userData.birthday.format('MM/DD/YYYY'),
+        phone_number: userData.phoneNumber,
+        gender: userData.gender,
+        user_image: userImage,
       }, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         }
       });
-
-      setUser(updatedUser); // อัปเดต context ทันทีหลังจากอัปเดตข้อมูลสำเร็จ
       setAlertMessage('ข้อมูลถูกอัพเดทเรียบร้อยแล้ว');
       setAlertSeverity('success');
       setOpenSnackbar(true);
+      // Delay navigation to show success message
+      setTimeout(() => {
+        router.push('/profile');
+      }, 500); // Change page after 3 seconds
     } catch (error) {
       console.error('Error updating user data:', error);
       setAlertMessage('เกิดข้อผิดพลาดในการอัพเดทข้อมูล');
@@ -458,17 +478,18 @@ const AccountDetailsForm: React.FC = () => {
                 </FormControl>
               </Grid>
               <Grid item md={6} xs={12}>
-              <FormControl fullWidth>
-                <InputLabel htmlFor="outlined-username" shrink>ชื่อผู้ใช้</InputLabel>
-                <OutlinedInput
-                  id="outlined-username"
-                  label="ชื่อผู้ใช้"
-                  name="username"
-                  value={userData.username}
-                  onChange={handleChange}
-                />
-              </FormControl>
-            </Grid>
+                <FormControl fullWidth>
+                  <InputLabel htmlFor="username">ชื่อผู้ใช้</InputLabel>
+                  <OutlinedInput
+                    id="username"
+                    label="ชื่อผู้ใช้"
+                    name="username"
+                    value={userData.username}
+                    onChange={handleChange}
+                  />
+                </FormControl>
+              </Grid>
+
               {/* <Grid item md={6} xs={12}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <Grid container spacing={2}>
