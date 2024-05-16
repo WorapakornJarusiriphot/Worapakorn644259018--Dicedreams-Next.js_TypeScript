@@ -6,6 +6,8 @@ import React, { useState } from "react";
 import Grid from "@mui/material/Grid";
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import ProfileCard from "@/components/ProfileCard";
+import SettingsCard from "@/components/SettingsCard";
 
 // FONTS
 import "@fontsource/roboto/300.css";
@@ -67,6 +69,30 @@ export default function App() {
               px: { xs: 0, md: 7 }
             }}
           >
+            {/* PROFILE CARD */}
+            <Grid item md={3}>
+              <ProfileCard
+                name={fullName}
+                sub={mainUser.title}
+                dt1={mainUser.dt1}
+                dt2={mainUser.dt2}
+                dt3={mainUser.dt3}
+              ></ProfileCard>
+            </Grid>
+
+            {/* SETTINGS CARD */}
+            <Grid item md={9}>
+              <SettingsCard
+                expose={(v: string) => setText(v)}
+                firstName={mainUser.firstName}
+                lastName={mainUser.lastName}
+                midName={mainUser.midName}
+                phone={mainUser.phone}
+                email={mainUser.email}
+                pass={mainUser.pass}
+                gender={mainUser.gender}
+              ></SettingsCard>
+            </Grid>
           </Grid>
         </Grid>
       </CssBaseline>

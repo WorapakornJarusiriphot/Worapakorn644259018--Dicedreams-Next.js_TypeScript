@@ -9,7 +9,7 @@ const passportJWT = require('../middleware/passportJWT');
 router.post("/",[passportJWT.isLogin,authentication.isUser], storeController.create);
 
 // Retrieve all stores
-router.get("/",[passportJWT.isLogin,authentication.isUser], storeController.findAll);
+router.get("/", storeController.findAll);
 
 // Retrieve a single store with id
 router.get("/:id",[passportJWT.isLogin,authentication.isUser], storeController.findOne);

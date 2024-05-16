@@ -7,7 +7,7 @@ const passportJWT = require('../middleware/passportJWT');
 
 
 router.post("/", [ passportJWT.isLogin,authentication.isStore ] , postActivityController.create);
-router.get("/", [ passportJWT.isLogin,authentication.isStoreOrUser ] , postActivityController.findAll);
+router.get("/", postActivityController.findAll);
 router.get("/:id", [ passportJWT.isLogin,authentication.isStoreOrUser ] , postActivityController.findOne);
 router.put("/:id", [ passportJWT.isLogin,authentication.isStore ] , postActivityController.update);
 router.delete("/:id", [ passportJWT.isLogin,authentication.isStore ] , postActivityController.delete);

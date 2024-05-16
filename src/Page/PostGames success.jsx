@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import InputLabel from "@mui/material/InputLabel";
-// import InputAdornment from "@mui.material/InputAdornment";
+import InputAdornment from "@mui/material/InputAdornment";
 import FormHelperText from "@mui/material/FormHelperText";
 import FormControl from "@mui/material/FormControl";
 import SearchIcon from "@mui/icons-material/Search";
@@ -104,12 +104,15 @@ function PostGames() {
         const participantsData = await participantsResponse.json();
 
         // ดึงข้อมูลผู้ใช้ทั้งหมด
-        const usersResponse = await fetch(`http://localhost:8080/api/users`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const usersResponse = await fetch(
+          `http://localhost:8080/api/users`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         if (!usersResponse.ok) throw new Error("Failed to fetch users");
         const usersData = await usersResponse.json();
 
@@ -119,31 +122,21 @@ function PostGames() {
           );
 
           // หา user ที่ตรงกับ users_id ของโพสต์
-          const postUser = usersData.find(
-            (user) => user.users_id === post.users_id
-          );
+          const postUser = usersData.find(user => user.users_id === post.users_id);
 
           return {
             ...post,
             participants: postParticipants.length + 1, // Adding 1 to the count of participants
             userFirstName: postUser ? postUser.first_name : "Unknown", // ใช้ข้อมูลจาก user
             userLastName: postUser ? postUser.last_name : "Unknown", // ใช้ข้อมูลจาก user
-            userProfileImage: postUser
-              ? postUser.user_image
-              : "default-image-url", // ใช้ข้อมูลจาก user
-            rawCreationDate: post.creation_date, // เก็บข้อมูลวันที่ดิบเพื่อใช้ในการเรียงลำดับ
+            userProfileImage: postUser ? postUser.user_image : "default-image-url", // ใช้ข้อมูลจาก user
             creation_date: formatDateTime(post.creation_date),
             date_meet: formatThaiDate(post.date_meet),
             time_meet: formatThaiTime(post.time_meet),
           };
         });
 
-        // เรียงโพสต์ตาม rawCreationDate จากใหม่ไปเก่า
-        const sortedPosts = postsWithParticipants.sort(
-          (a, b) => new Date(b.rawCreationDate) - new Date(a.rawCreationDate)
-        );
-
-        setItems(sortedPosts);
+        setItems(postsWithParticipants);
       } catch (error) {
         setError("Failed to load data: " + error.message);
       } finally {

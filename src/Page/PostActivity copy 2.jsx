@@ -93,9 +93,9 @@ function PostActivity() {
         if (!postsResponse.ok) throw new Error("Failed to fetch posts");
         const postsData = await postsResponse.json();
 
-        // ดึงข้อมูลร้านค้าทั้งหมด
-        const storesResponse = await fetch(
-          `http://localhost:8080/api/store`,
+        // ดึงข้อมูลผู้ใช้ทั้งหมด
+        const usersResponse = await fetch(
+          `http://localhost:8080/api/users`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -103,24 +103,19 @@ function PostActivity() {
             },
           }
         );
-        if (!storesResponse.ok) throw new Error("Failed to fetch stores");
-        const storesData = await storesResponse.json();
+        if (!usersResponse.ok) throw new Error("Failed to fetch users");
+        const usersData = await usersResponse.json();
 
-        const postsWithStores = postsData.map((post) => {
-          // หา store ที่ตรงกับ store_id ของโพสต์
-          const postStore = storesData.find(store => store.store_id === post.store_id);
-
-          // ตรวจสอบว่าข้อมูลวันที่มีรูปแบบที่ถูกต้องหรือไม่
-          const rawCreationDate = parseISO(post.creation_date);
-          if (isNaN(rawCreationDate)) {
-            console.error("Invalid date format:", post.creation_date);
-          }
+        const postsWithUsers = postsData.map((post) => {
+          // หา user ที่ตรงกับ store_id ของโพสต์
+          const postUser = usersData.find(user => user.users_id === post.store_id);
 
           return {
             ...post,
-            userFirstName: postStore ? postStore.name_store : "Unknown", // ใช้ข้อมูลจาก store
-            userProfileImage: postStore ? postStore.store_image : "/images/default-profile.png", // ใช้ข้อมูลจาก store
-            rawCreationDate: rawCreationDate, // แปลงวันที่เป็น Date object เพื่อใช้ในการเรียงลำดับ
+            userFirstName: postUser ? postUser.first_name : "Unknown", // ใช้ข้อมูลจาก user
+            userLastName: postUser ? postUser.last_name : "Unknown", // ใช้ข้อมูลจาก user
+            userProfileImage: postUser ? postUser.user_image : "/images/default-profile.png", // ใช้ภาพเริ่มต้นที่อยู่ใน public folder
+            rawCreationDate: post.creation_date, // เก็บข้อมูลวันที่ดิบเพื่อใช้ในการเรียงลำดับ
             creation_date: formatDateTime(post.creation_date),
             date_activity: formatThaiDate(post.date_activity),
             time_activity: formatThaiTime(post.time_activity),
@@ -128,8 +123,8 @@ function PostActivity() {
         });
 
         // เรียงโพสต์ตาม rawCreationDate จากใหม่ไปเก่า
-        const sortedPosts = postsWithStores.sort((a, b) => 
-          b.rawCreationDate - a.rawCreationDate
+        const sortedPosts = postsWithUsers.sort((a, b) =>
+          new Date(b.rawCreationDate) - new Date(a.rawCreationDate)
         );
 
         setItems(sortedPosts);
@@ -173,7 +168,7 @@ function PostActivity() {
             <Grid item>
               <Image
                 src={item.userProfileImage}
-                alt={`${item.userFirstName}`}
+                alt={`${item.userFirstName} ${item.userLastName}`}
                 width={50} // ปรับขนาดตามที่ต้องการ
                 height={50}
                 layout="fixed"
@@ -182,7 +177,7 @@ function PostActivity() {
             </Grid>
             <Grid item xs>
               <Typography variant="subtitle1" gutterBottom>
-                {item.userFirstName}
+                {item.userFirstName} {item.userLastName}
               </Typography>
               <Typography variant="body2" sx={{ color: "white" }}>
                 {item.creation_date}
