@@ -110,17 +110,11 @@ function PostActivity() {
           // หา store ที่ตรงกับ store_id ของโพสต์
           const postStore = storesData.find(store => store.store_id === post.store_id);
 
-          // ตรวจสอบว่าข้อมูลวันที่มีรูปแบบที่ถูกต้องหรือไม่
-          const rawCreationDate = parseISO(post.creation_date);
-          if (isNaN(rawCreationDate)) {
-            console.error("Invalid date format:", post.creation_date);
-          }
-
           return {
             ...post,
             userFirstName: postStore ? postStore.name_store : "Unknown", // ใช้ข้อมูลจาก store
             userProfileImage: postStore ? postStore.store_image : "/images/default-profile.png", // ใช้ข้อมูลจาก store
-            rawCreationDate: rawCreationDate, // แปลงวันที่เป็น Date object เพื่อใช้ในการเรียงลำดับ
+            rawCreationDate: new Date(post.creation_date), // แปลงวันที่เป็น Date object เพื่อใช้ในการเรียงลำดับ
             creation_date: formatDateTime(post.creation_date),
             date_activity: formatThaiDate(post.date_activity),
             time_activity: formatThaiTime(post.time_activity),
@@ -128,8 +122,8 @@ function PostActivity() {
         });
 
         // เรียงโพสต์ตาม rawCreationDate จากใหม่ไปเก่า
-        const sortedPosts = postsWithStores.sort((a, b) => 
-          b.rawCreationDate - a.rawCreationDate
+        const sortedPosts = postsWithStores.sort((a, b) =>
+          new Date(b.rawCreationDate) - new Date(a.rawCreationDate)
         );
 
         setItems(sortedPosts);
