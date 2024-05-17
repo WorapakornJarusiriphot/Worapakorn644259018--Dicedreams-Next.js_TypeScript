@@ -32,6 +32,7 @@ import Stack from "@mui/material/Stack";
 import { DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
+import { renderTimeViewClock } from "@mui/x-date-pickers/timeViewRenderers";
 
 const ProSpan = styled("span")({
   display: "inline-block",
@@ -256,12 +257,17 @@ function Filter() {
                 }
               >
                 <TimePicker
-                  slotProps={{
-                    textField: {
-                      variant: "outlined",
-                      InputLabelProps: { style: { color: "white" } },
-                      InputProps: { style: { color: "white" } },
-                    },
+                  // slotProps={{
+                  //   textField: {
+                  //     variant: "outlined",
+                  //     InputLabelProps: { style: { color: "white" } },
+                  //     InputProps: { style: { color: "white" } },
+                  //   },
+                  // }}
+                  viewRenderers={{
+                    hours: renderTimeViewClock,
+                    minutes: renderTimeViewClock,
+                    seconds: renderTimeViewClock,
                   }}
                 />
               </DemoItem>

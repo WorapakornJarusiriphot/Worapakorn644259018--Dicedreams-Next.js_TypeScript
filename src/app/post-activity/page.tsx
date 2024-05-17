@@ -747,19 +747,19 @@ export default function PostActivity() {
       return;
     }
 
-    const formattedDate = dateActivity.format('DD/MM/YYYY');
+    const formattedDate = dateActivity.format('MM/DD/YYYY');
     const formattedTime = timeActivity.format('HH:mm:ss');
 
     // สร้างรูปแบบข้อมูลที่เหมือนกับที่ใช้ใน Postman
     const data = {
       name_activity: nameActivity,
       detail_post: detailPost,
-      creation_date: `${formattedDate} ${formattedTime}`, // ตั้งค่าวันที่สร้าง
-      date_activity: formattedDate, // วันที่ของกิจกรรม
-      time_activity: formattedTime, // เวลาของกิจกรรม
-      status_post: 'active', // สถานะของโพสต์
-      store_id: storeId, // ID ร้านค้า
-      post_activity_image: postActivityImage // รูปภาพในรูปแบบ Base64
+      creation_date: new Date().toISOString(),
+      date_activity: formattedDate,
+      time_activity: formattedTime,
+      status_post: 'active',
+      store_id: storeId,
+      post_activity_image: postActivityImage,
     };
 
     try {
@@ -854,10 +854,10 @@ export default function PostActivity() {
   const [birthday, setBirthday] = React.useState<string | null>(null);
 
   // Capture the date selected in the DatePicker
-  const handleBirthdayChange = (date: dayjs.Dayjs | null) => {
-    // Change the format to MM-DD-YYYY
-    setBirthday(date ? date.format('MM-DD-YYYY') : null);
-  };
+  // const handleBirthdayChange = (date: dayjs.Dayjs | null) => {
+  //   // Change the format to MM-DD-YYYY
+  //   setBirthday(date ? date.format('MM-DD-YYYY') : null);
+  // };
 
   // // อัพเดตส่วนของ handleSubmit เพื่อจัดการการแจ้งเตือน
   // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

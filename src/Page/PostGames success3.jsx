@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import InputLabel from "@mui/material/InputLabel";
+// import InputAdornment from "@mui.material/InputAdornment";
 import FormHelperText from "@mui/material/FormHelperText";
 import FormControl from "@mui/material/FormControl";
 import SearchIcon from "@mui/icons-material/Search";
@@ -112,32 +113,30 @@ function PostGames() {
         if (!usersResponse.ok) throw new Error("Failed to fetch users");
         const usersData = await usersResponse.json();
 
-        const postsWithParticipants = postsData
-          .filter((post) => post.status_post === "active") // กรองโพสต์ที่สถานะเป็น active
-          .map((post) => {
-            const postParticipants = participantsData.filter(
-              (participant) => participant.post_games_id === post.post_games_id
-            );
+        const postsWithParticipants = postsData.map((post) => {
+          const postParticipants = participantsData.filter(
+            (participant) => participant.post_games_id === post.post_games_id
+          );
 
-            // หา user ที่ตรงกับ users_id ของโพสต์
-            const postUser = usersData.find(
-              (user) => user.users_id === post.users_id
-            );
+          // หา user ที่ตรงกับ users_id ของโพสต์
+          const postUser = usersData.find(
+            (user) => user.users_id === post.users_id
+          );
 
-            return {
-              ...post,
-              participants: postParticipants.length + 1, // Adding 1 to the count of participants
-              userFirstName: postUser ? postUser.first_name : "Unknown", // ใช้ข้อมูลจาก user
-              userLastName: postUser ? postUser.last_name : "Unknown", // ใช้ข้อมูลจาก user
-              userProfileImage: postUser
-                ? postUser.user_image
-                : "default-image-url", // ใช้ข้อมูลจาก user
-              rawCreationDate: post.creation_date, // เก็บข้อมูลวันที่ดิบเพื่อใช้ในการเรียงลำดับ
-              creation_date: formatDateTime(post.creation_date),
-              date_meet: post.date_meet,
-              time_meet: post.time_meet,
-            };
-          });
+          return {
+            ...post,
+            participants: postParticipants.length + 1, // Adding 1 to the count of participants
+            userFirstName: postUser ? postUser.first_name : "Unknown", // ใช้ข้อมูลจาก user
+            userLastName: postUser ? postUser.last_name : "Unknown", // ใช้ข้อมูลจาก user
+            userProfileImage: postUser
+              ? postUser.user_image
+              : "default-image-url", // ใช้ข้อมูลจาก user
+            rawCreationDate: post.creation_date, // เก็บข้อมูลวันที่ดิบเพื่อใช้ในการเรียงลำดับ
+            creation_date: formatDateTime(post.creation_date),
+            date_meet: post.date_meet,
+            time_meet: post.time_meet,
+          };
+        });
 
         // กรองโพสต์ที่เวลานัดหมายผ่านไปแล้ว
         const currentTime = new Date();
@@ -170,7 +169,7 @@ function PostGames() {
     <div>
       {items.map((item) => (
         <Box
-          key={item.post_games_id}
+          key={item.id}
           sx={{
             borderColor: "grey.800",
             borderWidth: 1,

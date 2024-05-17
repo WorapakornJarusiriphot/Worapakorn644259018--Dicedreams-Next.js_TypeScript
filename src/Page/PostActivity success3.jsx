@@ -94,28 +94,28 @@ function PostActivity() {
         const postsData = await postsResponse.json();
 
         // ดึงข้อมูลร้านค้าทั้งหมด
-        const storesResponse = await fetch(`http://localhost:8080/api/store`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const storesResponse = await fetch(
+          `http://localhost:8080/api/store`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         if (!storesResponse.ok) throw new Error("Failed to fetch stores");
         const storesData = await storesResponse.json();
 
         const now = new Date();
 
         const postsWithStores = postsData
-          .filter((post) => post.status_post !== "unActive") // กรองโพสต์ที่มีสถานะเป็น unActive
-          .filter((post) => {
+          .filter(post => {
             const postDate = parseISO(post.date_activity);
             return postDate >= now; // กรองโพสต์ที่วันนัดหมายยังไม่ถึงวันนี้
           })
           .map((post) => {
             // หา store ที่ตรงกับ store_id ของโพสต์
-            const postStore = storesData.find(
-              (store) => store.store_id === post.store_id
-            );
+            const postStore = storesData.find(store => store.store_id === post.store_id);
 
             // ตรวจสอบว่าข้อมูลวันที่มีรูปแบบที่ถูกต้องหรือไม่
             const rawCreationDate = parseISO(post.creation_date);
@@ -126,9 +126,7 @@ function PostActivity() {
             return {
               ...post,
               userFirstName: postStore ? postStore.name_store : "Unknown", // ใช้ข้อมูลจาก store
-              userProfileImage: postStore
-                ? postStore.store_image
-                : "/images/default-profile.png", // ใช้ข้อมูลจาก store
+              userProfileImage: postStore ? postStore.store_image : "/images/default-profile.png", // ใช้ข้อมูลจาก store
               rawCreationDate: rawCreationDate, // แปลงวันที่เป็น Date object เพื่อใช้ในการเรียงลำดับ
               creation_date: formatDateTime(post.creation_date),
               date_activity: formatThaiDate(post.date_activity),
@@ -137,8 +135,8 @@ function PostActivity() {
           });
 
         // เรียงโพสต์ตาม rawCreationDate จากใหม่ไปเก่า
-        const sortedPosts = postsWithStores.sort(
-          (a, b) => b.rawCreationDate - a.rawCreationDate
+        const sortedPosts = postsWithStores.sort((a, b) => 
+          b.rawCreationDate - a.rawCreationDate
         );
 
         setItems(sortedPosts);
