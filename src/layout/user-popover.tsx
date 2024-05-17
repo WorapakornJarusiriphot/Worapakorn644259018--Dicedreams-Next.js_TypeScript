@@ -125,7 +125,7 @@ export function UserPopover({ anchorEl, onClose, open, userId }: UserPopoverProp
       <Box sx={{ p: '16px 20px ' }}>
         <Typography variant="subtitle1">{user.firstName} {user.lastName}</Typography>
         <Typography color="text.secondary" variant="body2">
-        {user.email}
+          {user.email}
         </Typography>
       </Box>
       <Divider />
@@ -134,19 +134,19 @@ export function UserPopover({ anchorEl, onClose, open, userId }: UserPopoverProp
           <ListItemIcon>
             <GearSixIcon fontSize="var(--icon-fontSize-md)" />
           </ListItemIcon>
-          Settings
+          ตั้งค่า
         </MenuItem>
         <MenuItem component={RouterLink} href="/profile" onClick={onClose}>
           <ListItemIcon>
             <UserIcon fontSize="var(--icon-fontSize-md)" />
           </ListItemIcon>
-          Profile
+          โปรไฟล์
         </MenuItem>
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <SignOutIcon fontSize="var(--icon-fontSize-md)" />
           </ListItemIcon>
-          Sign out
+          ออกจากระบบ
         </MenuItem>
       </MenuList>
     </Popover>

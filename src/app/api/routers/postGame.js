@@ -10,7 +10,7 @@ const passportJWT = require('../middleware/passportJWT');
 router.post("/",[passportJWT.isLogin,authentication.isUser], postGameController.create);
 
 // Retrieve all games
-router.get("/",[passportJWT.isLogin,authentication.isUser], postGameController.findAll);
+router.get("/", postGameController.findAll);
 
 // Retrieve all games by a specific user
 router.get("/user/:userId",[passportJWT.isLogin, authentication.isUser], postGameController.findAllUserPosts);
