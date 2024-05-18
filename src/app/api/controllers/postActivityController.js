@@ -21,7 +21,7 @@ exports.create = async (req, res, next) => {
       date_activity,
       time_activity,
       post_activity_image,
-      store_id
+      store_id,
     } = req.body;
 
     const data = {
@@ -42,9 +42,25 @@ exports.create = async (req, res, next) => {
     next(error);
   }
 };
+
 exports.findAll = async (req, res, next) => {
   try {
-    const post_activity = await PostActivity.findAll();
+    const { search } = req.query;
+    console.log(`Received search query for activities: ${search}`); // เพิ่ม log เพื่อตรวจสอบคำค้นหา
+
+    const condition = search
+      ? {
+          [Op.or]: [
+            { name_activity: { [Op.like]: `%${search}%` } },
+            { detail_post: { [Op.like]: `%${search}%` } },
+          ],
+          status_post: { [Op.not]: "unActive" },
+        }
+      : {
+          status_post: { [Op.not]: "unActive" },
+        };
+
+    const post_activity = await PostActivity.findAll({ where: condition });
     post_activity.map((post_activity) => {
       post_activity.post_activity_image = `${req.protocol}://${req.get(
         "host"
@@ -55,6 +71,8 @@ exports.findAll = async (req, res, next) => {
     next(error);
   }
 };
+
+
 exports.findOne = async (req, res, next) => {
   try {
     const post_activity_id = req.params.id;
@@ -67,6 +85,7 @@ exports.findOne = async (req, res, next) => {
     next(error);
   }
 };
+
 exports.update = async (req, res, next) => {
   try {
     const post_activity_id = req.params.id;
@@ -99,6 +118,7 @@ exports.update = async (req, res, next) => {
     next(error);
   }
 };
+
 exports.delete = async (req, res, next) => {
   try {
     const post_activity_id = req.params.id;
@@ -112,6 +132,7 @@ exports.delete = async (req, res, next) => {
     next(error);
   }
 };
+
 exports.deleteAll = async (req, res, next) => {
   try {
     const post_activity = await PostActivity.destroy({

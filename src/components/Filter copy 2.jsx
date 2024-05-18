@@ -33,7 +33,6 @@ import { DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
 import { renderTimeViewClock } from "@mui/x-date-pickers/timeViewRenderers";
-import { useRouter } from "next/navigation"; // เพิ่มการใช้ useRouter
 
 const ProSpan = styled("span")({
   display: "inline-block",
@@ -127,30 +126,6 @@ function Filter() {
     setSelectedCurrency(event.target.value);
   };
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const router = useRouter();
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
-  const handleCategoryChange = (event) => {
-    setSelectedCategory(event.target.value);
-  };
-
-  const handleSearch = () => {
-    if (searchTerm.trim()) {
-      router.push(`/search?search=${searchTerm}`);
-    }
-  };
-
-  const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      handleSearch();
-    }
-  };
-
   const currencies = [
     {
       value: "โพสต์ทั้งหมด",
@@ -177,32 +152,33 @@ function Filter() {
           label="ค้นหาโพสต์"
           variant="outlined"
           placeholder="ค้นหาโพสต์"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          onKeyDown={handleKeyDown}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
                 <SearchIcon />
               </InputAdornment>
             ),
+            style: { backgroundColor: "rgba(0, 0, 0, 0)" }, // ตั้งค่าพื้นหลังเป็นโปร่งใส
           }}
         />
         <br />
         <br />
 
-        <FormControl fullWidth sx={{ marginTop: "10px" }}>
-          <InputLabel id="category-select-label">ค้นหาประเภทโพสต์</InputLabel>
+        <FormControl fullWidth>
+          <InputLabel id="currency-select-label">ค้นหาประเภทโพสต์</InputLabel>
           <Select
-            labelId="category-select-label"
-            id="category-select"
-            value={selectedCategory}
+            labelId="currency-select-label"
+            id="currency-select"
+            value={selectedCurrency} // ใช้ตัวแปร selectedCurrency ที่นี่
             label="ค้นหาประเภทโพสต์"
-            onChange={handleCategoryChange}
+            onChange={handleCurrencyChange} // เรียกใช้ฟังก์ชัน handleCurrencyChange เมื่อมีการเลือกตัวเลือก
           >
-            <MenuItem value="">โพสต์ทั้งหมด</MenuItem>
-            <MenuItem value="postGames">โพสต์นัดเล่น</MenuItem>
-            <MenuItem value="postActivity">โพสต์กิจกรรม</MenuItem>
+            {/* วนลูปเพื่อสร้าง MenuItem */}
+            {currencies.map((currency) => (
+              <MenuItem key={currency.value} value={currency.value}>
+                {currency.label}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 
@@ -322,8 +298,7 @@ function Filter() {
         <FormControl component="fieldset">
           <Button
             variant="contained"
-            onClick={handleSearch}
-            sx={{ background: "white", color: "black", marginTop: "10px" }}
+            sx={{ background: "white", color: "black", marginRight: "10px" }}
           >
             ค้นหา
           </Button>
