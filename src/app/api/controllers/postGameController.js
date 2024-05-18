@@ -213,8 +213,22 @@ exports.findAll = (req, res) => {
   //   var condition = name_games
   //     ? { name_games: { [Op.like]: `%${name_games}%` } }
   //     : null;
+  const { search } = req.query;
+  console.log(`Received search query for games: ${search}`); // เพิ่ม log เพื่อตรวจสอบคำค้นหา
 
-  PostGames.findAll()
+  const condition = search
+    ? {
+        [Op.or]: [
+          { name_games: { [Op.like]: `%${search}%` } },
+          { detail_post: { [Op.like]: `%${search}%` } },
+        ],
+        status_post: { [Op.not]: "unActive" },
+      }
+    : {
+        status_post: { [Op.not]: "unActive" },
+      };
+
+  PostGames.findAll({ where: condition })
     .then((data) => {
       data.map((post_games) => {
         if (post_games.games_image) {
@@ -237,23 +251,22 @@ exports.findAllUserPosts = (req, res) => {
   const userId = req.params.userId; // รับ ID ผู้ใช้จากพารามิเตอร์
 
   PostGames.findAll({
-      where: { users_id: userId } // ค้นหาโพสต์ที่มี users_id ตรงกับ ID ที่ส่งมา
+    where: { users_id: userId }, // ค้นหาโพสต์ที่มี users_id ตรงกับ ID ที่ส่งมา
   })
-  .then(data => {
-      data.forEach(post => {
-          if (post.games_image) {
-              post.games_image = `${req.protocol}://${req.get("host")}/images/${post.games_image}`;
-          }
+    .then((data) => {
+      data.forEach((post) => {
+        if (post.games_image) {
+          post.games_image = `${req.protocol}://${req.get("host")}/images/${post.games_image}`;
+        }
       });
       res.send(data);
-  })
-  .catch(err => {
+    })
+    .catch((err) => {
       res.status(500).send({
-          message: err.message || "มีข้อผิดพลาดเกิดขึ้นขณะดึงข้อมูลโพสต์"
+        message: err.message || "มีข้อผิดพลาดเกิดขึ้นขณะดึงข้อมูลโพสต์",
       });
-  });
+    });
 };
-
 
 // Find a single game with an id
 exports.findOne = (req, res) => {

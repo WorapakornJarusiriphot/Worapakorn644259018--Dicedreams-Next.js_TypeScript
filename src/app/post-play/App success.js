@@ -2,8 +2,6 @@
 
 import { Dropzone, FileItem, ImagePreview } from "@dropzone-ui/react";
 import { useState } from "react";
-import Modal from "@mui/material/Modal";
-import Box from "@mui/material/Box";
 
 export default function App({ onImageUpload }) {
   const [files, setFiles] = useState([]);
@@ -12,6 +10,7 @@ export default function App({ onImageUpload }) {
   const updateFiles = (incomingFiles) => {
     setFiles(incomingFiles);
     if (incomingFiles.length > 0 && incomingFiles[0].file instanceof File) {
+      // ส่งข้อมูลรูปภาพกลับไปที่ component หลัก
       onImageUpload(incomingFiles[0].file);
     } else {
       console.error("The uploaded file is not a valid File instance.");
@@ -28,10 +27,6 @@ export default function App({ onImageUpload }) {
 
   const handleClean = (files) => {
     console.log("list cleaned", files);
-  };
-
-  const handleClose = () => {
-    setImageSrc(undefined);
   };
 
   return (
@@ -70,36 +65,11 @@ export default function App({ onImageUpload }) {
             />
           ))}
       </Dropzone>
-      <Modal
-        open={!!imageSrc}
-        onClose={handleClose}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "auto",
-            maxHeight: "90%",
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <img
-            src={imageSrc}
-            alt="Preview"
-            style={{
-              width: "100%",
-              height: "auto",
-              maxHeight: "80vh",
-            }}
-          />
-        </Box>
-      </Modal>
+      <ImagePreview
+        imgSource={imageSrc}
+        openImage={imageSrc}
+        onClose={() => handleSee(undefined)}
+      />
     </>
   );
 }

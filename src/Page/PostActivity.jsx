@@ -242,7 +242,7 @@ function PostActivity() {
         </Box>
       ))}
       {items.length === 0 && (
-        <Typography sx={{ color: "white" }}>ไม่พบโพสต์</Typography>
+        <Typography sx={{ color: "white" }}></Typography>
       )}
     </div>
   );

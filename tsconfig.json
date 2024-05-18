@@ -21,6 +21,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/sign-up/Label.tsx", "src/app/sign-up/page.tsx", "src/app/profile/Tabs.tsx" , "src/Page/PostGames.jsx", "src/Page/Home.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/sign-up/Label.tsx", "src/app/sign-up/page.tsx", "src/app/profile/Tabs.tsx" , "src/Page/PostGames.jsx", "src/Page/Home.jsx", "src/app/search/page.jsx"],
   "exclude": ["node_modules"]
 }
