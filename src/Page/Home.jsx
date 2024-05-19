@@ -60,12 +60,19 @@ function Home() {
     setNumber(event.target.value);
   };
 
-  const filteredData =
-    selectedCategory === "postGames"
-      ? data.filter((post) => post.name_games)
-      : selectedCategory === "postActivity"
-        ? data.filter((post) => post.name_activity)
-        : data;
+  const filteredData = data.filter((post) => {
+    if (selectedCategory === "postGames" && post.name_games) {
+      return post.participants >= number;
+    } else if (selectedCategory === "postActivity" && post.name_activity) {
+      return true;
+    } else if (selectedCategory === "") {
+      return post.participants >= number;
+    }
+    return false;
+  });
+
+  // เพิ่มการล็อกข้อมูลเพื่อดูผลลัพธ์
+  console.log("Filtered data HOME:", filteredData);
 
   const [value, setValue] = React.useState(dayjs("2022-04-17T15:30"));
   // const [number, setNumber] = useState("");

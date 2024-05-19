@@ -27,10 +27,7 @@ const useFetchPosts = (selectedCategory, searchTerm, number) => {
           postData = postData.concat(postActivities);
         }
 
-        // Log ข้อมูลที่ได้รับจาก API
-        console.log("Fetched postData:", postData);
-
-        // Filter based on searchTerm
+        // Filter based on searchTerm and number
         if (searchTerm) {
           postData = postData.filter(
             (post) =>
@@ -43,16 +40,9 @@ const useFetchPosts = (selectedCategory, searchTerm, number) => {
           );
         }
 
-        // Log ข้อมูลหลังจากกรองด้วย searchTerm
-        console.log("Filtered by searchTerm:", postData);
-
-        // Filter based on number of participants
         if (number) {
           postData = postData.filter((post) => post.participants >= number);
         }
-
-        // Log ข้อมูลหลังจากกรองด้วย number
-        console.log("Filtered by number:", postData);
 
         setData(postData);
       } catch (error) {
