@@ -10,7 +10,7 @@ const passportJWT = require('../middleware/passportJWT');
 router.post("/",[passportJWT.isLogin,authentication.isUser], participateController.create);
 
 // Retrieve all participates
-router.get("/",[passportJWT.isLogin,authentication.isUser], participateController.findAll);
+router.get("/", participateController.findAll);
 
 // Retrieve a single participate with id
 router.get("/:id",[passportJWT.isLogin,authentication.isUser], participateController.findOne);
