@@ -68,29 +68,28 @@ function Home() {
     setNumber(event.target.value);
   };
 
-  // const filteredData = data; // ใช้ข้อมูลที่ถูกกรองแล้วจาก useFetchPosts
-
-  // console.log("Filtered data HOME:", filteredData);
-
-  // Filter data based on selected date
-  const filteredData = data.filter((post) => {
-    if (selectedDate) {
-      const postDate = post.date_meet || post.date_activity;
-      return dayjs(postDate).isSame(selectedDate, "day");
+  // เปลี่ยน const เป็น let เพื่อให้สามารถเปลี่ยนแปลงค่าได้
+  let filteredData = data.filter((post) => {
+    if (selectedCategory === "postGames" && post.name_games) {
+      return post.participants >= number;
+    } else if (selectedCategory === "postActivity" && post.name_activity) {
+      return true;
+    } else if (selectedCategory === "") {
+      return post.participants >= number;
     }
-    return true;
+    return false;
   });
 
   console.log("Filtered data HOME:", filteredData);
 
-  // // ตรวจสอบการกรองข้อมูลตามวันที่และประเภทโพสต์
-  // if (selectedDate) {
-  //   filteredData = filteredData.filter((post) => {
-  //     const postDate = post.date_meet || post.date_activity;
-  //     return dayjs(postDate).isSame(selectedDate, "day");
-  //   });
-  //   console.log("Filtered data by date:", filteredData);
-  // }
+  // ตรวจสอบการกรองข้อมูลตามวันที่และประเภทโพสต์
+  if (selectedDate) {
+    filteredData = filteredData.filter((post) => {
+      const postDate = post.date_meet || post.date_activity;
+      return dayjs(postDate).isSame(selectedDate, "day");
+    });
+    console.log("Filtered data by date:", filteredData);
+  }
 
   const [value, setValue] = React.useState(dayjs("2022-04-17T15:30"));
   // const [number, setNumber] = useState("");

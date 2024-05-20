@@ -55,6 +55,7 @@ function Home() {
     console.log("Date selected:", newDate);
     setSelectedDate(newDate);
   };
+  
 
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
@@ -68,29 +69,19 @@ function Home() {
     setNumber(event.target.value);
   };
 
-  // const filteredData = data; // ใช้ข้อมูลที่ถูกกรองแล้วจาก useFetchPosts
-
-  // console.log("Filtered data HOME:", filteredData);
-
-  // Filter data based on selected date
   const filteredData = data.filter((post) => {
-    if (selectedDate) {
-      const postDate = post.date_meet || post.date_activity;
-      return dayjs(postDate).isSame(selectedDate, "day");
+    if (selectedCategory === "postGames" && post.name_games) {
+      return post.participants >= number;
+    } else if (selectedCategory === "postActivity" && post.name_activity) {
+      return true;
+    } else if (selectedCategory === "") {
+      return post.participants >= number;
     }
-    return true;
+    return false;
   });
 
+  // เพิ่มการล็อกข้อมูลเพื่อดูผลลัพธ์
   console.log("Filtered data HOME:", filteredData);
-
-  // // ตรวจสอบการกรองข้อมูลตามวันที่และประเภทโพสต์
-  // if (selectedDate) {
-  //   filteredData = filteredData.filter((post) => {
-  //     const postDate = post.date_meet || post.date_activity;
-  //     return dayjs(postDate).isSame(selectedDate, "day");
-  //   });
-  //   console.log("Filtered data by date:", filteredData);
-  // }
 
   const [value, setValue] = React.useState(dayjs("2022-04-17T15:30"));
   // const [number, setNumber] = useState("");
@@ -123,10 +114,6 @@ function Home() {
   // };
 
   const handleSearch = () => {
-    console.log("Search term:", searchTerm); // ตรวจสอบคำที่ใช้ในการค้นหา
-    console.log("Selected category:", selectedCategory); // ตรวจสอบหมวดหมู่ที่เลือก
-    console.log("Number of participants:", number); // ตรวจสอบจำนวนผู้เข้าร่วม
-    console.log("Selected date:", selectedDate); // ตรวจสอบวันที่เลือก
     if (searchTerm.trim()) {
       router.push(`/search?search=${searchTerm}`);
     }
