@@ -43,24 +43,17 @@ function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [number, setNumber] = useState("");
   const [selectedDate, setSelectedDate] = useState(null); // เพิ่ม useState สำหรับ selectedDate
-  const [selectedTime, setSelectedTime] = useState(null); // เพิ่ม useState สำหรับ selectedTime
   const { data, loading, error } = useFetchPosts(
     selectedCategory,
     searchTerm,
     number,
-    selectedDate, // เพิ่ม selectedDate
-    selectedTime // เพิ่ม selectedTime
+    selectedDate // เพิ่ม selectedDate
   );
 
   // เพิ่มฟังก์ชัน handleDateChange
   const handleDateChange = (newDate) => {
     console.log("Date selected:", newDate);
     setSelectedDate(newDate);
-  };
-
-  const handleTimeChange = (newTime) => {
-    console.log("Time selected:", newTime);
-    setSelectedTime(newTime);
   };
 
   const handleCategoryChange = (event) => {
@@ -188,8 +181,6 @@ function Home() {
               selectedCurrency={selectedCurrency}
               handleDateChange={handleDateChange} // เพิ่ม handleDateChange
               selectedDate={selectedDate} // เพิ่ม selectedDate
-              handleTimeChange={handleTimeChange} // เพิ่ม handleTimeChange
-              selectedTime={selectedTime} // เพิ่ม selectedTime
             />
           </Grid>
           <Grid item xs={12} md={8}>

@@ -2,13 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import dayjs from "dayjs";
 
-const useFetchPosts = (
-  selectedCategory,
-  searchTerm,
-  number,
-  selectedDate,
-  selectedTime
-) => {
+const useFetchPosts = (selectedCategory, searchTerm, number, selectedDate) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -58,11 +52,6 @@ const useFetchPosts = (
           postData = postData.filter((post) => post.participants >= number);
         }
 
-        // Filter based on number of participants
-        if (number) {
-          postData = postData.filter((post) => post.participants >= number);
-        }
-
         // Log ข้อมูลหลังจากกรองด้วย number
         console.log("Filtered by number:", postData);
 
@@ -79,27 +68,6 @@ const useFetchPosts = (
         // Log ข้อมูลหลังจากกรองด้วย selectedDate
         console.log("Filtered by selectedDate:", postData);
 
-        // Filter and sort based on selectedTime
-        if (selectedTime) {
-          console.log("Using time for filtering and sorting:", selectedTime);
-          postData = postData
-            .filter((post) => {
-              const postTime = post.time_meet || post.time_activity;
-              return (
-                postTime &&
-                dayjs(postTime, "HH:mm").isSame(selectedTime, "hour")
-              );
-            })
-            .sort((a, b) => {
-              const aTime = dayjs(a.time_meet || a.time_activity, "HH:mm");
-              const bTime = dayjs(b.time_meet || b.time_activity, "HH:mm");
-              return aTime - bTime;
-            });
-        }
-
-        // Log ข้อมูลหลังจากกรองด้วย selectedTime
-        console.log("Filtered by selectedTime:", postData);
-
         setData(postData);
       } catch (error) {
         setError(error.message);
@@ -109,7 +77,7 @@ const useFetchPosts = (
     };
 
     fetchData();
-  }, [selectedCategory, searchTerm, number, selectedDate, selectedTime]);
+  }, [selectedCategory, searchTerm, number, selectedDate]);
 
   return { data, loading, error };
 };
