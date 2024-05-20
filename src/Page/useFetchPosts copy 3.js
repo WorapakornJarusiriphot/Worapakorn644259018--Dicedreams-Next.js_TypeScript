@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import dayjs from "dayjs";
 
 const useFetchPosts = (selectedCategory, searchTerm, number, selectedDate) => {
   const [data, setData] = useState([]);
@@ -56,12 +55,10 @@ const useFetchPosts = (selectedCategory, searchTerm, number, selectedDate) => {
         console.log("Filtered by number:", postData);
 
         // Filter based on selectedDate
-        // Filter based on selectedDate
         if (selectedDate) {
-          console.log("Using date for filtering:", selectedDate);
           postData = postData.filter((post) => {
             const postDate = post.date_meet || post.date_activity;
-            return dayjs(postDate).isSame(selectedDate, "day");
+            return dayjs(postDate).isSame(selectedDate, 'day');
           });
         }
 
