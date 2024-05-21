@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
+import { set, sub } from "date-fns";
+import { faker } from "@faker-js/faker";
+
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import Badge from "@mui/material/Badge";
@@ -16,10 +19,12 @@ import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemButton from "@mui/material/ListItemButton";
-import Iconify from "@/components/iconify";
-import Scrollbar from "@/components/scrollbar";
+
 import { fToNow } from "@/utils/format-time";
 
+import Iconify from "@/components/iconify";
+import Scrollbar from "@/components/scrollbar";
+import { useEffect } from "react";
 // ----------------------------------------------------------------------
 
 export default function NotificationsPopover() {
@@ -197,12 +202,10 @@ NotificationItem.propTypes = {
     createdAt: PropTypes.string,
     notification_id: PropTypes.string,
     read: PropTypes.bool,
-    data: PropTypes.shape({
-      first_name: PropTypes.string,
-      last_name: PropTypes.string,
-      user_image: PropTypes.string,
-    }),
+    first_name: PropTypes.string,
+    last_name: PropTypes.string,
     type: PropTypes.string,
+    user_image: PropTypes.string,
   }),
 };
 
@@ -272,10 +275,7 @@ function renderContent(notification) {
 
   return {
     avatar: notification.data.user_image ? (
-      <Avatar
-        alt={notification.data.first_name}
-        src={`http://localhost:8080/images/${notification.data.user_image}`}
-      />
+      <img alt={notification.data.first_name} src={notification.data.user_image} />
     ) : null,
     title,
   };
