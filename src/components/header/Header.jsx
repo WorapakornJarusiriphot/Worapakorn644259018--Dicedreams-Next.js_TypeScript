@@ -31,20 +31,22 @@ import { UserPopover } from "@/layout/user-popover";
 // import jwtDecode from 'jwt-decode';
 import { jwtDecode } from "jwt-decode";
 // import { JwtPayload } from 'jsonwebtoken';
-import { JwtPayload } from 'jwt-decode';
+import { JwtPayload } from "jwt-decode";
+
+import NotificationsPopover from "@/layout/dashboard/common/notifications-popover";
 
 function Header() {
   const userPopover = usePopover();
   const [user, setUser] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
+    firstName: "",
+    lastName: "",
+    email: "",
     username: "",
     userType: "",
     firstName: "",
     lastName: "",
     profilePictureUrl: "",
-    userId: ''  // เพิ่ม field userId
+    userId: "", // เพิ่ม field userId
   });
 
   // const [user, setUser] = useState({
@@ -70,17 +72,17 @@ function Header() {
   //   }
   // }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
     if (accessToken) {
       const decoded = jwtDecode(accessToken);
       if (decoded && decoded.users_id) {
-        setUser(prev => ({
+        setUser((prev) => ({
           ...prev,
           firstName: decoded.firstName,
           lastName: decoded.lastName,
           email: decoded.email,
-          userId: decoded.users_id  // สมมุติว่า token มี field users_id
+          userId: decoded.users_id, // สมมุติว่า token มี field users_id
         }));
       }
     }
@@ -287,16 +289,29 @@ function Header() {
               >
                 ออกจากระบบ
               </Button>
-              <Avatar
-                src={user.profilePictureUrl}
-                alt={altText}
-                onClick={userPopover.handleOpen}
-                ref={userPopover.anchorRef}
-              >
-                {!user.profilePictureUrl &&
-                  `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`}
-              </Avatar>
-              <UserPopover userId={user.userId} anchorEl={userPopover.anchorRef.current} onClose={userPopover.handleClose} open={userPopover.open} />
+              <Tooltip title="การแจ้งเตือน">
+                <NotificationsPopover />
+              </Tooltip>
+              <Tooltip title="บัญชี">
+                <Avatar
+                  src={user.profilePictureUrl}
+                  alt={altText}
+                  onClick={userPopover.handleOpen}
+                  ref={userPopover.anchorRef}
+                  sx={{
+                    marginLeft: "10px", // เพิ่มระยะห่างทางด้านซ้าย
+                  }}
+                >
+                  {!user.profilePictureUrl &&
+                    `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`}
+                </Avatar>
+              </Tooltip>
+              <UserPopover
+                userId={user.userId}
+                anchorEl={userPopover.anchorRef.current}
+                onClose={userPopover.handleClose}
+                open={userPopover.open}
+              />
             </>
           ) : (
             <>
