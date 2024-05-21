@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
@@ -272,10 +272,7 @@ function renderContent(notification) {
 
   return {
     avatar: notification.data.user_image ? (
-      <Avatar
-        alt={notification.data.first_name}
-        src={`http://localhost:8080/images/${notification.data.user_image}`}
-      />
+      <img alt={notification.data.first_name} src={notification.data.user_image} />
     ) : null,
     title,
   };

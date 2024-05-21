@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
@@ -197,12 +197,10 @@ NotificationItem.propTypes = {
     createdAt: PropTypes.string,
     notification_id: PropTypes.string,
     read: PropTypes.bool,
-    data: PropTypes.shape({
-      first_name: PropTypes.string,
-      last_name: PropTypes.string,
-      user_image: PropTypes.string,
-    }),
+    first_name: PropTypes.string,
+    last_name: PropTypes.string,
     type: PropTypes.string,
+    user_image: PropTypes.string,
   }),
 };
 
@@ -259,7 +257,7 @@ function renderContent(notification) {
 
   const title = (
     <Typography variant="subtitle2">
-      {notification.data.first_name} {notification.data.last_name}
+      {notification.first_name} {notification.last_name}
       <Typography
         component="span"
         variant="body2"
@@ -271,11 +269,8 @@ function renderContent(notification) {
   );
 
   return {
-    avatar: notification.data.user_image ? (
-      <Avatar
-        alt={notification.data.first_name}
-        src={`http://localhost:8080/images/${notification.data.user_image}`}
-      />
+    avatar: notification.user_image ? (
+      <img alt={notification.first_name} src={notification.user_image} />
     ) : null,
     title,
   };
