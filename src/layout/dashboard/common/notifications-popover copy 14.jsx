@@ -221,11 +221,7 @@ function NotificationItem({ notification }) {
     setExpanded((prev) => !prev);
   };
 
-  const { avatar, title } = renderContent(
-    notification,
-    expanded,
-    handleToggleExpand
-  );
+  const { avatar, title } = renderContent(notification, expanded, handleToggleExpand);
 
   return (
     <ListItemButton
@@ -279,49 +275,45 @@ function renderContent(notification, expanded, handleToggleExpand) {
           component="span"
           sx={{ fontWeight: "bold", color: "black" }}
         >
-          {notification.data.name_games}
+          {expanded
+            ? notification.data.name_games
+            : notification.data.name_games.length > 20
+            ? `${notification.data.name_games.substring(0, 20)}...`
+            : notification.data.name_games}
         </Typography>
-        <Typography component="span">
-          {expanded ? (
-            <>
-              , <Typography component="span">รายละเอียด:</Typography>{" "}
-              <Typography
-                component="span"
-                sx={{ fontWeight: "bold", color: "black" }}
-              >
-                {notification.data.detail_post}
-              </Typography>
-              , <Typography component="span">จำนวนคนจะไป:</Typography>{" "}
-              <Typography
-                component="span"
-                sx={{ fontWeight: "bold", color: "black" }}
-              >
-                {notification.data.participants}/{notification.data.num_people}
-              </Typography>
-              , <Typography component="span">วันที่เจอกัน:</Typography>{" "}
-              <Typography
-                component="span"
-                sx={{ fontWeight: "bold", color: "black" }}
-              >
-                {formatThaiDate(notification.data.date_meet)}
-              </Typography>
-              , <Typography component="span">เวลาที่เจอกัน:</Typography>{" "}
-              <Typography
-                component="span"
-                sx={{ fontWeight: "bold", color: "black" }}
-              >
-                {formatThaiTime(notification.data.time_meet)}
-              </Typography>
-            </>
-          ) : (
-            " ..."
-          )}
-        </Typography>
-        {notification.data.detail_post.length > 0 && (
+        {notification.data.name_games.length > 20 && (
           <Button size="small" onClick={handleToggleExpand}>
             {expanded ? "ย่อ" : "ขยาย"}
           </Button>
         )}
+        , <Typography component="span">รายละเอียด:</Typography>{" "}
+        <Typography
+          component="span"
+          sx={{ fontWeight: "bold", color: "black" }}
+        >
+          {notification.data.detail_post}
+        </Typography>
+        , <Typography component="span">จำนวนคนจะไป:</Typography>{" "}
+        <Typography
+          component="span"
+          sx={{ fontWeight: "bold", color: "black" }}
+        >
+          {notification.data.participants}/{notification.data.num_people}
+        </Typography>
+        , <Typography component="span">วันที่เจอกัน:</Typography>{" "}
+        <Typography
+          component="span"
+          sx={{ fontWeight: "bold", color: "black" }}
+        >
+          {formatThaiDate(notification.data.date_meet)}
+        </Typography>
+        , <Typography component="span">เวลาที่เจอกัน:</Typography>{" "}
+        <Typography
+          component="span"
+          sx={{ fontWeight: "bold", color: "black" }}
+        >
+          {formatThaiTime(notification.data.time_meet)}
+        </Typography>
       </>
     );
   } else if (notification.type === "chat") {

@@ -221,11 +221,7 @@ function NotificationItem({ notification }) {
     setExpanded((prev) => !prev);
   };
 
-  const { avatar, title } = renderContent(
-    notification,
-    expanded,
-    handleToggleExpand
-  );
+  const { avatar, title } = renderContent(notification, expanded, handleToggleExpand);
 
   return (
     <ListItemButton
@@ -275,49 +271,31 @@ function renderContent(notification, expanded, handleToggleExpand) {
         มีผู้ใช้เข้าร่วมโพสต์นัดเล่นของคุณ:
         <br />
         <Typography component="span">เกม:</Typography>{" "}
-        <Typography
-          component="span"
-          sx={{ fontWeight: "bold", color: "black" }}
-        >
+        <Typography component="span" sx={{ fontWeight: "bold", color: "black" }}>
           {notification.data.name_games}
         </Typography>
-        <Typography component="span">
-          {expanded ? (
-            <>
-              , <Typography component="span">รายละเอียด:</Typography>{" "}
-              <Typography
-                component="span"
-                sx={{ fontWeight: "bold", color: "black" }}
-              >
-                {notification.data.detail_post}
-              </Typography>
-              , <Typography component="span">จำนวนคนจะไป:</Typography>{" "}
-              <Typography
-                component="span"
-                sx={{ fontWeight: "bold", color: "black" }}
-              >
-                {notification.data.participants}/{notification.data.num_people}
-              </Typography>
-              , <Typography component="span">วันที่เจอกัน:</Typography>{" "}
-              <Typography
-                component="span"
-                sx={{ fontWeight: "bold", color: "black" }}
-              >
-                {formatThaiDate(notification.data.date_meet)}
-              </Typography>
-              , <Typography component="span">เวลาที่เจอกัน:</Typography>{" "}
-              <Typography
-                component="span"
-                sx={{ fontWeight: "bold", color: "black" }}
-              >
-                {formatThaiTime(notification.data.time_meet)}
-              </Typography>
-            </>
-          ) : (
-            " ..."
-          )}
-        </Typography>
-        {notification.data.detail_post.length > 0 && (
+        {!expanded && <Typography component="span"> ... </Typography>}
+        {expanded && (
+          <>
+            , <Typography component="span">รายละเอียด:</Typography>{" "}
+            <Typography component="span" sx={{ fontWeight: "bold", color: "black" }}>
+              {notification.data.detail_post}
+            </Typography>
+            , <Typography component="span">จำนวนคนจะไป:</Typography>{" "}
+            <Typography component="span" sx={{ fontWeight: "bold", color: "black" }}>
+              {notification.data.participants}/{notification.data.num_people}
+            </Typography>
+            , <Typography component="span">วันที่เจอกัน:</Typography>{" "}
+            <Typography component="span" sx={{ fontWeight: "bold", color: "black" }}>
+              {formatThaiDate(notification.data.date_meet)}
+            </Typography>
+            , <Typography component="span">เวลาที่เจอกัน:</Typography>{" "}
+            <Typography component="span" sx={{ fontWeight: "bold", color: "black" }}>
+              {formatThaiTime(notification.data.time_meet)}
+            </Typography>
+          </>
+        )}
+        {notification.data.detail_post.length > 20 && (
           <Button size="small" onClick={handleToggleExpand}>
             {expanded ? "ย่อ" : "ขยาย"}
           </Button>
@@ -333,11 +311,7 @@ function renderContent(notification, expanded, handleToggleExpand) {
       <Typography component="span" sx={{ fontWeight: "bold", color: "black" }}>
         {notification.data.first_name} {notification.data.last_name}
       </Typography>
-      <Typography
-        component="span"
-        variant="body2"
-        sx={{ color: "text.secondary" }}
-      >
+      <Typography component="span" variant="body2" sx={{ color: "text.secondary" }}>
         &nbsp; {message}
       </Typography>
     </Typography>
@@ -345,10 +319,7 @@ function renderContent(notification, expanded, handleToggleExpand) {
 
   return {
     avatar: notification.data.user_image ? (
-      <Avatar
-        alt={notification.data.first_name}
-        src={`http://localhost:8080/images/${notification.data.user_image}`}
-      />
+      <Avatar alt={notification.data.first_name} src={`http://localhost:8080/images/${notification.data.user_image}`} />
     ) : null,
     title,
   };
