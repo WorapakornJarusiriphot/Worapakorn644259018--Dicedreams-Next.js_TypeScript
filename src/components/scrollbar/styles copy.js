@@ -11,7 +11,7 @@ export const StyledRootScrollbar = styled('div')(() => ({
 
 export const StyledScrollbar = styled(SimpleBar)(({ theme }) => ({
   maxHeight: '100%',
-  overflowY: 'auto',
+  overflowY: 'auto', // เพิ่ม overflowY เพื่อจัดการการเลื่อนในแนวตั้ง
   '& .simplebar-scrollbar': {
     '&:before': {
       backgroundColor: alpha(theme.palette.grey[600], 0.48),
@@ -24,10 +24,7 @@ export const StyledScrollbar = styled(SimpleBar)(({ theme }) => ({
     zIndex: 'inherit',
   },
   '& .simplebar-content-wrapper': {
-    height: '100%',
+    height: '100%', // เพิ่มการตั้งค่าส่วนนี้เพื่อลดช่องว่างที่ไม่ต้องการ
     overflow: 'auto',
-  },
-  '& .simplebar-placeholder': {
-    display: 'none', // ซ่อน placeholder เพื่อป้องกันช่องว่างที่ไม่ต้องการ
   },
 }));
