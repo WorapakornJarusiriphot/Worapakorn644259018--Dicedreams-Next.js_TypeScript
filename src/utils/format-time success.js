@@ -1,22 +1,22 @@
-import { format, getTime, formatDistanceToNow, parseISO } from "date-fns";
-import { th } from "date-fns/locale";
+import { format, getTime, formatDistanceToNow, parseISO } from 'date-fns';
+import { th } from 'date-fns/locale';
 
 // ----------------------------------------------------------------------
 
 export function fDate(date, newFormat) {
-  const fm = newFormat || "dd MMM yyyy";
+  const fm = newFormat || 'dd MMM yyyy';
 
-  return date ? format(new Date(date), fm) : "";
+  return date ? format(new Date(date), fm) : '';
 }
 
 export function fDateTime(date, newFormat) {
-  const fm = newFormat || "dd MMM yyyy p";
+  const fm = newFormat || 'dd MMM yyyy p';
 
-  return date ? format(new Date(date), fm) : "";
+  return date ? format(new Date(date), fm) : '';
 }
 
 export function fTimestamp(date) {
-  return date ? getTime(new Date(date)) : "";
+  return date ? getTime(new Date(date)) : '';
 }
 
 export function fToNow(date) {
@@ -25,7 +25,7 @@ export function fToNow(date) {
         addSuffix: true,
         locale: th,
       })
-    : "";
+    : '';
 }
 
 export function formatThaiDate(dateString) {

@@ -46,9 +46,7 @@ export default function NotificationsPopover() {
         }
         const data = await response.json();
         if (data.messages && Array.isArray(data.messages)) {
-          setNotifications(
-            data.messages.sort((a, b) => new Date(b.time) - new Date(a.time))
-          );
+          setNotifications(data.messages.sort((a, b) => new Date(b.time) - new Date(a.time)));
         } else {
           console.error("Invalid data format:", data);
           setError("Invalid data format");
@@ -89,9 +87,7 @@ export default function NotificationsPopover() {
 
   const filterNewNotifications = (notifications) => {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    return notifications.filter(
-      (notification) => new Date(notification.time) > oneDayAgo
-    );
+    return notifications.filter(notification => new Date(notification.time) > oneDayAgo);
   };
 
   return (
@@ -174,10 +170,7 @@ export default function NotificationsPopover() {
             >
               {Array.isArray(notifications) &&
                 notifications
-                  .filter(
-                    (notification) =>
-                      !filterNewNotifications([notification]).length
-                  )
+                  .filter(notification => !filterNewNotifications([notification]).length)
                   .map((notification) => (
                     <NotificationItem
                       key={notification.notification_id}

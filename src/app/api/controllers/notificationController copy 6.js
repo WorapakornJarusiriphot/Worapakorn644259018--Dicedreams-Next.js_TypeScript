@@ -6,49 +6,38 @@ const Chat = db.chat; // Add this line to import the Chat model
 const PostGame = db.post_games;
 
 // Define the relationships
-Participate.belongsTo(User, { foreignKey: "user_id" });
-Participate.belongsTo(PostGame, { foreignKey: "post_games_id" });
-PostGame.belongsTo(User, { foreignKey: "users_id" });
+Participate.belongsTo(User, { foreignKey: 'user_id' });
+Participate.belongsTo(PostGame, { foreignKey: 'post_games_id' });
+PostGame.belongsTo(User, { foreignKey: 'users_id' });
 
 // get all notification
 exports.findAll = async (req, res, next) => {
   try {
     const messages = [];
+    
+    // Debug: ตรวจสอบว่ามี user_id ที่รับเข้ามาถูกต้องหรือไม่
+    console.log("User ID:", req.user.users_id);
+
     const notifications = await Notification.findAll({
       where: { user_id: req.user.users_id, read: false },
     });
 
+    // Debug: ตรวจสอบว่ามีการดึงข้อมูล notifications ได้หรือไม่
+    console.log("Notifications:", notifications);
+
     for (let i = 0; i < notifications.length; i++) {
       if (notifications[i].type === "participate") {
-        const participate = await Participate.findByPk(
-          notifications[i].entity_id,
-          {
-            include: [
-              {
-                model: User,
-                attributes: ["first_name", "last_name", "user_image"],
-              },
-              {
-                model: PostGame,
-                include: [
-                  {
-                    model: User,
-                    attributes: ["first_name", "last_name", "user_image"],
-                  },
-                ],
-              },
-            ],
-          }
-        );
+        const participate = await Participate.findByPk(notifications[i].entity_id, {
+          include: [
+            { model: User, attributes: ['first_name', 'last_name', 'user_image'] },
+            { model: PostGame, include: [{ model: User, attributes: ['first_name', 'last_name', 'user_image'] }] }
+          ]
+        });
+
+        // Debug: ตรวจสอบว่ามีการดึงข้อมูล participate ได้หรือไม่
+        console.log("Participate:", participate);
 
         if (participate && participate.user && participate.post_game) {
-          const postParticipants = await Participate.count({
-            where: {
-              post_games_id: participate.post_games_id,
-              participant_status: "active",
-            },
-          });
-
           messages.push({
             type: "participate",
             data: {
@@ -58,13 +47,13 @@ exports.findAll = async (req, res, next) => {
               user_image: participate.user.user_image,
               name_games: participate.post_game.name_games,
               detail_post: participate.post_game.detail_post,
-              participants: postParticipants + 1, // เพิ่มการนับผู้เข้าร่วมที่ถูกต้อง
+              participants: participate.post_game.participants || 0, // Assuming you have this field
               num_people: participate.post_game.num_people,
               date_meet: participate.post_game.date_meet,
               time_meet: participate.post_game.time_meet,
               game_user_first_name: participate.post_game.user.first_name,
               game_user_last_name: participate.post_game.user.last_name,
-              game_user_image: participate.post_game.user.user_image,
+              game_user_image: participate.post_game.user.user_image
             },
             notification_id: notifications[i].notification_id,
             entity_id: notifications[i].entity_id,
@@ -77,7 +66,7 @@ exports.findAll = async (req, res, next) => {
 
     res.status(200).json({ messages: messages });
   } catch (error) {
-    console.error("Error in findAll:", error);
+    console.error('Error in findAll:', error);
     next(error);
   }
 };
@@ -96,9 +85,11 @@ exports.update = async (req, res, next) => {
       );
     }
 
-    // update socket.io to update notification to all client
-
-    req.app.get("socketio").emit("notifications_" + req.user.users_id, []);
+    // update socket.io to update notification to all client 
+  
+    req.app
+    .get("socketio")
+    .emit("notifications_" + req.user.users_id, []);
 
     res.status(200).json({ message: "Notification was updated successfully." });
   } catch (error) {
