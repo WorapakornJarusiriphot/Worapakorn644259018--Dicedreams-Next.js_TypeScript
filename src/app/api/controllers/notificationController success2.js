@@ -6,9 +6,9 @@ const Chat = db.chat; // Add this line to import the Chat model
 const PostGame = db.post_games;
 
 // Define the relationships
-Participate.belongsTo(User, { foreignKey: "user_id" });
-Participate.belongsTo(PostGame, { foreignKey: "post_games_id" });
-PostGame.belongsTo(User, { foreignKey: "users_id" });
+Participate.belongsTo(User, { foreignKey: 'user_id' });
+Participate.belongsTo(PostGame, { foreignKey: 'post_games_id' });
+PostGame.belongsTo(User, { foreignKey: 'users_id' });
 
 // get all notification
 exports.findAll = async (req, res, next) => {
@@ -20,33 +20,16 @@ exports.findAll = async (req, res, next) => {
 
     for (let i = 0; i < notifications.length; i++) {
       if (notifications[i].type === "participate") {
-        const participate = await Participate.findByPk(
-          notifications[i].entity_id,
-          {
-            include: [
-              {
-                model: User,
-                attributes: ["first_name", "last_name", "user_image"],
-              },
-              {
-                model: PostGame,
-                include: [
-                  {
-                    model: User,
-                    attributes: ["first_name", "last_name", "user_image"],
-                  },
-                ],
-              },
-            ],
-          }
-        );
+        const participate = await Participate.findByPk(notifications[i].entity_id, {
+          include: [
+            { model: User, attributes: ['first_name', 'last_name', 'user_image'] },
+            { model: PostGame, include: [{ model: User, attributes: ['first_name', 'last_name', 'user_image'] }] }
+          ]
+        });
 
         if (participate && participate.user && participate.post_game) {
           const postParticipants = await Participate.count({
-            where: {
-              post_games_id: participate.post_games_id,
-              participant_status: "active",
-            },
+            where: { post_games_id: participate.post_games_id, participant_status: 'active' }
           });
 
           messages.push({
@@ -64,7 +47,7 @@ exports.findAll = async (req, res, next) => {
               time_meet: participate.post_game.time_meet,
               game_user_first_name: participate.post_game.user.first_name,
               game_user_last_name: participate.post_game.user.last_name,
-              game_user_image: participate.post_game.user.user_image,
+              game_user_image: participate.post_game.user.user_image
             },
             notification_id: notifications[i].notification_id,
             entity_id: notifications[i].entity_id,
@@ -77,7 +60,7 @@ exports.findAll = async (req, res, next) => {
 
     res.status(200).json({ messages: messages });
   } catch (error) {
-    console.error("Error in findAll:", error);
+    console.error('Error in findAll:', error);
     next(error);
   }
 };
@@ -96,9 +79,11 @@ exports.update = async (req, res, next) => {
       );
     }
 
-    // update socket.io to update notification to all client
-
-    req.app.get("socketio").emit("notifications_" + req.user.users_id, []);
+    // update socket.io to update notification to all client 
+  
+    req.app
+    .get("socketio")
+    .emit("notifications_" + req.user.users_id, []);
 
     res.status(200).json({ message: "Notification was updated successfully." });
   } catch (error) {
