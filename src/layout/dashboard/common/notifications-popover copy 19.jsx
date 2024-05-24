@@ -189,7 +189,7 @@ export default function NotificationsPopover() {
           </Box>
 
           {totalUnRead > 0 && (
-            <Tooltip title="ทำเครื่องหมายทั้งหมดว่าอ่านแล้ว">
+            <Tooltip title="Mark all as read">
               <IconButton color="primary" onClick={handleMarkAllAsRead}>
                 <Iconify icon="eva:done-all-fill" />
               </IconButton>
@@ -284,9 +284,6 @@ function NotificationItem({ notification, onMarkAsRead }) {
 
   const handleToggleExpand = () => {
     setExpanded((prev) => !prev);
-  };
-
-  const handleMarkAsRead = () => {
     if (!notification.read) {
       onMarkAsRead(notification.notification_id);
     }
@@ -295,8 +292,7 @@ function NotificationItem({ notification, onMarkAsRead }) {
   const { avatar, title } = renderContent(
     notification,
     expanded,
-    handleToggleExpand,
-    handleMarkAsRead
+    handleToggleExpand
   );
 
   return (
@@ -307,10 +303,9 @@ function NotificationItem({ notification, onMarkAsRead }) {
         mt: "1px",
         ...(notification.read && {
           bgcolor: "action.selected",
-          color: "text.disabled",
         }),
       }}
-      onClick={handleMarkAsRead}
+      onClick={handleToggleExpand}
     >
       <ListItemAvatar>
         <Avatar sx={{ bgcolor: "background.neutral" }}>{avatar}</Avatar>
@@ -324,7 +319,7 @@ function NotificationItem({ notification, onMarkAsRead }) {
               mt: 0.5,
               display: "flex",
               alignItems: "center",
-              color: notification.read ? "text.disabled" : "text.primary",
+              color: "text.disabled",
             }}
           >
             <Iconify
@@ -341,12 +336,7 @@ function NotificationItem({ notification, onMarkAsRead }) {
 
 // ----------------------------------------------------------------------
 
-function renderContent(
-  notification,
-  expanded,
-  handleToggleExpand,
-  handleMarkAsRead
-) {
+function renderContent(notification, expanded, handleToggleExpand) {
   let message = "";
   if (notification.type === "participate") {
     message = (

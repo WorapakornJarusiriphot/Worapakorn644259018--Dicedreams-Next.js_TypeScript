@@ -10,12 +10,12 @@ Participate.belongsTo(User, { foreignKey: "user_id" });
 Participate.belongsTo(PostGame, { foreignKey: "post_games_id" });
 PostGame.belongsTo(User, { foreignKey: "users_id" });
 
-// get all notifications
+// get all notification
 exports.findAll = async (req, res, next) => {
   try {
     const messages = [];
     const notifications = await Notification.findAll({
-      where: { user_id: req.user.users_id },
+      where: { user_id: req.user.users_id, read: false },
     });
 
     for (let i = 0; i < notifications.length; i++) {
