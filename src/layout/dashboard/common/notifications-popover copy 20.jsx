@@ -189,7 +189,7 @@ export default function NotificationsPopover() {
           </Box>
 
           {totalUnRead > 0 && (
-            <Tooltip title="ทำเครื่องหมายทั้งหมดว่าอ่านแล้ว">
+            <Tooltip title="Mark all as read">
               <IconButton color="primary" onClick={handleMarkAllAsRead}>
                 <Iconify icon="eva:done-all-fill" />
               </IconButton>
@@ -307,7 +307,6 @@ function NotificationItem({ notification, onMarkAsRead }) {
         mt: "1px",
         ...(notification.read && {
           bgcolor: "action.selected",
-          color: "text.disabled",
         }),
       }}
       onClick={handleMarkAsRead}
@@ -324,7 +323,7 @@ function NotificationItem({ notification, onMarkAsRead }) {
               mt: 0.5,
               display: "flex",
               alignItems: "center",
-              color: notification.read ? "text.disabled" : "text.primary",
+              color: "text.disabled",
             }}
           >
             <Iconify
@@ -341,12 +340,7 @@ function NotificationItem({ notification, onMarkAsRead }) {
 
 // ----------------------------------------------------------------------
 
-function renderContent(
-  notification,
-  expanded,
-  handleToggleExpand,
-  handleMarkAsRead
-) {
+function renderContent(notification, expanded, handleToggleExpand, handleMarkAsRead) {
   let message = "";
   if (notification.type === "participate") {
     message = (
