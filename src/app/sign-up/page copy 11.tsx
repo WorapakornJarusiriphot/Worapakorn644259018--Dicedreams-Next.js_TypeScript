@@ -15,7 +15,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -71,14 +71,7 @@ import { FirebaseError } from 'firebase/app';
 
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { FormHelperText } from '@mui/material';
-import { fetchSignInMethodsForEmail } from "firebase/auth";
 
-
-
-interface MyDatePickerProps extends DatePickerProps<Dayjs, false> {
-  helperText?: string;
-}
 
 const darkTheme = createTheme({
   palette: {
@@ -119,37 +112,8 @@ const validationSchema = Yup.object({
   lastName: Yup.string().required('กรุณากรอกนามสกุล'),
   username: Yup.string()
     .matches(/^[a-zA-Z0-9]+$/, 'Username ต้องเป็นภาษาอังกฤษเท่านั้นและไม่มีช่องว่าง')
-    .required('กรุณากรอกชื่อผู้ใช้')
-    .test('checkDuplicateUsername', 'Username นี้มีคนใช้แล้ว', async function (value) {
-      if (!value) return true;
-      try {
-        const response = await axios.get('http://localhost:8080/api/users');
-        const users = response.data;
-        return !users.some((user: { username: string }) => user.username === value);
-      } catch (error) {
-        return false; // หรือคุณอาจจะจัดการข้อผิดพลาดในรูปแบบอื่น
-      }
-    }),
-  email: Yup.string()
-    .email('กรุณากรอกอีเมลที่ถูกต้อง')
-    .required('กรุณากรอกอีเมล')
-    .test('checkDuplicateEmail', 'Email นี้มีคนใช้แล้ว', async function (value) {
-      if (!value) return true;
-      try {
-        const response = await axios.get('http://localhost:8080/api/users');
-        const users = response.data;
-        const existsInAPI = users.some((user: { email: string }) => user.email === value);
-
-        if (existsInAPI) {
-          return false;
-        }
-
-        const signInMethods = await fetchSignInMethodsForEmail(auth, value);
-        return signInMethods.length === 0;
-      } catch (error) {
-        return false; // หรือคุณอาจจะจัดการข้อผิดพลาดในรูปแบบอื่น
-      }
-    }),
+    .required('กรุณากรอกชื่อผู้ใช้'),
+  email: Yup.string().email('กรุณากรอกอีเมลที่ถูกต้อง').required('กรุณากรอกอีเมล'),
   password: Yup.string()
     .min(8, 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร')
     .matches(/[A-Z]/, 'รหัสผ่านต้องมีอักษรพิมพ์ใหญ่')
@@ -160,12 +124,7 @@ const validationSchema = Yup.object({
   phoneNumber: Yup.string()
     .matches(/^\+?\d+$/, 'เบอร์โทรศัพท์ต้องเป็นหมายเลขเบอร์โทรศัพท์จริงๆเท่านั้น')
     .required('กรุณากรอกหมายเลขโทรศัพท์'),
-  birthday: Yup.date()
-    .nullable()
-    .required('กรุณาเลือกวันเกิด')
-    .test('age', 'วันเกิดต้องไม่ต่ำกว่า 10 ปีจากวันปัจจุบัน', function (value) {
-      return dayjs().diff(dayjs(value), 'year') >= 10;
-    }),
+  birthday: Yup.date().nullable().required('กรุณาเลือกวันเกิด'),
   gender: Yup.string().required('กรุณาเลือกเพศ'),
 });
 
@@ -189,10 +148,33 @@ export default function SignUp() {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        // ตรวจสอบว่าอีเมลนี้ถูกใช้งานแล้วหรือไม่ใน Firebase
-        const signInMethods = await fetchSignInMethodsForEmail(auth, values.email);
-        if (signInMethods.length > 0) {
-          setAlertMessage('อีเมลนี้มีคนใช้แล้ว');
+        // Client-side validations
+        if (!/^[a-zA-Z0-9]+$/.test(values.username)) {
+          throw new Error('Username ต้องเป็นภาษาอังกฤษเท่านั้นและไม่มีช่องว่าง');
+        }
+        if (!values.email.includes('@')) {
+          throw new Error('Email ต้องมี "@"');
+        }
+        if (!/^\+?\d+$/.test(values.phoneNumber)) {
+          throw new Error('เบอร์โทรศัพท์ต้องเป็นหมายเลขเบอร์โทรศัพท์จริงๆเท่านั้น');
+        }
+        if (dayjs().diff(dayjs(values.birthday), 'year') < 10) {
+          throw new Error('วันเกิดต้องไม่ต่ำกว่า 10 ปีจากวันปัจจุบัน');
+        }
+
+        // Check for existing username or email
+        const usersResponse = await axios.get('http://localhost:8080/api/users');
+        const users = usersResponse.data;
+        const usernameExists = users.some((user: { username: string; }) => user.username === values.username);
+        const emailExists = users.some((user: { email: string; }) => user.email === values.email);
+        if (usernameExists) {
+          setAlertMessage('Username นี้มีคนใช้แล้ว');
+          setAlertSeverity('error');
+          setOpenSnackbar(true);
+          return;
+        }
+        if (emailExists) {
+          setAlertMessage('Email นี้มีคนใช้แล้ว');
           setAlertSeverity('error');
           setOpenSnackbar(true);
           return;
@@ -203,17 +185,7 @@ export default function SignUp() {
         console.log('Firebase user created:', firebaseUser);
 
         // Save user data in MySQL
-        const response = await axios.post('http://localhost:8080/api/users', {
-          first_name: values.firstName,
-          last_name: values.lastName,
-          username: values.username,
-          email: values.email,
-          password: values.password,
-          phone_number: values.phoneNumber,
-          birthday: dayjs(values.birthday).format('MM-DD-YYYY'),
-          gender: values.gender
-        });
-
+        const response = await axios.post('http://localhost:8080/api/users', values);
         console.log('Response from server:', response.data);
 
         setAlertMessage('สมัครสมาชิกสำเร็จ!');
@@ -224,12 +196,8 @@ export default function SignUp() {
           router.push('/sign-in');
         }, 3000); // Change page after 3 seconds
       } catch (error: any) {
-        if (error.code === 'auth/email-already-in-use') {
-          setAlertMessage('อีเมลนี้ได้ถูกใช้งานแล้วในระบบ');
-        } else {
-          setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.response?.data?.message || error.message || 'เกิดข้อผิดพลาด'));
-        }
         console.error('Error:', error);
+        setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.message || 'เกิดข้อผิดพลาด'));
         setAlertSeverity('error');
         setOpenSnackbar(true);
       }
@@ -239,10 +207,6 @@ export default function SignUp() {
   const handleSnackbarClose = () => {
     setOpenSnackbar(false);
   };
-
-  interface MyDatePickerProps extends DatePickerProps<Dayjs, false> {
-    helperText?: string;
-  }
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -258,8 +222,6 @@ export default function SignUp() {
             zIndex: 2,
           }}
         >
-          <br />
-          <br />
           <Typography component="h1" variant="h5">
             สมัครสมาชิก
           </Typography>
@@ -360,46 +322,40 @@ export default function SignUp() {
               </Grid>
               <Grid item xs={12}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DemoContainer
-                    components={['DateTimePicker']}
-                  >
-                    <DemoItem
-                      label={'วันเกิด *'}
-                    >
-                      <FormControl error={formik.touched.birthday && Boolean(formik.errors.birthday)}>
-                        <DatePicker
-                          label="วันเกิด"
-                          value={formik.values.birthday}
-                          onChange={(value) => formik.setFieldValue('birthday', value)}
-                        />
-                        <FormHelperText>
-                          {formik.touched.birthday && formik.errors.birthday ? formik.errors.birthday : 'วันเกิดต้องไม่ต่ำกว่า 10 ปีจากวันปัจจุบัน'}
-                        </FormHelperText>
-                      </FormControl>
-                    </DemoItem>
-                  </DemoContainer>
+                  <DatePicker
+                    label="วันเกิด"
+                    value={formik.values.birthday}
+                    onChange={(value) => formik.setFieldValue('birthday', value)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        error={formik.touched.birthday && Boolean(formik.errors.birthday)}
+                        helperText={formik.touched.birthday && formik.errors.birthday ? formik.errors.birthday : ''}
+                        onBlur={formik.handleBlur}
+                      />
+                    )}
+                  />
                 </LocalizationProvider>
               </Grid>
               <Grid item xs={12}>
-                <FormControl component="fieldset" error={formik.touched.gender && Boolean(formik.errors.gender)}>
-                  <FormLabel component="legend">เพศ *</FormLabel>
-                  <RadioGroup
-                    row
-                    aria-label="gender"
-                    name="gender"
-                    value={formik.values.gender}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  >
-                    <FormControlLabel value="ชาย" control={<Radio />} label="ชาย" />
-                    <FormControlLabel value="หญิง" control={<Radio />} label="หญิง" />
-                  </RadioGroup>
-                  {formik.touched.gender && formik.errors.gender && (
-                    <Typography variant="body2" color="error">
-                      {formik.errors.gender}
-                    </Typography>
-                  )}
-                </FormControl>
+                <TextField
+                  select
+                  required
+                  fullWidth
+                  name="gender"
+                  label="เพศ"
+                  SelectProps={{ native: true }}
+                  helperText={formik.touched.gender && formik.errors.gender ? formik.errors.gender : ''}
+                  error={formik.touched.gender && Boolean(formik.errors.gender)}
+                  value={formik.values.gender}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                >
+                  <option value=""></option>
+                  <option value="ชาย">ชาย</option>
+                  <option value="หญิง">หญิง</option>
+                </TextField>
               </Grid>
             </Grid>
             <Button

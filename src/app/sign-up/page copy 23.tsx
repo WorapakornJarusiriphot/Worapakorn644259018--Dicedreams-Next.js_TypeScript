@@ -130,26 +130,23 @@ const validationSchema = Yup.object({
         return false; // หรือคุณอาจจะจัดการข้อผิดพลาดในรูปแบบอื่น
       }
     }),
-  email: Yup.string()
+    email: Yup.string()
     .email('กรุณากรอกอีเมลที่ถูกต้อง')
     .required('กรุณากรอกอีเมล')
     .test('checkDuplicateEmail', 'Email นี้มีคนใช้แล้ว', async function (value) {
       if (!value) return true;
       try {
-        const response = await axios.get('http://localhost:8080/api/users');
-        const users = response.data;
-        const existsInAPI = users.some((user: { email: string }) => user.email === value);
-
-        if (existsInAPI) {
+        const signInMethods = await fetchSignInMethodsForEmail(auth, value);
+        if (signInMethods.length > 0) {
           return false;
         }
-
-        const signInMethods = await fetchSignInMethodsForEmail(auth, value);
-        return signInMethods.length === 0;
+        const response = await axios.get('http://localhost:8080/api/users');
+        const users = response.data;
+        return !users.some((user: { email: string }) => user.email === value);
       } catch (error) {
-        return false; // หรือคุณอาจจะจัดการข้อผิดพลาดในรูปแบบอื่น
+        return false;
       }
-    }),
+    }),  
   password: Yup.string()
     .min(8, 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร')
     .matches(/[A-Z]/, 'รหัสผ่านต้องมีอักษรพิมพ์ใหญ่')
@@ -197,25 +194,15 @@ export default function SignUp() {
           setOpenSnackbar(true);
           return;
         }
-
+    
         // Create user in Firebase Auth
         const firebaseUser = await createUserWithEmailAndPassword(auth, values.email, values.password);
         console.log('Firebase user created:', firebaseUser);
-
+    
         // Save user data in MySQL
-        const response = await axios.post('http://localhost:8080/api/users', {
-          first_name: values.firstName,
-          last_name: values.lastName,
-          username: values.username,
-          email: values.email,
-          password: values.password,
-          phone_number: values.phoneNumber,
-          birthday: dayjs(values.birthday).format('MM-DD-YYYY'),
-          gender: values.gender
-        });
-
+        const response = await axios.post('http://localhost:8080/api/users', values);
         console.log('Response from server:', response.data);
-
+    
         setAlertMessage('สมัครสมาชิกสำเร็จ!');
         setAlertSeverity('success');
         setOpenSnackbar(true);
@@ -227,13 +214,14 @@ export default function SignUp() {
         if (error.code === 'auth/email-already-in-use') {
           setAlertMessage('อีเมลนี้ได้ถูกใช้งานแล้วในระบบ');
         } else {
-          setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.response?.data?.message || error.message || 'เกิดข้อผิดพลาด'));
+          setAlertMessage('สมัครสมาชิกไม่สำเร็จ: ' + (error.message || 'เกิดข้อผิดพลาด'));
         }
         console.error('Error:', error);
         setAlertSeverity('error');
         setOpenSnackbar(true);
       }
     },
+    
   });
 
   const handleSnackbarClose = () => {
@@ -371,12 +359,23 @@ export default function SignUp() {
                           label="วันเกิด"
                           value={formik.values.birthday}
                           onChange={(value) => formik.setFieldValue('birthday', value)}
+                        // error={formik.touched.birthday && Boolean(formik.errors.birthday)}
+                        // helperText={formik.touched.birthday && formik.errors.birthday ? formik.errors.birthday : ''}
+                        // onBlur={formik.handleBlur}
                         />
                         <FormHelperText>
                           {formik.touched.birthday && formik.errors.birthday ? formik.errors.birthday : 'วันเกิดต้องไม่ต่ำกว่า 10 ปีจากวันปัจจุบัน'}
                         </FormHelperText>
                       </FormControl>
                     </DemoItem>
+                    {/* {cleared && (
+                          <Alert
+                            sx={{ position: 'absolute', bottom: 0, right: 0 }}
+                            severity="success"
+                          >
+                            Field cleared!
+                          </Alert>
+                        )} */}
                   </DemoContainer>
                 </LocalizationProvider>
               </Grid>
