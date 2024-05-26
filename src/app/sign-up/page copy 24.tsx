@@ -258,8 +258,6 @@ export default function SignUp() {
             zIndex: 2,
           }}
         >
-          <br />
-          <br />
           <Typography component="h1" variant="h5">
             สมัครสมาชิก
           </Typography>
