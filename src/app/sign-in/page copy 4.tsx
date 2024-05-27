@@ -35,18 +35,6 @@ import Iconify from '@/components/iconify';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
-
-import Input from '@mui/material/Input';
-import FilledInput from '@mui/material/FilledInput';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputLabel from '@mui/material/InputLabel';
-import FormHelperText from '@mui/material/FormHelperText';
-import FormControl from '@mui/material/FormControl';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-
-
-
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
@@ -87,16 +75,9 @@ const validationSchema = Yup.object({
 });
 
 export default function SignIn() {
+  const theme = useTheme();
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-  };
-
-  const theme = useTheme();
 
   const formik = useFormik({
     initialValues: {
@@ -111,27 +92,24 @@ export default function SignIn() {
       };
 
       try {
+        console.log('Attempting login with:', credentials);
         const response = await axios.post('http://localhost:8080/api/auth', credentials);
+
+        console.log('Access token:', response.data.access_token);
+
+        // จัดเก็บ token ใน local storage
         localStorage.setItem('access_token', response.data.access_token);
+
+        // เปลี่ยนเส้นทางไปยังหน้าแรกหรือหน้าอื่น ๆ หลังจากล็อกอินสำเร็จ
         router.push('/');
       } catch (error: any) {
+        console.log('Login failed:', error);
         if (axios.isAxiosError(error)) {
-          const responseMessage = error.response?.data.message;
-          const isEmail = /\S+@\S+\.\S+/.test(values.identifier);
-
-          if (responseMessage === 'User Not Exist') {
-            if (isEmail) {
-              setErrorMessage('ไม่มีอีเมลนี้อยู่ในฐานข้อมูล');
-            } else {
-              setErrorMessage('ไม่มี username นี้อยู่ในฐานข้อมูล');
-            }
-          } else if (responseMessage === 'Invalid Password') {
-            setErrorMessage('คุณกรอก Password ผิด กรุณากรอก Password ให้ถูกต้อง');
-          } else {
-            setErrorMessage('คุณกรอก Password ผิด กรุณากรอก Password ให้ถูกต้อง');
-          }
+          setErrorMessage('ชื่อผู้ใช้หรืออีเมลหรือรหัสผ่านไม่ถูกต้อง');
+          console.log('Server response:', error.response?.data);
         } else {
           setErrorMessage('เกิดข้อผิดพลาดที่ไม่คาดคิด');
+          console.log('Unexpected error:', error);
         }
       }
     },
@@ -176,7 +154,7 @@ export default function SignIn() {
               fullWidth
               name="password"
               label="รหัสผ่าน"
-              type={showPassword ? 'text' : 'password'}
+              type="password"
               id="password"
               autoComplete="current-password"
               value={formik.values.password}
@@ -184,20 +162,6 @@ export default function SignIn() {
               onBlur={formik.handleBlur}
               error={formik.touched.password && Boolean(formik.errors.password)}
               helperText={formik.touched.password && formik.errors.password}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
@@ -247,7 +211,7 @@ export default function SignIn() {
 
             <br />
             <br />
-
+          
             <Grid container>
               <Grid item xs>
                 <Link href="/" variant="body2">

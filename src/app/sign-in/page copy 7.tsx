@@ -47,6 +47,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 
 
+
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
@@ -89,13 +90,8 @@ const validationSchema = Yup.object({
 export default function SignIn() {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
 
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-  };
-
+  // Inside your component
   const theme = useTheme();
 
   const formik = useFormik({
@@ -117,18 +113,12 @@ export default function SignIn() {
       } catch (error: any) {
         if (axios.isAxiosError(error)) {
           const responseMessage = error.response?.data.message;
-          const isEmail = /\S+@\S+\.\S+/.test(values.identifier);
-
           if (responseMessage === 'User Not Exist') {
-            if (isEmail) {
-              setErrorMessage('ไม่มีอีเมลนี้อยู่ในฐานข้อมูล');
-            } else {
-              setErrorMessage('ไม่มี username นี้อยู่ในฐานข้อมูล');
-            }
+            setErrorMessage('ไม่มี username นี้อยู่ในฐานข้อมูล');
           } else if (responseMessage === 'Invalid Password') {
             setErrorMessage('คุณกรอก Password ผิด กรุณากรอก Password ให้ถูกต้อง');
           } else {
-            setErrorMessage('คุณกรอก Password ผิด กรุณากรอก Password ให้ถูกต้อง');
+            setErrorMessage('ชื่อผู้ใช้หรืออีเมลหรือรหัสผ่านไม่ถูกต้อง');
           }
         } else {
           setErrorMessage('เกิดข้อผิดพลาดที่ไม่คาดคิด');
@@ -176,7 +166,7 @@ export default function SignIn() {
               fullWidth
               name="password"
               label="รหัสผ่าน"
-              type={showPassword ? 'text' : 'password'}
+              type="password"
               id="password"
               autoComplete="current-password"
               value={formik.values.password}
@@ -184,20 +174,6 @@ export default function SignIn() {
               onBlur={formik.handleBlur}
               error={formik.touched.password && Boolean(formik.errors.password)}
               helperText={formik.touched.password && formik.errors.password}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
