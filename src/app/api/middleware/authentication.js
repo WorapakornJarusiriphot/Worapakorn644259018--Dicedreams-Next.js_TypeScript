@@ -43,7 +43,7 @@ module.exports.isStore = (req, res, next) => {
 module.exports.isStoreOrUser = (req, res, next) => {
     const { role } = req.user;
 
-    if ( role === 'store'|| role === 'User') {
+    if ( role === 'store'|| role === 'user') {
         next();
     } else {
         return res.status(403).json({
