@@ -150,7 +150,6 @@ const darkTheme = createTheme({
   },
 });
 
-
 interface PostData {
   nameGames: string;
   detailPost: string;
@@ -163,7 +162,7 @@ interface PostData {
 const initialValues: PostData = {
   nameGames: '',
   detailPost: '',
-  numPeople: 2,
+  numPeople: 0,
   dateMeet: dayjs(),
   timeMeet: dayjs(),
   gamesImage: '',
@@ -172,16 +171,12 @@ const initialValues: PostData = {
 const validationSchema = Yup.object().shape({
   nameGames: Yup.string().required('กรุณากรอกชื่อโพสต์'),
   detailPost: Yup.string().required('กรุณากรอกรายละเอียดของโพสต์'),
-  numPeople: Yup.number().min(2, 'กรุณาเลือกจำนวนผู้เล่นอย่างน้อย 2 คน').required('กรุณาเลือกจำนวนผู้เล่น'),
+  numPeople: Yup.number().min(1, 'กรุณาเลือกจำนวนผู้เล่น').required('กรุณาเลือกจำนวนผู้เล่น'),
   dateMeet: Yup.date().required('กรุณาเลือกวันที่เจอกัน').test('dateMeet', 'เลือกวันที่เจอกันต้องไม่เป็นอดีต', function (value) {
     return dayjs(value).isAfter(dayjs(), 'day');
   }),
   timeMeet: Yup.date().required('กรุณาเลือกเวลาที่เจอกัน').test('timeMeet', 'เลือกเวลาที่เจอกันต้องไม่เป็นอดีต', function (value) {
-    const selectedDate = this.parent.dateMeet;
-    if (selectedDate && dayjs(selectedDate).isSame(dayjs(), 'day')) {
-      return dayjs(value).isAfter(dayjs());
-    }
-    return true;
+    return dayjs(value).isAfter(dayjs());
   }),
   gamesImage: Yup.mixed().required('กรุณาอัพโหลดรูปภาพด้วย')
 });
@@ -811,9 +806,10 @@ export default function PostPlay() {
                         )}
                       </FormControl>
                     </Grid>
+
                     <Grid item xs={12}>
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DemoContainer components={['DatePicker', 'TimePicker']}>
+                        <DemoContainer components={['DateTimePicker', 'TimePicker']}>
                           <DemoItem label={'เลือกวันที่เจอกัน *'}>
                             <DatePicker
                               name="dateMeet"
@@ -844,7 +840,9 @@ export default function PostPlay() {
                       </LocalizationProvider>
                     </Grid>
                     <Grid item xs={12}>
-                      <DemoItem label={'รูปภาพ *'}>
+                      <DemoItem
+                        label={'รูปภาพ *'}
+                      >
                         <App onImageUpload={(file) => handleImageUpload(file, setFieldValue)} />
                         {touched.gamesImage && errors.gamesImage && (
                           <Alert severity="error">{errors.gamesImage}</Alert>
@@ -852,7 +850,9 @@ export default function PostPlay() {
                       </DemoItem>
                     </Grid>
                     <Grid item xs={12}>
-                      <DemoItem label={'สถานที่ *'}>
+                      <DemoItem
+                        label={'สถานที่ *'}
+                      >
                         <img src={locationImage.src} alt="Location" style={{ width: '100%', cursor: 'pointer', marginTop: '10px' }} onClick={handleImageClick} />
                         <Modal open={fullImageOpen} onClose={handleModalClose} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                           <Box sx={{ width: '80%', height: '80%' }}>

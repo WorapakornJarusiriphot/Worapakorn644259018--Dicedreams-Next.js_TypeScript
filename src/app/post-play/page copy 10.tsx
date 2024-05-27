@@ -110,10 +110,6 @@ import { jwtDecode } from "jwt-decode";
 
 import { JwtPayload } from 'jwt-decode';
 
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
-
-
 // TODO remove, this demo shouldn't need to reset the theme.
 // กำหนดธีมสีเข้ม
 const darkTheme = createTheme({
@@ -148,42 +144,6 @@ const darkTheme = createTheme({
       },
     },
   },
-});
-
-
-interface PostData {
-  nameGames: string;
-  detailPost: string;
-  numPeople: number;
-  dateMeet: dayjs.Dayjs;
-  timeMeet: dayjs.Dayjs;
-  gamesImage: string;
-}
-
-const initialValues: PostData = {
-  nameGames: '',
-  detailPost: '',
-  numPeople: 2,
-  dateMeet: dayjs(),
-  timeMeet: dayjs(),
-  gamesImage: '',
-};
-
-const validationSchema = Yup.object().shape({
-  nameGames: Yup.string().required('กรุณากรอกชื่อโพสต์'),
-  detailPost: Yup.string().required('กรุณากรอกรายละเอียดของโพสต์'),
-  numPeople: Yup.number().min(2, 'กรุณาเลือกจำนวนผู้เล่นอย่างน้อย 2 คน').required('กรุณาเลือกจำนวนผู้เล่น'),
-  dateMeet: Yup.date().required('กรุณาเลือกวันที่เจอกัน').test('dateMeet', 'เลือกวันที่เจอกันต้องไม่เป็นอดีต', function (value) {
-    return dayjs(value).isAfter(dayjs(), 'day');
-  }),
-  timeMeet: Yup.date().required('กรุณาเลือกเวลาที่เจอกัน').test('timeMeet', 'เลือกเวลาที่เจอกันต้องไม่เป็นอดีต', function (value) {
-    const selectedDate = this.parent.dateMeet;
-    if (selectedDate && dayjs(selectedDate).isSame(dayjs(), 'day')) {
-      return dayjs(value).isAfter(dayjs());
-    }
-    return true;
-  }),
-  gamesImage: Yup.mixed().required('กรุณาอัพโหลดรูปภาพด้วย')
 });
 
 
@@ -657,28 +617,39 @@ export default function PostPlay() {
 
 
 
-  const handleSubmit = async (values: PostData, { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }) => {
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    // รับ JWT token จาก local storage
     const token = localStorage.getItem('access_token');
+
+    // ตรวจสอบและแสดง `users_id`
+    console.log('users_id:', userId);
+
+    // ตรวจสอบว่ามี token หรือไม่
     if (!token) {
+      console.error('JWT token is missing');
       setAlertMessage('ไม่พบ JWT token กรุณาเข้าสู่ระบบอีกครั้ง');
       setAlertSeverity('error');
       setOpenSnackbar(true);
-      setSubmitting(false);
       return;
     }
 
+    // สร้างรูปแบบข้อมูลที่เหมือนกับที่ใช้ใน Postman
     const data = {
-      name_games: values.nameGames,
-      detail_post: values.detailPost,
-      num_people: values.numPeople,
-      date_meet: values.dateMeet.format('MM/DD/YYYY'),
-      time_meet: values.timeMeet.format('HH:mm:ss'),
+      name_games: nameGames,
+      detail_post: detailPost,
+      num_people: numPeople,
+      date_meet: dateMeet.format('MM/DD/YYYY'),
+      time_meet: timeMeet.format('HH:mm:ss'),
       status_post: 'active',
-      users_id: userId,
-      games_image: values.gamesImage
+      users_id: userId, // ตรวจสอบว่า userId ถูกต้อง
+      games_image: gamesImage // ตรวจสอบรูปแบบ Base64
     };
 
     try {
+      // ส่งคำขอ HTTP POST ไปยังเซิร์ฟเวอร์ด้วย axios พร้อม token ใน Authorization header
       const response = await axios.post('http://localhost:8080/api/postGame', data, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -689,24 +660,56 @@ export default function PostPlay() {
       if (response.status === 201) {
         setAlertMessage('สร้างโพสต์สำเร็จ!');
         setAlertSeverity('success');
+        console.log('Navigating to the homepage'); // บันทึกข้อมูลการนำทาง
         router.push('/'); // เปลี่ยนเส้นทางเมื่อโพสต์สำเร็จ
+        // router.replace('/'); // เปลี่ยนเส้นทางเมื่อโพสต์สำเร็จ
       } else {
         setAlertMessage(`การสร้างโพสต์ไม่สำเร็จ: ได้รับสถานะ ${response.status}`);
         setAlertSeverity('error');
       }
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
+        console.error('Error response:', error.response);
         setAlertMessage(`สร้างโพสต์ไม่สำเร็จ: ${error.response.data.message || 'เกิดข้อผิดพลาด'}`);
       } else {
+        console.error('Unknown error:', error);
         setAlertMessage('สร้างโพสต์ไม่สำเร็จ: เกิดข้อผิดพลาด');
       }
       setAlertSeverity('error');
     }
-    setOpenSnackbar(true);
-    setSubmitting(false);
+    setOpenSnackbar(true); // แสดงการแจ้งเตือน
   };
 
-  const handleImageUpload = (file: File, setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void) => {
+
+
+
+
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setGamesImage(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+
+  // const handleImageUpload = (file: File) => {
+  //   // แปลงไฟล์เป็น Base64
+  //   const reader = new FileReader();
+  //   reader.onloadend = () => {
+  //     const base64String = reader.result as string;
+  //     setGamesImage(base64String); // กำหนด gamesImage เป็น Base64
+  //   };
+  //   reader.readAsDataURL(file);
+  // };
+
+  const handleImageUpload = (file: File) => {
+    // Check that the input is a valid file before proceeding
     if (!(file instanceof File)) {
       console.error('The uploaded file is not of the expected type File.');
       return;
@@ -715,15 +718,120 @@ export default function PostPlay() {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
-      setFieldValue('gamesImage', base64String);
+      setGamesImage(base64String); // กำหนด gamesImage เป็น Base64
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(file); // Use FileReader to read the file as a data URL
   };
+
+
+  interface AppProps {
+    onImageUpload: (file: any) => void;
+  }
+
+
+  // const router = useRouter(); // Initialize the router
+  // const [openSnackbar, setOpenSnackbar] = React.useState(false);
+  // const [alertMessage, setAlertMessage] = React.useState('');
+  // const [alertSeverity, setAlertSeverity] = React.useState<'success' | 'error'>('success');
+
+  const [message, setMessage] = useState('');
+
+  const [alert, setAlert] = React.useState<{ open: boolean; message: string; severity: string }>({ open: false, message: '', severity: '' });
+
+  const [birthday, setBirthday] = React.useState<string | null>(null);
+
+  // Capture the date selected in the DatePicker
+  const handleBirthdayChange = (date: dayjs.Dayjs | null) => {
+    // Change the format to MM-DD-YYYY
+    setBirthday(date ? date.format('MM-DD-YYYY') : null);
+  };
+
+  // // อัพเดตส่วนของ handleSubmit เพื่อจัดการการแจ้งเตือน
+  // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+  //   const data = new FormData(event.currentTarget);
+
+  //   // Construct userData with the birthday in the correct format
+  //   const userData = {
+  //     first_name: data.get('firstName') as string,
+  //     last_name: data.get('lastName') as string,
+  //     username: data.get('username') as string,
+  //     password: data.get('password') as string,
+  //     email: data.get('email') as string,
+  //     birthday: birthday || undefined, // Birthday directly from state
+  //     phone_number: data.get('phoneNumber') as string || undefined,
+  //     gender: data.get('gender') as string || undefined,
+  //     role: 'user',
+  //   };
+
+  //   console.log('User data being sent:', userData);
+
+  //   try {
+  //     // Create user in Firebase Auth
+  //     const firebaseUser = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+  //     console.log('Firebase user created:', firebaseUser);
+
+  //     // Save user data in MySQL
+  //     const response = await axios.post('http://localhost:8080/api/users', userData);
+  //     console.log('Response from server:', response.data);
+
+  //     setAlertMessage('สร้างโพสต์สำเร็จ!');
+  //     setAlertSeverity('success');
+  //     router.push('/sign-in'); // Navigate to the sign-in page after successful registration
+  //   } catch (error: any) {
+  //     if (axios.isAxiosError(error)) {
+  //       console.error('Error response:', error.response);
+  //     } else {
+  //       console.error('Unknown error:', error);
+  //     }
+
+  //     setAlertMessage('สร้างโพสต์ไม่สำเร็จ: ' + (error.response?.data.message || 'เกิดข้อผิดพลาด'));
+  //     setAlertSeverity('error');
+  //   }
+  //   setOpenSnackbar(true); // เปิดการแจ้งเตือน
+  // };
+
+
+
 
   const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') return;
     setOpenSnackbar(false);
   };
+
+  const [cleared, setCleared] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (cleared) {
+      const timeout = setTimeout(() => {
+        setCleared(false);
+      }, 1500);
+
+      return () => clearTimeout(timeout);
+    }
+    return () => { };
+  }, [cleared]);
+
+  const [open, setOpen] = React.useState(false);
+
+  const handleClick = () => {
+    setOpen(true);
+  };
+
+  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+  // const [number, setNumber] = useState("");
+  // const [numPeople, setNumPeople] = React.useState(1);
+
+  // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setNumPeople(event.target.value);
+  // };
 
   const handleImageClick = () => {
     setFullImageOpen(true); // Open the modal
@@ -744,155 +852,284 @@ export default function PostPlay() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              position: 'relative',
-              zIndex: 2,
+              position: 'relative',  // Ensure this is positioned relative to its container
+              zIndex: 2,  // Lower z-index than Header
             }}
           >
             <br />
             <br />
+            {/* <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+            <LockOutlinedIcon />
+          </Avatar> */}
             <Typography component="h1" variant="h5">
               สร้างโพสต์นัดเล่น
             </Typography>
-            <Formik
-              initialValues={initialValues}
-              validationSchema={validationSchema}
-              onSubmit={handleSubmit}
-            >
-              {({ values, errors, touched, handleChange, handleBlur, handleSubmit, setFieldValue, isSubmitting }) => (
-                <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <TextField
-                        required
-                        fullWidth
-                        label="ชื่อโพสต์"
-                        name="nameGames"
-                        value={values.nameGames}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        helperText={touched.nameGames && errors.nameGames}
-                        error={touched.nameGames && Boolean(errors.nameGames)}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="รายละเอียดของโพสต์"
-                        name="detailPost"
-                        value={values.detailPost}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        helperText={touched.detailPost && errors.detailPost}
-                        error={touched.detailPost && Boolean(errors.detailPost)}
-                        multiline
-                        rows={4}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormControl fullWidth>
-                        <InputLabel id="number-select-label">จำนวนผู้เล่นที่จะนัดเจอกัน *</InputLabel>
-                        <Select
-                          labelId="number-select-label"
-                          name="numPeople"
-                          value={values.numPeople}
-                          label="จำนวนผู้เล่นที่จะนัดเจอกัน"
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          error={touched.numPeople && Boolean(errors.numPeople)}
-                        >
-                          {Array.from({ length: 74 }, (_, index) => (
-                            <MenuItem key={index + 2} value={index + 2}>
-                              {index + 2}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        {touched.numPeople && errors.numPeople && (
-                          <Alert severity="error">{errors.numPeople}</Alert>
-                        )}
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DemoContainer components={['DatePicker', 'TimePicker']}>
-                          <DemoItem label={'เลือกวันที่เจอกัน *'}>
-                            <DatePicker
-                              name="dateMeet"
-                              value={values.dateMeet}
-                              onChange={(newDate) => setFieldValue('dateMeet', newDate)}
-                              onBlur={handleBlur}
-                              error={touched.dateMeet && Boolean(errors.dateMeet)}
-                              renderInput={(params) => <TextField {...params} />}
-                            />
-                            {touched.dateMeet && errors.dateMeet && (
-                              <Alert severity="error">{errors.dateMeet}</Alert>
-                            )}
-                          </DemoItem>
-                          <DemoItem label={'เลือกเวลาที่เจอกัน *'}>
-                            <TimePicker
-                              name="timeMeet"
-                              value={values.timeMeet}
-                              onChange={(newTime) => setFieldValue('timeMeet', newTime)}
-                              onBlur={handleBlur}
-                              error={touched.timeMeet && Boolean(errors.timeMeet)}
-                              renderInput={(params) => <TextField {...params} />}
-                            />
-                            {touched.timeMeet && errors.timeMeet && (
-                              <Alert severity="error">{errors.timeMeet}</Alert>
-                            )}
-                          </DemoItem>
-                        </DemoContainer>
-                      </LocalizationProvider>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <DemoItem label={'รูปภาพ *'}>
-                        <App onImageUpload={(file) => handleImageUpload(file, setFieldValue)} />
-                        {touched.gamesImage && errors.gamesImage && (
-                          <Alert severity="error">{errors.gamesImage}</Alert>
-                        )}
-                      </DemoItem>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <DemoItem label={'สถานที่ *'}>
-                        <img src={locationImage.src} alt="Location" style={{ width: '100%', cursor: 'pointer', marginTop: '10px' }} onClick={handleImageClick} />
-                        <Modal open={fullImageOpen} onClose={handleModalClose} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                          <Box sx={{ width: '80%', height: '80%' }}>
-                            <img src={locationImage.src} alt="Location" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                          </Box>
-                        </Modal>
-                        {googleMapLink && (
-                          <Link href={googleMapLink} target="_blank" rel="noopener noreferrer">
-                            ดูลิงค์แผนที่จาก Google Maps
-                          </Link>
-                        )}
-                      </DemoItem>
-                    </Grid>
-                  </Grid>
-                  <Button
-                    type="submit"
+            <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+              <Grid container spacing={2}>
+                {/* <Grid item xs={12} sm={6}>
+                  <TextField
+                    autoComplete="given-name"
+                    name="firstName"
+                    required
                     fullWidth
-                    variant="contained"
-                    sx={{
-                      mt: 3,
-                      mb: 2,
-                      color: 'white',
-                      backgroundColor: 'blue',
-                      '&:hover': {
-                        backgroundColor: 'darkred',
-                      }
-                    }}
-                    disabled={isSubmitting}
+                    id="firstName"
+                    label="ชื่อจริง"
+                    autoFocus
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="lastName"
+                    label="นามสกุล"
+                    name="lastName"
+                    autoComplete="family-name"
+                  />
+                </Grid> */}
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    // id="username"
+                    // label="ชื่อโพสต์"
+                    // name="username"
+                    // autoComplete="username"
+                    // required
+                    // fullWidth
+                    // id="nameGames"
+                    label="ชื่อโพสต์"
+                    // helperText={`${nameGames.split(/\s+/).filter(Boolean).length} / 20`}
+                    helperText={`${nameGames.length} / 100`}
+                    value={nameGames}
+                    onChange={handleNameChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    // required
+                    fullWidth
+                    // name="phoneNumber"
+                    label="รายละเอียดของโพสต์"
+                    type="tel"
+                    // id="phoneNumber"
+                    // autoComplete="tel"
+                    multiline
+                    rows={4}
+                    // helperText={`${detailPost.split(/\s+/).filter(Boolean).length} / 100`}
+                    helperText={`${detailPost.length} / 500`}
+                    // required
+                    // fullWidth
+                    // id="detailPost"
+                    // label="รายละเอียดของโพสต์"
+                    value={detailPost}
+                    onChange={handleDetailChange} // Updated to use the handleDetailChange that limits words
+                  // multiline
+                  // rows={4}
+                  // defaultValue="Default Value"
+                  />
+                </Grid>
+                {/* <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="email"
+                    label="อีเมล"
+                    name="email"
+                    autoComplete="email"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    name="password"
+                    label="รหัสผ่าน"
+                    type="password"
+                    id="password"
+                    autoComplete="new-password"
+                  />
+                </Grid> */}
+
+                {/* <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    type="number"
+                    id="numPeople"
+                    label="จำนวนคน"
+                    value={numPeople}
+                    onChange={(e) => setNumPeople(Number(e.target.value))}
+                  />
+                </Grid> */}
+
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="number-select-label">
+                      จำนวนผู้เล่นที่จะนัดเจอกัน *
+                    </InputLabel>
+                    <Select
+                      labelId="number-select-label"
+                      // id="number-select"
+                      value={numPeople}
+                      label="จำนวนผู้เล่นที่จะนัดเจอกัน"
+                      // onChange={handleChange}
+                      // required
+                      // fullWidth
+                      // type="number"
+                      id="numPeople"
+                      // label="จำนวนคน"
+                      // value={numPeople}
+                      onChange={(e) => setNumPeople(Number(e.target.value))}
+                    >
+                      {/* วนลูปเพื่อสร้าง MenuItem สำหรับตัวเลือกตั้งแต่ 1 ถึง 75 */}
+                      {Array.from({ length: 75 }, (_, index) => (
+                        <MenuItem key={index + 1} value={index + 1}>
+                          {index + 1}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+
+                <Grid item xs={12}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer
+                      components={['DateTimePicker', 'TimePicker']}
+                    >
+                      <DemoItem
+                        label={'เลือกวันที่เจอกัน *'}
+                      >
+                        <DatePicker
+                          // label="Birthday"
+                          // value={birthday ? dayjs(birthday, 'MM-DD-YYYY') : null}
+                          // onChange={handleBirthdayChange}
+                          value={dateMeet}
+                          onChange={(newDate) => setDateMeet(newDate ?? dayjs())}
+                        />
+                      </DemoItem>
+                      {cleared && (
+                        <Alert
+                          sx={{ position: 'absolute', bottom: 0, right: 0 }}
+                          severity="success"
+                        >
+                          Field cleared!
+                        </Alert>
+                      )}
+                      <DemoItem
+                        label={'เลือกเวลาที่เจอกัน *'}
+                      >
+                        <TimePicker
+                          // label="Birthday"
+                          value={timeMeet}
+                          onChange={(newTime) => setTimeMeet(newTime ?? dayjs())}
+                          // value={birthday ? dayjs(birthday, 'MM-DD-YYYY') : null}
+                          // onChange={handleBirthdayChange}
+                          viewRenderers={{
+                            hours: renderTimeViewClock,
+                            minutes: renderTimeViewClock,
+                            seconds: renderTimeViewClock,
+                          }}
+                        />
+                      </DemoItem>
+
+                      {cleared && (
+                        <Alert
+                          sx={{ position: 'absolute', bottom: 0, right: 0 }}
+                          severity="success"
+                        >
+                          Field cleared!
+                        </Alert>
+                      )}
+                    </DemoContainer>
+                  </LocalizationProvider>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <DemoItem
+                    label={'รูปภาพ *'}
                   >
-                    สร้างโพสต์นัดเล่น
-                  </Button>
-                  <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbarClose}>
-                    <Alert onClose={handleSnackbarClose} severity={alertSeverity} sx={{ width: '100%' }}>
-                      {alertMessage}
-                    </Alert>
-                  </Snackbar>
-                </Box>
-              )}
-            </Formik>
+                    <App onImageUpload={handleImageUpload} />
+                  </DemoItem>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <DemoItem
+                    label={'สถานที่ *'}
+                  >
+                    <img src={locationImage.src} alt="Location" style={{ width: '100%', cursor: 'pointer', marginTop: '10px' }} onClick={handleImageClick} />
+
+                    {/* Modal เพื่อขยายภาพ */}
+                    <Modal open={fullImageOpen} onClose={handleModalClose} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <Box sx={{ width: '80%', height: '80%' }}>
+                        <img src={locationImage.src} alt="Location" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      </Box>
+                    </Modal>
+
+                    {googleMapLink && (
+                      <Link href={googleMapLink} target="_blank" rel="noopener noreferrer">
+                        ดูลิงค์แผนที่จาก Google Maps
+                      </Link>
+                    )}
+                  </DemoItem>
+                </Grid>
+
+                {/* <Grid item xs={12}>
+                  <FormControl>
+                    <FormLabel id="demo-row-radio-buttons-group-label">เพศ</FormLabel>
+                    <RadioGroup
+                      row
+                      aria-labelledby="demo-row-radio-buttons-group-label"
+                      // name="row-radio-buttons-group"
+                      name="gender"
+                    >
+                      <FormControlLabel value="male" control={<Radio />} label="ชาย" />
+                      <FormControlLabel value="female" control={<Radio />} label="หญิง" />
+                    </RadioGroup>
+                  </FormControl>
+                </Grid> */}
+                {/* <Grid item xs={12}>
+                <FormControlLabel
+                  control={<Checkbox value="allowExtraEmails" color="primary" />}
+                  label="I want to receive inspiration, marketing promotions and updates via email."
+                />
+              </Grid> */}
+              </Grid>
+
+              <br />
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{
+                  mt: 3,
+                  mb: 2,
+                  color: 'white',  // ตั้งค่าตัวอักษรเป็นสีขาว
+                  backgroundColor: 'blue',  // ตั้งค่าพื้นหลังเป็นสีแดง
+                  '&:hover': {
+                    backgroundColor: 'darkred',  // ตั้งค่าพื้นหลังของปุ่มเมื่อ hover เป็นสีแดงเข้ม
+                  }
+                }}
+              >
+                สร้างโพสต์นัดเล่น
+              </Button>
+              <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbarClose}>
+                <Alert onClose={handleSnackbarClose} severity={alertSeverity} sx={{ width: '100%' }}>
+                  {alertMessage}
+                </Alert>
+              </Snackbar>
+              {/* <Grid container justifyContent="flex-end">
+                <Grid item>
+                  <Link href="/sign-in" variant="body2">
+                    มีบัญชีอยู่แล้วใช่ไหม? เข้าสู่ระบบ
+                  </Link>
+                </Grid>
+              </Grid> */}
+            </Box>
           </Box>
+          {/* <Copyright sx={{ mt: 5 }} /> */}
         </Container>
       </ThemeProvider>
     </>
