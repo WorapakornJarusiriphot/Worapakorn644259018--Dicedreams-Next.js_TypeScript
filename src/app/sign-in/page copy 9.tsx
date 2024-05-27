@@ -117,14 +117,8 @@ export default function SignIn() {
       } catch (error: any) {
         if (axios.isAxiosError(error)) {
           const responseMessage = error.response?.data.message;
-          const isEmail = /\S+@\S+\.\S+/.test(values.identifier);
-
           if (responseMessage === 'User Not Exist') {
-            if (isEmail) {
-              setErrorMessage('ไม่มีอีเมลนี้อยู่ในฐานข้อมูล');
-            } else {
-              setErrorMessage('ไม่มี username นี้อยู่ในฐานข้อมูล');
-            }
+            setErrorMessage('ไม่มี username นี้อยู่ในฐานข้อมูล');
           } else if (responseMessage === 'Invalid Password') {
             setErrorMessage('คุณกรอก Password ผิด กรุณากรอก Password ให้ถูกต้อง');
           } else {

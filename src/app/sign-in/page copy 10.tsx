@@ -128,7 +128,7 @@ export default function SignIn() {
           } else if (responseMessage === 'Invalid Password') {
             setErrorMessage('คุณกรอก Password ผิด กรุณากรอก Password ให้ถูกต้อง');
           } else {
-            setErrorMessage('คุณกรอก Password ผิด กรุณากรอก Password ให้ถูกต้อง');
+            setErrorMessage('ชื่อผู้ใช้หรืออีเมลหรือรหัสผ่านไม่ถูกต้อง');
           }
         } else {
           setErrorMessage('เกิดข้อผิดพลาดที่ไม่คาดคิด');

@@ -75,14 +75,6 @@ import { FormHelperText } from '@mui/material';
 import { fetchSignInMethodsForEmail } from "firebase/auth";
 
 
-import Input from '@mui/material/Input';
-import FilledInput from '@mui/material/FilledInput';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputLabel from '@mui/material/InputLabel';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-
-
 
 interface MyDatePickerProps extends DatePickerProps<Dayjs, false> {
   helperText?: string;
@@ -182,16 +174,6 @@ export default function SignUp() {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertSeverity, setAlertSeverity] = useState<'success' | 'error'>('success');
-
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-  };
-
-  const theme = useTheme();
 
   const formik = useFormik({
     initialValues: {
@@ -366,7 +348,7 @@ export default function SignUp() {
                   fullWidth
                   name="password"
                   label="รหัสผ่าน"
-                  type={showPassword ? 'text' : 'password'}
+                  type="password"
                   id="password"
                   autoComplete="new-password"
                   helperText={formik.touched.password && formik.errors.password ? formik.errors.password : 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร, มีอักษรพิมพ์ใหญ่, มีอักษรพิมพ์เล็ก, มีตัวเลข, มีสัญลักษณ์พิเศษ'}
@@ -374,20 +356,6 @@ export default function SignUp() {
                   value={formik.values.password}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={handleClickShowPassword}
-                          onMouseDown={handleMouseDownPassword}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
                 />
               </Grid>
               <Grid item xs={12}>
