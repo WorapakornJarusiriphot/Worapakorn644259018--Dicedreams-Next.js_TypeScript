@@ -258,17 +258,17 @@ const handleWordLimit = (text: string, limit: number): string => {
   return text;
 };
 
-// interface PostActivity {
-//   post_activity_id: string;
-//   name_activity: string;
-//   status_post: string;
-//   creation_date: Date;
-//   detail_post: string;
-//   date_activity: Date;
-//   time_activity: string;
-//   post_activity_image?: string;
-//   store_id: string;
-// }
+interface PostActivity {
+  post_activity_id: string;
+  name_activity: string;
+  status_post: string;
+  creation_date: Date;
+  detail_post: string;
+  date_activity: Date;
+  time_activity: string;
+  post_activity_image?: string;
+  store_id: string;
+}
 
 export default function PostActivity() {
 
@@ -285,7 +285,7 @@ export default function PostActivity() {
   const [postActivityImage, setPostActivityImage] = React.useState(''); // Base64 image
   const [storeId, setStoreId] = React.useState(''); // Set storeId dynamically
 
-  // const [postActivity, setPostActivity] = useState<PostActivity | null>(null);
+  const [postActivity, setPostActivity] = useState<PostActivity | null>(null);
 
   const [googleMapLink, setGoogleMapLink] = useState('');
 
@@ -372,7 +372,7 @@ export default function PostActivity() {
     const data = {
       name_activity: values.nameActivity,
       detail_post: values.detailPost,
-      creation_date: new Date().toISOString(),
+      // creation_date: new Date().toISOString(),
       date_activity: formattedDate, // วันที่ของกิจกรรม
       time_activity: formattedTime, // เวลาของกิจกรรม
       status_post: 'active',
@@ -430,7 +430,8 @@ export default function PostActivity() {
   };
 
 
-  const handleImageUpload = (file: File, setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void) => {
+  const handleImageUpload = (file: File) => {
+    // Check that the input is a valid file before proceeding
     if (!(file instanceof File)) {
       console.error('The uploaded file is not of the expected type File.');
       return;
@@ -439,9 +440,9 @@ export default function PostActivity() {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
-      setFieldValue('postActivityImage', base64String);
+      setPostActivityImage(base64String); // กำหนด postActivityImage เป็น Base64
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(file); // Use FileReader to read the file as a data URL
   };
 
 
@@ -535,7 +536,13 @@ export default function PostActivity() {
                       <TextField
                         required
                         fullWidth
-                        name="nameActivity"
+                        // id="username"
+                        // label="ชื่อโพสต์กิจกรรม"
+                        // name="username"
+                        // autoComplete="username"
+                        // required
+                        // fullWidth
+                        // id="nameActivity"
                         label="ชื่อโพสต์กิจกรรม"
                         value={values.nameActivity}
                         onChange={handleChange}
@@ -648,7 +655,6 @@ export default function PostActivity() {
                         backgroundColor: 'darkred',  // ตั้งค่าพื้นหลังของปุ่มเมื่อ hover เป็นสีแดงเข้ม
                       }
                     }}
-                    disabled={isSubmitting}
                   >
                     สร้างโพสต์กิจกรรม
                   </Button>
