@@ -372,7 +372,7 @@ export default function PostActivity() {
     const data = {
       name_activity: values.nameActivity,
       detail_post: values.detailPost,
-      creation_date: new Date().toISOString(),
+      // creation_date: new Date().toISOString(),
       date_activity: formattedDate, // วันที่ของกิจกรรม
       time_activity: formattedTime, // เวลาของกิจกรรม
       status_post: 'active',
@@ -648,7 +648,6 @@ export default function PostActivity() {
                         backgroundColor: 'darkred',  // ตั้งค่าพื้นหลังของปุ่มเมื่อ hover เป็นสีแดงเข้ม
                       }
                     }}
-                    disabled={isSubmitting}
                   >
                     สร้างโพสต์กิจกรรม
                   </Button>

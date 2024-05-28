@@ -366,13 +366,13 @@ export default function PostActivity() {
     }
 
     const formattedDate = values.dateActivity.format('MM/DD/YYYY');
-    const formattedTime = values.timeActivity.format('HH:mm:ss');
+    const formattedTime = timeActivity.format('HH:mm:ss');
 
     // สร้างรูปแบบข้อมูลที่เหมือนกับที่ใช้ใน Postman
     const data = {
       name_activity: values.nameActivity,
       detail_post: values.detailPost,
-      creation_date: new Date().toISOString(),
+      // creation_date: new Date().toISOString(),
       date_activity: formattedDate, // วันที่ของกิจกรรม
       time_activity: formattedTime, // เวลาของกิจกรรม
       status_post: 'active',
@@ -648,7 +648,6 @@ export default function PostActivity() {
                         backgroundColor: 'darkred',  // ตั้งค่าพื้นหลังของปุ่มเมื่อ hover เป็นสีแดงเข้ม
                       }
                     }}
-                    disabled={isSubmitting}
                   >
                     สร้างโพสต์กิจกรรม
                   </Button>
