@@ -105,8 +105,8 @@ const initialValues: PostData = {
 };
 
 const validationSchema = Yup.object().shape({
-  nameGames: Yup.string().required('กรุณากรอกชื่อโพสต์').max(100, 'ไม่สามารถพิมพ์เกิน 100 ตัวอักษรได้'),
-  detailPost: Yup.string().required('กรุณากรอกรายละเอียดของโพสต์').max(500, 'ไม่สามารถพิมพ์เกิน 500 ตัวอักษรได้'),
+  nameGames: Yup.string().required('กรุณากรอกชื่อโพสต์'),
+  detailPost: Yup.string().required('กรุณากรอกรายละเอียดของโพสต์'),
   numPeople: Yup.number().min(2, 'กรุณาเลือกจำนวนผู้เล่นอย่างน้อย 2 คน').required('กรุณาเลือกจำนวนผู้เล่น'),
   dateMeet: Yup.date().required('กรุณาเลือกวันที่เจอกัน').test('dateMeet', 'เลือกวันที่เจอกันต้องไม่เป็นอดีต', function (value) {
     return dayjs(value).isAfter(dayjs(), 'day');
@@ -198,24 +198,24 @@ export default function PostPlay() {
   const [dateMeet, setDateMeet] = React.useState(dayjs());
   const [timeMeet, setTimeMeet] = React.useState(dayjs());
   const [statusPost, setStatusPost] = React.useState('');
-  const [gamesImage, setGamesImage] = React.useState('');
-  const [userId, setUserId] = React.useState('');
+  const [gamesImage, setGamesImage] = React.useState(''); 
+  const [userId, setUserId] = React.useState(''); 
 
   const [googleMapLink, setGoogleMapLink] = useState('');
 
-  const [fullImageOpen, setFullImageOpen] = useState(false);
+  const [fullImageOpen, setFullImageOpen] = useState(false); 
 
   const limitText = (text: string, limit: number): string => {
     return text.slice(0, limit);
   };
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const newText = event.target.value.slice(0, 100); // Limit to 100 characters
+    const newText = limitText(event.target.value, 100);
     setNameGames(newText);
   };
 
   const handleDetailChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const newText = event.target.value.slice(0, 500); // Limit to 500 characters
+    const newText = limitText(event.target.value, 500);
     setDetailPost(newText);
   };
 
@@ -277,7 +277,7 @@ export default function PostPlay() {
       if (response.status === 201) {
         setAlertMessage('สร้างโพสต์สำเร็จ!');
         setAlertSeverity('success');
-        router.push('/');
+        router.push('/'); 
       } else {
         setAlertMessage(`การสร้างโพสต์ไม่สำเร็จ: ได้รับสถานะ ${response.status}`);
         setAlertSeverity('error');

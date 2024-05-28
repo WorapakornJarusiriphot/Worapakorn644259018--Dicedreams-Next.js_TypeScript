@@ -42,6 +42,13 @@ import { FileUpload, FileUploadProps } from '@/components/FileUpload/FileUpload'
 import App from "./App";
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import locationImage from './location.png';
+import Paper from "@mui/material/Paper";
+import InputBase from "@mui/material/InputBase";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import SearchIcon from "@mui/icons-material/Search";
+import DirectionsIcon from "@mui/icons-material/Directions";
 import { InputLabel, MenuItem, Modal, Select } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import Tooltip from "@mui/material/Tooltip";
@@ -105,8 +112,8 @@ const initialValues: PostData = {
 };
 
 const validationSchema = Yup.object().shape({
-  nameGames: Yup.string().required('กรุณากรอกชื่อโพสต์').max(100, 'ไม่สามารถพิมพ์เกิน 100 ตัวอักษรได้'),
-  detailPost: Yup.string().required('กรุณากรอกรายละเอียดของโพสต์').max(500, 'ไม่สามารถพิมพ์เกิน 500 ตัวอักษรได้'),
+  nameGames: Yup.string().required('กรุณากรอกชื่อโพสต์'),
+  detailPost: Yup.string().required('กรุณากรอกรายละเอียดของโพสต์'),
   numPeople: Yup.number().min(2, 'กรุณาเลือกจำนวนผู้เล่นอย่างน้อย 2 คน').required('กรุณาเลือกจำนวนผู้เล่น'),
   dateMeet: Yup.date().required('กรุณาเลือกวันที่เจอกัน').test('dateMeet', 'เลือกวันที่เจอกันต้องไม่เป็นอดีต', function (value) {
     return dayjs(value).isAfter(dayjs(), 'day');
@@ -166,18 +173,6 @@ const renderInput = (params: TextFieldProps) => (
   />
 );
 
-interface UserData {
-  first_name: string;
-  last_name: string;
-  username: string;
-  password: string;
-  email: string;
-  birthday?: string;
-  phone_number?: string;
-  gender?: string;
-  role: string;
-}
-
 const handleWordLimit = (text: string, limit: number): string => {
   const words = text.split(/\s+/);
   if (words.length > limit) {
@@ -198,25 +193,23 @@ export default function PostPlay() {
   const [dateMeet, setDateMeet] = React.useState(dayjs());
   const [timeMeet, setTimeMeet] = React.useState(dayjs());
   const [statusPost, setStatusPost] = React.useState('');
-  const [gamesImage, setGamesImage] = React.useState('');
-  const [userId, setUserId] = React.useState('');
+  const [gamesImage, setGamesImage] = React.useState(''); // Base64 image
+  const [userId, setUserId] = React.useState(''); // Set userId dynamically
 
   const [googleMapLink, setGoogleMapLink] = useState('');
 
-  const [fullImageOpen, setFullImageOpen] = useState(false);
+  const [fullImageOpen, setFullImageOpen] = useState(false); // State for the modal
 
   const limitText = (text: string, limit: number): string => {
     return text.slice(0, limit);
   };
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const newText = event.target.value.slice(0, 100); // Limit to 100 characters
-    setNameGames(newText);
+    setNameGames(limitText(event.target.value, 100)); // Limit to 100 characters
   };
 
   const handleDetailChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const newText = event.target.value.slice(0, 500); // Limit to 500 characters
-    setDetailPost(newText);
+    setDetailPost(limitText(event.target.value, 500)); // Limit to 500 characters
   };
 
   React.useEffect(() => {
@@ -230,7 +223,7 @@ export default function PostPlay() {
       try {
         const decoded = jwtDecode<DecodedToken>(token);
         console.log('Decoded token:', decoded);
-        setUserId(decoded.users_id);
+        setUserId(decoded.users_id); // ตั้งค่า userId
       } catch (error) {
         console.error('Error decoding token:', error);
       }
@@ -277,7 +270,7 @@ export default function PostPlay() {
       if (response.status === 201) {
         setAlertMessage('สร้างโพสต์สำเร็จ!');
         setAlertSeverity('success');
-        router.push('/');
+        router.push('/'); // เปลี่ยนเส้นทางเมื่อโพสต์สำเร็จ
       } else {
         setAlertMessage(`การสร้างโพสต์ไม่สำเร็จ: ได้รับสถานะ ${response.status}`);
         setAlertSeverity('error');
@@ -314,11 +307,11 @@ export default function PostPlay() {
   };
 
   const handleImageClick = () => {
-    setFullImageOpen(true);
+    setFullImageOpen(true); // Open the modal
   };
 
   const handleModalClose = () => {
-    setFullImageOpen(false);
+    setFullImageOpen(false); // Close the modal
   };
 
   return (
@@ -356,9 +349,12 @@ export default function PostPlay() {
                         label="ชื่อโพสต์"
                         name="nameGames"
                         value={values.nameGames}
-                        onChange={(e) => { handleChange(e); handleNameChange(e); }}
+                        onChange={(e) => {
+                          handleChange(e);
+                          handleNameChange(e);
+                        }}
                         onBlur={handleBlur}
-                        helperText={`${values.nameGames.length} / 100 ${touched.nameGames && errors.nameGames ? ` - ${errors.nameGames}` : ''}`}
+                        helperText={(touched.nameGames && errors.nameGames) ? errors.nameGames : `${values.nameGames.length} / 100`}
                         error={touched.nameGames && Boolean(errors.nameGames)}
                       />
                     </Grid>
@@ -368,9 +364,12 @@ export default function PostPlay() {
                         label="รายละเอียดของโพสต์"
                         name="detailPost"
                         value={values.detailPost}
-                        onChange={(e) => { handleChange(e); handleDetailChange(e); }}
+                        onChange={(e) => {
+                          handleChange(e);
+                          handleDetailChange(e);
+                        }}
                         onBlur={handleBlur}
-                        helperText={`${values.detailPost.length} / 500 ${touched.detailPost && errors.detailPost ? ` - ${errors.detailPost}` : ''}`}
+                        helperText={(touched.detailPost && errors.detailPost) ? errors.detailPost : `${values.detailPost.length} / 500`}
                         error={touched.detailPost && Boolean(errors.detailPost)}
                         multiline
                         rows={4}
