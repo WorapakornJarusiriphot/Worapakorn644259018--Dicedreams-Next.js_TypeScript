@@ -100,7 +100,7 @@ const initialValues: PostData = {
   detailPost: '',
   numPeople: 2,
   dateMeet: dayjs(),
-  timeMeet: dayjs().add(5, 'minute'), // เพิ่มเวลา 5 นาทีจากเวลาปัจจุบัน
+  timeMeet: dayjs(),
   gamesImage: '',
 };
 
@@ -109,11 +109,9 @@ const validationSchema = Yup.object().shape({
   detailPost: Yup.string().required('กรุณากรอกรายละเอียดของโพสต์').max(500, 'ไม่สามารถพิมพ์เกิน 500 ตัวอักษรได้'),
   numPeople: Yup.number().min(2, 'กรุณาเลือกจำนวนผู้เล่นอย่างน้อย 2 คน').required('กรุณาเลือกจำนวนผู้เล่น'),
   dateMeet: Yup.date().required('กรุณาเลือกวันที่เจอกัน').test('dateMeet', 'เลือกวันที่เจอกันต้องไม่เป็นอดีต', function (value) {
-    const selectedDate = dayjs(value);
-    const currentDate = dayjs().startOf('day'); // ตั้งค่าเวลาเริ่มต้นของวันปัจจุบัน
-    return selectedDate.isAfter(currentDate);
+    return dayjs(value).isAfter(dayjs(), 'day');
   }),
-  timeMeet: Yup.date().required('กรุณาเลือกเวลาที่เจอกัน').test('timeMeet', 'เลือกเวลาที่เจอกันต้องไม่เป็นอดีตหรือปัจจุบัน', function (value) {
+  timeMeet: Yup.date().required('กรุณาเลือกเวลาที่เจอกัน').test('timeMeet', 'เลือกเวลาที่เจอกันต้องไม่เป็นอดีต', function (value) {
     const selectedDate = this.parent.dateMeet;
     if (selectedDate && dayjs(selectedDate).isSame(dayjs(), 'day')) {
       return dayjs(value).isAfter(dayjs());
@@ -403,12 +401,8 @@ export default function PostPlay() {
                     </Grid>
                     <Grid item xs={12}>
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DemoContainer
-                          components={['DateTimePicker', 'TimePicker']}
-                        >
-                          <DemoItem
-                            label={'เลือกวันที่เจอกัน *'}
-                          >
+                        <DemoContainer components={['DatePicker', 'TimePicker']}>
+                          <DemoItem label={'เลือกวันที่เจอกัน *'}>
                             <DatePicker
                               name="dateMeet"
                               value={values.dateMeet}
