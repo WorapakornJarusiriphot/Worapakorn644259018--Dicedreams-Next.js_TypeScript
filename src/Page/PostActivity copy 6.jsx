@@ -268,10 +268,10 @@ function PostActivity() {
             {item.name_activity}
           </Typography>
           <Typography variant="body1" gutterBottom>
-            วันที่กิจกรรมสิ้นสุด: {item.date_activity}
+            วันที่กิจกรรมเริ่ม: {item.date_activity}
           </Typography>
           <Typography variant="body1" gutterBottom>
-            เวลาที่กิจกรรมสิ้นสุด: {item.time_activity}
+            เวลาที่กิจกรรมเริ่ม: {item.time_activity}
           </Typography>
 
           <br />

@@ -15,42 +15,49 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+
 import dayjs from 'dayjs';
 import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker, DatePickerProps } from '@mui/x-date-pickers/DatePicker';
-import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
-import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker';
-import { styled } from "@mui/material/styles";
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { TextFieldProps } from '@mui/material/TextField';
+
+import { styled } from "@mui/material/styles";
+
 import Alert from '@mui/material/Alert';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/firebaseConfig";
+
 import Snackbar from '@mui/material/Snackbar';
 import { useRouter } from 'next/navigation';
 import axios, { AxiosError } from 'axios';
 import { useState } from 'react';
 import { FileUpload, FileUploadProps } from '@/components/FileUpload/FileUpload';
 import App from "./App";
-import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
+
 import locationImage from './location.png';
+
+import { useEffect } from 'react';
 import { InputLabel, MenuItem, Modal, Select } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import Tooltip from "@mui/material/Tooltip";
 import Stack from "@mui/material/Stack";
 import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
+
 import { jwtDecode } from "jwt-decode";
 import { JwtPayload } from 'jwt-decode';
+
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
+
+import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 
 const darkTheme = createTheme({
   palette: {
@@ -86,42 +93,41 @@ const darkTheme = createTheme({
   },
 });
 
+
 interface PostData {
-  nameGames: string;
+  nameActivity: string;
   detailPost: string;
-  numPeople: number;
-  dateMeet: dayjs.Dayjs;
-  timeMeet: dayjs.Dayjs;
-  gamesImage: string;
+  dateActivity: dayjs.Dayjs;
+  timeActivity: dayjs.Dayjs;
+  postActivityImage: string;
 }
 
 const initialValues: PostData = {
-  nameGames: '',
+  nameActivity: '',
   detailPost: '',
-  numPeople: 2,
-  dateMeet: dayjs(),
-  timeMeet: dayjs().add(5, 'minute'), // เพิ่มเวลา 5 นาทีจากเวลาปัจจุบัน
-  gamesImage: '',
+  dateActivity: dayjs(),
+  timeActivity: dayjs().add(5, 'minute'), // เพิ่มเวลา 5 นาทีจากเวลาปัจจุบัน
+  postActivityImage: '',
 };
 
 const validationSchema = Yup.object().shape({
-  nameGames: Yup.string().required('กรุณากรอกชื่อโพสต์').max(100, 'ไม่สามารถพิมพ์เกิน 100 ตัวอักษรได้'),
+  nameActivity: Yup.string().required('กรุณากรอกชื่อโพสต์').max(100, 'ไม่สามารถพิมพ์เกิน 100 ตัวอักษรได้'),
   detailPost: Yup.string().required('กรุณากรอกรายละเอียดของโพสต์').max(500, 'ไม่สามารถพิมพ์เกิน 500 ตัวอักษรได้'),
-  numPeople: Yup.number().min(2, 'กรุณาเลือกจำนวนผู้เล่นอย่างน้อย 2 คน').required('กรุณาเลือกจำนวนผู้เล่น'),
-  dateMeet: Yup.date().required('กรุณาเลือกวันที่เจอกัน').test('dateMeet', 'เลือกวันที่เจอกันต้องไม่เป็นอดีต', function (value) {
+  dateActivity: Yup.date().required('กรุณาเลือกวันที่เจอกัน').test('dateActivity', 'เลือกวันที่เจอกันต้องไม่เป็นอดีต', function (value) {
     const selectedDate = dayjs(value);
     const currentDate = dayjs().startOf('day'); // ตั้งค่าเวลาเริ่มต้นของวันปัจจุบัน
     return selectedDate.isAfter(currentDate);
   }),
-  timeMeet: Yup.date().required('กรุณาเลือกเวลาที่เจอกัน').test('timeMeet', 'เลือกเวลาที่เจอกันต้องไม่เป็นอดีตหรือปัจจุบัน', function (value) {
-    const selectedDate = this.parent.dateMeet;
+  timeActivity: Yup.date().required('กรุณาเลือกเวลาที่เจอกัน').test('timeActivity', 'เลือกเวลาที่เจอกันต้องไม่เป็นอดีตหรือปัจจุบัน', function (value) {
+    const selectedDate = this.parent.dateActivity;
     if (selectedDate && dayjs(selectedDate).isSame(dayjs(), 'day')) {
       return dayjs(value).isAfter(dayjs());
     }
     return true;
   }),
-  gamesImage: Yup.mixed().required('กรุณาอัพโหลดรูปภาพด้วย')
+  postActivityImage: Yup.mixed().required('กรุณาอัพโหลดรูปภาพด้วย')
 });
+
 
 const fileUploadProp: FileUploadProps = {
   accept: 'image/*',
@@ -138,6 +144,7 @@ const fileUploadProp: FileUploadProps = {
   },
 }
 
+
 const Label = styled(({ className, componentName, valueType }: { className?: string, componentName: string, valueType: string }) => (
   <span className={className}>
     <strong>{componentName}</strong> ({valueType})
@@ -146,39 +153,7 @@ const Label = styled(({ className, componentName, valueType }: { className?: str
   color: theme.palette.primary.main,
 }));
 
-const renderTextField = (params: TextFieldProps) => (
-  <TextField
-    {...params}
-    fullWidth
-    sx={{ width: '100%' }}
-  />
-);
 
-const renderInput = (params: TextFieldProps) => (
-  <TextField
-    {...params}
-    InputLabelProps={{ style: { color: 'white' } }}
-    InputProps={{ style: { color: 'white', borderColor: 'white' } }}
-    sx={{
-      '& .MuiOutlinedInput-root': {
-        '&:hover fieldset': { borderColor: 'white' },
-        '&.Mui-focused fieldset': { borderColor: 'white' },
-      },
-    }}
-  />
-);
-
-interface UserData {
-  first_name: string;
-  last_name: string;
-  username: string;
-  password: string;
-  email: string;
-  birthday?: string;
-  phone_number?: string;
-  gender?: string;
-  role: string;
-}
 
 const handleWordLimit = (text: string, limit: number): string => {
   const words = text.split(/\s+/);
@@ -188,23 +163,21 @@ const handleWordLimit = (text: string, limit: number): string => {
   return text;
 };
 
-export default function PostPlay() {
+export default function PostActivity() {
 
   const router = useRouter();
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState('');
   const [alertSeverity, setAlertSeverity] = React.useState<'success' | 'error'>('success');
-  const [nameGames, setNameGames] = React.useState('');
+  const [nameActivity, setNameActivity] = React.useState('');
   const [detailPost, setDetailPost] = React.useState('');
-  const [numPeople, setNumPeople] = React.useState(2);
-  const [dateMeet, setDateMeet] = React.useState(dayjs());
-  const [timeMeet, setTimeMeet] = React.useState(dayjs());
+  const [dateActivity, setDateActivity] = React.useState(dayjs());
+  const [timeActivity, setTimeActivity] = React.useState(dayjs());
   const [statusPost, setStatusPost] = React.useState('');
-  const [gamesImage, setGamesImage] = React.useState('');
-  const [userId, setUserId] = React.useState('');
+  const [postActivityImage, setPostActivityImage] = React.useState('');
+  const [storeId, setStoreId] = React.useState('');
 
   const [googleMapLink, setGoogleMapLink] = useState('');
-
   const [fullImageOpen, setFullImageOpen] = useState(false);
 
   const limitText = (text: string, limit: number): string => {
@@ -212,18 +185,16 @@ export default function PostPlay() {
   };
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const newText = event.target.value.slice(0, 100); // Limit to 100 characters
-    setNameGames(newText);
+    setNameActivity(limitText(event.target.value, 100));
   };
 
   const handleDetailChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const newText = event.target.value.slice(0, 500); // Limit to 500 characters
-    setDetailPost(newText);
+    setDetailPost(limitText(event.target.value, 500));
   };
 
   React.useEffect(() => {
     interface DecodedToken extends JwtPayload {
-      users_id: string;
+      store_id: string;
     }
 
     const token = localStorage.getItem('access_token');
@@ -232,7 +203,7 @@ export default function PostPlay() {
       try {
         const decoded = jwtDecode<DecodedToken>(token);
         console.log('Decoded token:', decoded);
-        setUserId(decoded.users_id);
+        setStoreId(decoded.store_id);
       } catch (error) {
         console.error('Error decoding token:', error);
       }
@@ -249,7 +220,9 @@ export default function PostPlay() {
 
   const handleSubmit = async (values: PostData, { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }) => {
     const token = localStorage.getItem('access_token');
+
     if (!token) {
+      console.error('JWT token is missing');
       setAlertMessage('ไม่พบ JWT token กรุณาเข้าสู่ระบบอีกครั้ง');
       setAlertSeverity('error');
       setOpenSnackbar(true);
@@ -257,19 +230,33 @@ export default function PostPlay() {
       return;
     }
 
+    console.log('store_id:', storeId);
+
+    if (!storeId) {
+      console.error('store_id is missing');
+      setAlertMessage('ไม่พบ store_id กรุณาตรวจสอบข้อมูลผู้ใช้');
+      setAlertSeverity('error');
+      setOpenSnackbar(true);
+      return;
+    }
+
+    const formattedDate = values.dateActivity.format('MM/DD/YYYY');
+    const formattedTime = values.timeActivity.format('HH:mm:ss');
+
+    // สร้างรูปแบบข้อมูลที่เหมือนกับที่ใช้ใน Postman
     const data = {
-      name_games: values.nameGames,
+      name_activity: values.nameActivity,
       detail_post: values.detailPost,
-      num_people: values.numPeople,
-      date_meet: values.dateMeet.format('MM/DD/YYYY'),
-      time_meet: values.timeMeet.format('HH:mm:ss'),
+      creation_date: new Date().toISOString(),
+      date_activity: formattedDate, // วันที่ของกิจกรรม
+      time_activity: formattedTime, // เวลาของกิจกรรม
       status_post: 'active',
-      users_id: userId,
-      games_image: values.gamesImage
+      store_id: storeId,
+      post_activity_image: values.postActivityImage,
     };
 
     try {
-      const response = await axios.post('http://localhost:8080/api/postGame', data, {
+      const response = await axios.post('http://localhost:8080/api/postActivity', data, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -286,14 +273,28 @@ export default function PostPlay() {
       }
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
+        console.error('Error response:', error.response);
         setAlertMessage(`สร้างโพสต์ไม่สำเร็จ: ${error.response.data.message || 'เกิดข้อผิดพลาด'}`);
       } else {
+        console.error('Unknown error:', error);
         setAlertMessage('สร้างโพสต์ไม่สำเร็จ: เกิดข้อผิดพลาด');
       }
       setAlertSeverity('error');
     }
     setOpenSnackbar(true);
     setSubmitting(false);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setPostActivityImage(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleImageUpload = (file: File, setFieldValue: (field: string, value: any, shouldValidate?: boolean) => void) => {
@@ -305,7 +306,7 @@ export default function PostPlay() {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
-      setFieldValue('gamesImage', base64String);
+      setFieldValue('postActivityImage', base64String);
     };
     reader.readAsDataURL(file);
   };
@@ -341,7 +342,7 @@ export default function PostPlay() {
             <br />
             <br />
             <Typography component="h1" variant="h5">
-              สร้างโพสต์นัดเล่น
+              สร้างโพสต์กิจกรรม
             </Typography>
             <Formik
               initialValues={initialValues}
@@ -355,19 +356,19 @@ export default function PostPlay() {
                       <TextField
                         required
                         fullWidth
-                        label="ชื่อโพสต์"
-                        name="nameGames"
-                        value={values.nameGames}
+                        label="ชื่อโพสต์กิจกรรม"
+                        name="nameActivity"
+                        value={values.nameActivity}
                         onChange={(e) => { handleChange(e); handleNameChange(e); }}
                         onBlur={handleBlur}
-                        helperText={`${values.nameGames.length} / 100 ${touched.nameGames && errors.nameGames ? ` - ${errors.nameGames}` : ''}`}
-                        error={touched.nameGames && Boolean(errors.nameGames)}
+                        helperText={`${values.nameActivity.length} / 100 ${touched.nameActivity && errors.nameActivity ? ` - ${errors.nameActivity}` : ''}`}
+                        error={touched.nameActivity && Boolean(errors.nameActivity)}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
-                        label="รายละเอียดของโพสต์"
+                        label="รายละเอียดของโพสต์กิจกรรม"
                         name="detailPost"
                         value={values.detailPost}
                         onChange={(e) => { handleChange(e); handleDetailChange(e); }}
@@ -379,55 +380,34 @@ export default function PostPlay() {
                       />
                     </Grid>
                     <Grid item xs={12}>
-                      <FormControl fullWidth>
-                        <InputLabel id="number-select-label">จำนวนผู้เล่นที่จะนัดเจอกัน *</InputLabel>
-                        <Select
-                          labelId="number-select-label"
-                          name="numPeople"
-                          value={values.numPeople}
-                          label="จำนวนผู้เล่นที่จะนัดเจอกัน"
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          error={touched.numPeople && Boolean(errors.numPeople)}
-                        >
-                          {Array.from({ length: 74 }, (_, index) => (
-                            <MenuItem key={index + 2} value={index + 2}>
-                              {index + 2}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        {touched.numPeople && errors.numPeople && (
-                          <Alert severity="error">{errors.numPeople}</Alert>
-                        )}
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={12}>
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DemoContainer
                           components={['DateTimePicker', 'TimePicker']}
                         >
                           <DemoItem
-                            label={'เลือกวันที่เจอกัน *'}
+                            label={'เลือกวันที่กิจกรรมเริ่ม *'}
                           >
                             <DatePicker
-                              name="dateMeet"
-                              value={values.dateMeet}
-                              onChange={(newDate) => setFieldValue('dateMeet', newDate)}
+                              name="dateActivity"
+                              value={values.dateActivity}
+                              onChange={(newDate) => setFieldValue('dateActivity', newDate)}
                               onBlur={handleBlur}
-                              error={touched.dateMeet && Boolean(errors.dateMeet)}
+                              error={touched.dateActivity && Boolean(errors.dateActivity)}
                               renderInput={(params) => <TextField {...params} />}
                             />
-                            {touched.dateMeet && errors.dateMeet && (
-                              <Alert severity="error">{errors.dateMeet}</Alert>
+                            {touched.dateActivity && errors.dateActivity && (
+                              <Alert severity="error">{errors.dateActivity}</Alert>
                             )}
                           </DemoItem>
-                          <DemoItem label={'เลือกเวลาที่เจอกัน *'}>
+                          <DemoItem
+                            label={'เลือกเวลาที่กิจกรรมเริ่ม *'}
+                          >
                             <TimePicker
-                              name="timeMeet"
-                              value={values.timeMeet}
-                              onChange={(newTime) => setFieldValue('timeMeet', newTime)}
+                              name="timeActivity"
+                              value={values.timeActivity}
+                              onChange={(newTime) => setFieldValue('timeActivity', newTime)}
                               onBlur={handleBlur}
-                              error={touched.timeMeet && Boolean(errors.timeMeet)}
+                              error={touched.timeActivity && Boolean(errors.timeActivity)}
                               renderInput={(params) => <TextField {...params} />}
                               viewRenderers={{
                                 hours: renderTimeViewClock,
@@ -435,29 +415,35 @@ export default function PostPlay() {
                                 seconds: renderTimeViewClock,
                               }}
                             />
-                            {touched.timeMeet && errors.timeMeet && (
-                              <Alert severity="error">{errors.timeMeet}</Alert>
+                            {touched.timeActivity && errors.timeActivity && (
+                              <Alert severity="error">{errors.timeActivity}</Alert>
                             )}
                           </DemoItem>
                         </DemoContainer>
                       </LocalizationProvider>
                     </Grid>
+
                     <Grid item xs={12}>
                       <DemoItem label={'รูปภาพ *'}>
                         <App onImageUpload={(file) => handleImageUpload(file, setFieldValue)} />
-                        {touched.gamesImage && errors.gamesImage && (
-                          <Alert severity="error">{errors.gamesImage}</Alert>
+                        {touched.postActivityImage && errors.postActivityImage && (
+                          <Alert severity="error">{errors.postActivityImage}</Alert>
                         )}
                       </DemoItem>
                     </Grid>
+
                     <Grid item xs={12}>
-                      <DemoItem label={'สถานที่ *'}>
+                      <DemoItem
+                        label={'สถานที่ *'}
+                      >
                         <img src={locationImage.src} alt="Location" style={{ width: '100%', cursor: 'pointer', marginTop: '10px' }} onClick={handleImageClick} />
+
                         <Modal open={fullImageOpen} onClose={handleModalClose} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                           <Box sx={{ width: '80%', height: '80%' }}>
                             <img src={locationImage.src} alt="Location" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                           </Box>
                         </Modal>
+
                         {googleMapLink && (
                           <Link href={googleMapLink} target="_blank" rel="noopener noreferrer">
                             ดูลิงค์แผนที่จาก Google Maps
@@ -465,7 +451,12 @@ export default function PostPlay() {
                         )}
                       </DemoItem>
                     </Grid>
+
+
                   </Grid>
+
+                  <br />
+
                   <Button
                     type="submit"
                     fullWidth
@@ -479,9 +470,8 @@ export default function PostPlay() {
                         backgroundColor: 'darkred',
                       }
                     }}
-                    disabled={isSubmitting}
                   >
-                    สร้างโพสต์นัดเล่น
+                    สร้างโพสต์กิจกรรม
                   </Button>
                   <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbarClose}>
                     <Alert onClose={handleSnackbarClose} severity={alertSeverity} sx={{ width: '100%' }}>
