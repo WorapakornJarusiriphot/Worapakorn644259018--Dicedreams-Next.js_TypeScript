@@ -12,7 +12,7 @@ router.post("/",[passportJWT.isLogin,authentication.isUser], storeController.cre
 router.get("/", storeController.findAll);
 
 // Retrieve a single store with id
-router.get("/:id",[passportJWT.isLogin,authentication.isUser], storeController.findOne);
+router.get("/:id",[passportJWT.isLogin,authentication.isStoreOrUser], storeController.findOne);
 
 // Retrieve all stores by user_id
 router.get("/user/:id",[passportJWT.isLogin,authentication.isUser], storeController.findAllByUserId);

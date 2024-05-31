@@ -19,8 +19,8 @@ import InputAdornment from "@mui/material/InputAdornment";
 import FormHelperText from "@mui/material/FormHelperText";
 import FormControl from "@mui/material/FormControl";
 import SearchIcon from "@mui/icons-material/Search";
-import CommentIcon from "@mui/icons-material/Comment";
-import LoginIcon from "@mui/icons-material/Login";
+import CommentIcon from "@mui/icons-material/Comment"; // สำหรับปุ่มพูดคุย
+import LoginIcon from "@mui/icons-material/Login"; // สำหรับปุ่มเข้าสู่ระบบ
 import * as React from "react";
 import InputBase from "@mui/material/InputBase";
 import Divider from "@mui/material/Divider";
@@ -29,14 +29,17 @@ import MenuIcon from "@mui/icons-material/Menu";
 import DirectionsIcon from "@mui/icons-material/Directions";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import Image from "next/image";
+
 import { jwtDecode } from "jwt-decode";
+import { JwtPayload } from "jwt-decode";
+
 import { useEffect, useState } from "react";
-import { format, parseISO, compareDesc } from "date-fns";
+
+import { format, parseISO, isAfter } from "date-fns";
 import { th } from "date-fns/locale";
 
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
-  if (!isValid(date)) return "วันที่ไม่ถูกต้อง";
   const formattedDate = format(
     date,
     "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'",
@@ -49,13 +52,11 @@ const formatDateTime = (dateString) => {
 
 const formatThaiDate = (dateString) => {
   const date = parseISO(dateString);
-  if (!isValid(date)) return "วันที่ไม่ถูกต้อง";
   const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy", { locale: th });
   return formattedDate;
 };
 
 const formatThaiTime = (timeString) => {
-  if (!timeString) return "Invalid time";
   const [hours, minutes] = timeString.split(":");
   const formattedTime = `เวลา ${hours}.${minutes} น.`;
   return formattedTime;
@@ -65,7 +66,7 @@ const isPastDateTime = (date, time) => {
   const [hours, minutes] = time.split(":");
   const eventDate = new Date(date);
   eventDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
-  return eventDate < new Date();
+  return isAfter(new Date(), eventDate);
 };
 
 function PostGames() {
@@ -76,126 +77,74 @@ function PostGames() {
 
   useEffect(() => {
     const fetchUserAndPosts = async () => {
-      setLoading(true);
       const accessToken = localStorage.getItem("access_token");
+      if (!accessToken) {
+        setError("Access token is not available.");
+        setLoading(false);
+        return;
+      }
 
       try {
-        if (accessToken) {
-          const decoded = jwtDecode(accessToken);
-          setUserId(decoded.users_id);
+        const decoded = jwtDecode(accessToken);
+        setUserId(decoded.users_id);
 
-          const userResponse = await fetch(
-            `http://localhost:8080/api/users/${decoded.users_id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-              },
-            }
+        const userResponse = await fetch(
+          `http://localhost:8080/api/users/${decoded.users_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (!userResponse.ok) throw new Error("Failed to fetch user details");
+        const userData = await userResponse.json();
+
+        const postsResponse = await fetch(
+          `http://localhost:8080/api/postGame/user/${decoded.users_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (!postsResponse.ok) throw new Error("Failed to fetch posts");
+        const postsData = await postsResponse.json();
+
+        const participantsResponse = await fetch(
+          `http://localhost:8080/api/participate`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (!participantsResponse.ok)
+          throw new Error("Failed to fetch participants");
+        const participantsData = await participantsResponse.json();
+
+        const postsWithParticipants = postsData.map((post) => {
+          const postParticipants = participantsData.filter(
+            (participant) => participant.post_games_id === post.post_games_id
           );
-          if (!userResponse.ok) throw new Error("Failed to fetch user details");
-          const userData = await userResponse.json();
+          return {
+            ...post,
+            participants: postParticipants.length + 1, // Adding 1 to the count of participants
+            userFirstName: userData.first_name,
+            userLastName: userData.last_name,
+            userProfileImage: userData.user_image,
+            creation_date: formatDateTime(post.creation_date),
+            date_meet: formatThaiDate(post.date_meet),
+            time_meet: formatThaiTime(post.time_meet),
+            isPast: isPastDateTime(post.date_meet, post.time_meet),
+          };
+        });
 
-          const postsResponse = await fetch(
-            `http://localhost:8080/api/postGame/user/${decoded.users_id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-          if (!postsResponse.ok) throw new Error("Failed to fetch posts");
-          const postsData = await postsResponse.json();
-
-          const participantsResponse = await fetch(
-            `http://localhost:8080/api/participate`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-          if (!participantsResponse.ok)
-            throw new Error("Failed to fetch participants");
-          const participantsData = await participantsResponse.json();
-
-          const postsWithParticipants = postsData.map((post) => {
-            const postParticipants = participantsData.filter(
-              (participant) => participant.post_games_id === post.post_games_id
-            );
-            return {
-              ...post,
-              participants: postParticipants.length + 1, // Adding 1 to the count of participants
-              userFirstName: userData.first_name,
-              userLastName: userData.last_name,
-              userProfileImage: userData.user_image,
-              creation_date: post.creation_date,
-              formattedCreationDate: formatDateTime(post.creation_date),
-              date_meet: post.date_meet,
-              time_meet: post.time_meet,
-              isPast: isPastDateTime(post.date_meet, post.time_meet),
-            };
-          });
-
-          // เรียงลำดับโพสต์ตามวันที่สร้างโพสต์ และแยกโพสต์ที่เลยนัดเล่นไปแล้วไปด้านล่าง
-          const sortedPosts = postsWithParticipants.sort((a, b) => {
-            if (a.isPast && !b.isPast) return 1;
-            if (!a.isPast && b.isPast) return -1;
-            return compareDesc(
-              new Date(a.creation_date),
-              new Date(b.creation_date)
-            );
-          });
-
-          setItems(sortedPosts);
-        } else {
-          const postsResponse = await fetch(
-            `http://localhost:8080/api/postGame`
-          );
-          if (!postsResponse.ok) throw new Error("Failed to fetch posts");
-          const postsData = await postsResponse.json();
-
-          const participantsResponse = await fetch(
-            `http://localhost:8080/api/participate`
-          );
-          if (!participantsResponse.ok)
-            throw new Error("Failed to fetch participants");
-          const participantsData = await participantsResponse.json();
-
-          const postsWithParticipants = postsData.map((post) => {
-            const postParticipants = participantsData.filter(
-              (participant) => participant.post_games_id === post.post_games_id
-            );
-            return {
-              ...post,
-              participants: postParticipants.length + 1, // Adding 1 to the count of participants
-              userFirstName: post.users.first_name,
-              userLastName: post.users.last_name,
-              userProfileImage: post.users.user_image,
-              creation_date: post.creation_date,
-              formattedCreationDate: formatDateTime(post.creation_date),
-              date_meet: post.date_meet,
-              time_meet: post.time_meet,
-              isPast: isPastDateTime(post.date_meet, post.time_meet),
-            };
-          });
-
-          // เรียงลำดับโพสต์ตามวันที่สร้างโพสต์ และแยกโพสต์ที่เลยนัดเล่นไปแล้วไปด้านล่าง
-          const sortedPosts = postsWithParticipants.sort((a, b) => {
-            if (a.isPast && !b.isPast) return 1;
-            if (!a.isPast && b.isPast) return -1;
-            return compareDesc(
-              new Date(a.creation_date),
-              new Date(b.creation_date)
-            );
-          });
-
-          setItems(sortedPosts);
-        }
+        setItems(postsWithParticipants);
       } catch (error) {
-        console.error("Failed to load data: " + error.message);
+        setError("Failed to load data: " + error.message);
       } finally {
         setLoading(false);
       }
@@ -206,6 +155,7 @@ function PostGames() {
 
   if (loading)
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
+  if (error) return <Typography sx={{ color: "white" }}>{error}</Typography>;
 
   return (
     <div>
@@ -221,8 +171,8 @@ function PostGames() {
             color: "white",
             padding: "16px",
             marginBottom: "16px",
-            backgroundColor: "#121212",
-            zIndex: 0,
+            backgroundColor: "#121212", // Added to match the Figma background
+            zIndex: 0, // กำหนดค่า z-index เพื่อให้การ์ดอยู่เหนือ navbar
           }}
         >
           <Grid
@@ -255,7 +205,7 @@ function PostGames() {
                 {item.userFirstName} {item.userLastName}
               </Typography>
               <Typography variant="body2" sx={{ color: "white" }}>
-                {item.formattedCreationDate}
+                {item.creation_date}
               </Typography>
             </Grid>
             <Grid item>
@@ -278,7 +228,7 @@ function PostGames() {
               height={296}
               layout="responsive"
               style={{
-                borderRadius: "0%",
+                borderRadius: "0%", // แก้ไขจาก 50% เป็น 0%
                 marginBottom: "16px",
               }}
             />
@@ -297,7 +247,7 @@ function PostGames() {
                   justifyContent: "center",
                   alignItems: "center",
                   color: "white",
-                  fontSize: "3vw",
+                  fontSize: "3vw", // ปรับให้เป็น responsive ตามขนาดของ viewport
                   zIndex: 20,
                 }}
               >
@@ -311,10 +261,10 @@ function PostGames() {
               {item.name_games}
             </Typography>
             <Typography sx={{ color: "white" }}>
-              วันที่เจอกัน: {formatThaiDate(item.date_meet)}
+              วันที่เจอกัน: {item.date_meet}
             </Typography>
             <Typography sx={{ color: "white" }}>
-              เวลาที่เจอกัน: {formatThaiTime(item.time_meet)}
+              เวลาที่เจอกัน: {item.time_meet}
             </Typography>
 
             <br />
@@ -362,7 +312,7 @@ function PostGames() {
                       "&:hover": {
                         backgroundColor: "#333333",
                       },
-                      zIndex: 0,
+                      zIndex: 0, // กำหนดค่า z-index เพื่อให้การ์ดอยู่เหนือ navbar
                     }}
                   >
                     พูดคุย
@@ -373,7 +323,11 @@ function PostGames() {
           </div>
         </Box>
       ))}
-      {items.length === 0 && <Typography sx={{ color: "white" }}></Typography>}
+      {items.length === 0 && (
+        <Typography sx={{ color: "white" }}>
+          ไม่พบโพสต์ที่คุณเคยโพสต์
+        </Typography>
+      )}
     </div>
   );
 }

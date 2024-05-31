@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import AccountDetailsForm from '@/components/dashboard/account/account-details-form';
 import PostGames from '@/components/post-play/PostGames';
 import Participating from '@/components/participating/Participating'
+import PostActivity from '@/components/post-activity/PostActivity'
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -57,6 +58,7 @@ export default function TabsProfile() {
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
+        <PostActivity />
         <PostGames />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>

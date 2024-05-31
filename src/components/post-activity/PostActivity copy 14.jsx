@@ -36,20 +36,16 @@ import { th } from "date-fns/locale";
 
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
-  if (!isValid(date)) return "วันที่ไม่ถูกต้อง";
-  const formattedDate = format(
-    date,
-    "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'",
-    {
-      locale: th,
-    }
-  );
+  if (!isValid(date)) return "Invalid date";
+  const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'", {
+    locale: th,
+  });
   return formattedDate;
 };
 
 const formatThaiDate = (dateString) => {
   const date = parseISO(dateString);
-  if (!isValid(date)) return "วันที่ไม่ถูกต้อง";
+  if (!isValid(date)) return "Invalid date";
   const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy", { locale: th });
   return formattedDate;
 };
@@ -119,16 +115,13 @@ function PostActivity() {
                 console.error("Invalid date format:", post.creation_date);
               }
 
-              const isPast = isPastDateTime(
-                post.date_activity,
-                post.time_activity
-              );
+              const isPast = isPastDateTime(post.date_activity, post.time_activity);
 
               return {
                 ...post,
                 userFirstName: postStore ? postStore.name_store : "Unknown",
                 userProfileImage: postStore
-                  ? postStore.store_image.replace("http}", "http") // แก้ไข URL ของรูปภาพให้ถูกต้อง
+                  ? postStore.store_image.replace("http}", "http:")
                   : "/images/default-profile.png",
                 rawCreationDate: rawCreationDate,
                 creation_date: formatDateTime(post.creation_date),
@@ -168,16 +161,13 @@ function PostActivity() {
                 console.error("Invalid date format:", post.creation_date);
               }
 
-              const isPast = isPastDateTime(
-                post.date_activity,
-                post.time_activity
-              );
+              const isPast = isPastDateTime(post.date_activity, post.time_activity);
 
               return {
                 ...post,
                 userFirstName: postStore ? postStore.name_store : "Unknown",
                 userProfileImage: postStore
-                  ? postStore.store_image.replace("http}", "http:") // แก้ไข URL ของรูปภาพให้ถูกต้อง
+                  ? postStore.store_image
                   : "/images/default-profile.png",
                 rawCreationDate: rawCreationDate,
                 creation_date: formatDateTime(post.creation_date),
@@ -196,7 +186,7 @@ function PostActivity() {
           setItems(sortedPosts);
         }
       } catch (error) {
-        console.error("Failed to load data: " + error.message);
+        setError("Failed to load data: " + error.message);
       } finally {
         setLoading(false);
       }
@@ -207,123 +197,119 @@ function PostActivity() {
 
   if (loading)
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
-  // ไม่แสดงผลข้อผิดพลาดให้ผู้ใช้เห็น
-  // if (error) return <Typography sx={{ color: "white" }}>{error}</Typography>;
+  if (error) return <Typography sx={{ color: "white" }}>{error}</Typography>;
 
   return (
     <div>
-      {items.length > 0 ? (
-        items.map((item) => (
-          <Box
-            key={item.post_activity_id}
-            sx={{
-              borderColor: "grey.800",
-              borderWidth: 1,
-              borderStyle: "solid",
-              borderRadius: 2,
-              marginTop: 3,
-              color: "white",
-              padding: "16px",
-              marginBottom: "16px",
-              backgroundColor: "#424242",
-            }}
+      {items.map((item) => (
+        <Box
+          key={item.post_activity_id}
+          sx={{
+            borderColor: "grey.800",
+            borderWidth: 1,
+            borderStyle: "solid",
+            borderRadius: 2,
+            marginTop: 3,
+            color: "white",
+            padding: "16px",
+            marginBottom: "16px",
+            backgroundColor: "#424242",
+          }}
+        >
+          <Grid
+            container
+            spacing={2}
+            alignItems="center"
+            sx={{ marginBottom: "16px" }}
           >
-            <Grid
-              container
-              spacing={2}
-              alignItems="center"
-              sx={{ marginBottom: "16px" }}
-            >
-              <Grid item>
-                <Image
-                  src={item.userProfileImage}
-                  alt={`${item.userFirstName}`}
-                  width={50}
-                  height={50}
-                  layout="fixed"
-                  style={{ borderRadius: "50%" }}
-                />
-              </Grid>
-              <Grid item xs>
-                <Typography variant="subtitle1" gutterBottom>
-                  {item.userFirstName}
-                </Typography>
-                <Typography variant="body2" sx={{ color: "white" }}>
-                  {item.creation_date}
-                </Typography>
-              </Grid>
-              <Grid item>
-                <IconButton
-                  sx={{
-                    color: "white",
-                  }}
-                  aria-label="settings"
-                >
-                  <MoreVertOutlinedIcon />
-                </IconButton>
-              </Grid>
-            </Grid>
-
-            <div style={{ position: "relative" }}>
+            <Grid item>
               <Image
-                src={item.post_activity_image}
-                alt={item.name_activity}
-                width={526}
-                height={296}
-                layout="responsive"
-                style={{
-                  borderRadius: "0%",
-                  marginBottom: "16px",
-                }}
+                src={item.userProfileImage}
+                alt={`${item.userFirstName}`}
+                width={50}
+                height={50}
+                layout="fixed"
+                style={{ borderRadius: "50%" }}
               />
-              {item.isPast && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    backgroundColor: "rgba(0, 0, 0, 0.65)",
-                    borderRadius: "50%",
-                    width: "60%",
-                    height: "60%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    color: "white",
-                    fontSize: "3vw",
-                    zIndex: 20,
-                  }}
-                >
-                  โพสต์กิจกรรมนี้ได้สิ้นสุดลงแล้ว
-                </div>
-              )}
-            </div>
+            </Grid>
+            <Grid item xs>
+              <Typography variant="subtitle1" gutterBottom>
+                {item.userFirstName}
+              </Typography>
+              <Typography variant="body2" sx={{ color: "white" }}>
+                {item.creation_date}
+              </Typography>
+            </Grid>
+            <Grid item>
+              <IconButton
+                sx={{
+                  color: "white",
+                }}
+                aria-label="settings"
+              >
+                <MoreVertOutlinedIcon />
+              </IconButton>
+            </Grid>
+          </Grid>
 
-            <Typography variant="h6" component="h3" gutterBottom>
-              {item.name_activity}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              วันที่กิจกรรมสิ้นสุด: {item.date_activity}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              เวลาที่กิจกรรมสิ้นสุด: {item.time_activity}
-            </Typography>
+          <div style={{ position: "relative" }}>
+            <Image
+              src={item.post_activity_image}
+              alt={item.name_activity}
+              width={526}
+              height={296}
+              layout="responsive"
+              style={{
+                borderRadius: "0%",
+                marginBottom: "16px",
+              }}
+            />
+            {item.isPast && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  backgroundColor: "rgba(0, 0, 0, 0.65)",
+                  borderRadius: "50%",
+                  width: "60%",
+                  height: "60%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "white",
+                  fontSize: "3vw",
+                  zIndex: 20,
+                }}
+              >
+                โพสต์กิจกรรมนี้ได้สิ้นสุดลงแล้ว
+              </div>
+            )}
+          </div>
 
-            <br />
+          <Typography variant="h6" component="h3" gutterBottom>
+            {item.name_activity}
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            วันที่กิจกรรมสิ้นสุด: {item.date_activity}
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            เวลาที่กิจกรรมสิ้นสุด: {item.time_activity}
+          </Typography>
 
-            <Typography variant="body1" gutterBottom>
-              {item.detail_post}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              สถานที่: 43/5 ถนนราชดำเนิน (ถนนต้นสน)
-              ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง
-            </Typography>
-          </Box>
-        ))
-      ) : (
-        <Typography sx={{ color: "white" }}></Typography>
-      )}
+          <br />
+
+          <Typography variant="body1" gutterBottom>
+            {item.detail_post}
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            สถานที่: 43/5 ถนนราชดำเนิน (ถนนต้นสน)
+            ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง
+          </Typography>
+        </Box>
+      ))}
+      {items.length === 0 && <Typography sx={{ color: "white" }}></Typography>}
     </div>
   );
 }
