@@ -373,7 +373,11 @@ function PostGames() {
           </div>
         </Box>
       ))}
-      {items.length === 0 && <Typography sx={{ color: "white" }}></Typography>}
+      {items.length === 0 && (
+        <Typography sx={{ color: "white" }}>
+          ไม่พบโพสต์ที่คุณเคยโพสต์
+        </Typography>
+      )}
     </div>
   );
 }

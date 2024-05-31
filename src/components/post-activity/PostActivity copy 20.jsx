@@ -322,7 +322,7 @@ function PostActivity() {
           </Box>
         ))
       ) : (
-        <Typography sx={{ color: "white" }}></Typography>
+        <Typography sx={{ color: "white" }}>ไม่มีโพสต์กิจกรรม</Typography>
       )}
     </div>
   );

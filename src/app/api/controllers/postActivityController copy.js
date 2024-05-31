@@ -1,5 +1,7 @@
+// create controller for postActivity
 const db = require("../models");
 const moment = require("moment");
+
 const { v4: uuidv4 } = require("uuid");
 const { Op } = require("sequelize");
 const fs = require("fs");
@@ -50,7 +52,7 @@ exports.findAll = async (req, res, next) => {
       ? {
           [Op.or]: [
             { name_activity: { [Op.like]: `%${search}%` } },
-            { detail_post: { [Op.like]: `%{search}%` } },
+            { detail_post: { [Op.like]: `%${search}%` } },
           ],
           status_post: { [Op.not]: "unActive" },
         }
@@ -70,25 +72,6 @@ exports.findAll = async (req, res, next) => {
   }
 };
 
-// ฟังก์ชันใหม่: ดึงโพสต์ทั้งหมดของร้านค้าตาม store_id
-exports.findAllStorePosts = async (req, res, next) => {
-  try {
-    const storeId = req.params.storeId; // รับ ID ร้านค้าจากพารามิเตอร์ URL
-    const post_activity = await PostActivity.findAll({
-      where: { store_id: storeId }, // ค้นหาโพสต์ที่มี store_id ตรงกับ ID ที่ส่งมา
-    });
-    post_activity.forEach((post) => {
-      if (post.post_activity_image) {
-        post.post_activity_image = `${req.protocol}://${req.get(
-          "host"
-        )}/images/${post.post_activity_image}`;
-      }
-    });
-    res.status(200).json(post_activity);
-  } catch (error) {
-    next(error);
-  }
-};
 
 exports.findOne = async (req, res, next) => {
   try {
@@ -124,12 +107,12 @@ exports.update = async (req, res, next) => {
         );
       }
     }
-    req.body.date_activity = moment(req.body.date_activity, "MM-DD-YYYY");
-    await PostActivity.update(req.body, {
-      where: {
-        post_activity_id,
-      },
-    });
+    (req.body.date_activity = moment(req.body.date_activity, "MM-DD-YYYY")),
+      await PostActivity.update(req.body, {
+        where: {
+          post_activity_id,
+        },
+      });
     res.status(200).json({ message: "PostActivity was updated successfully." });
   } catch (error) {
     next(error);
