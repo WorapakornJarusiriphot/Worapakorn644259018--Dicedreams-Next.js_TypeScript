@@ -60,12 +60,8 @@ function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersResponse = await axios.get(
-          "http://localhost:8080/api/users"
-        );
-        const storesResponse = await axios.get(
-          "http://localhost:8080/api/store"
-        );
+        const usersResponse = await axios.get("http://localhost:8080/api/users");
+        const storesResponse = await axios.get("http://localhost:8080/api/store");
         setUsers(usersResponse.data);
         setStores(storesResponse.data);
       } catch (error) {

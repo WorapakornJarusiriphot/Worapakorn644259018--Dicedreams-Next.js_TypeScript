@@ -25,6 +25,58 @@ npm install @mui/material@latest @mui/x-date-pickers@latest
 
 
 
+คุณสามารถลบ Git branch ที่อยู่บน GitHub โดยทำตามขั้นตอนดังนี้:
+
+1. **เช็คชื่อ branch ที่ต้องการลบ**:
+   - คุณสามารถตรวจสอบชื่อ branch ที่ต้องการลบโดยใช้คำสั่ง:
+     ```bash
+     git branch -r
+     ```
+
+2. **ลบ branch บน GitHub**:
+   - ใช้คำสั่งต่อไปนี้ในการลบ branch ที่อยู่บน remote repository (GitHub):
+     ```bash
+     git push origin --delete feature/feature/display-people-section
+     ```
+
+3. **ลบ branch ที่อยู่บนเครื่องของคุณ** (ถ้าจำเป็น):
+   - ถ้าคุณต้องการลบ branch ที่อยู่ใน local repository ของคุณด้วย ใช้คำสั่ง:
+     ```bash
+     git branch -d feature/feature/display-people-section
+     ```
+   - ถ้า branch นั้นยังไม่ได้ merge เข้าสู่ branch หลักและคุณยังคงต้องการลบ ใช้คำสั่ง:
+     ```bash
+     git branch -D feature/feature/display-people-section
+     ```
+
+เพียงเท่านี้ branch `feature/feature/display-people-section` จะถูกลบทั้งใน GitHub และ local repository ของคุณ (ถ้าคุณเลือกที่จะลบใน local ด้วย)
+
+
+จากข้อความที่แสดงขึ้นมา หมายความว่าคุณได้ลบ branch `feature/feature/display-people-section` บน remote repository (GitHub) สำเร็จแล้ว ข้อความที่บอกว่า `[deleted]` ยืนยันว่าการลบนั้นสำเร็จ
+
+```plaintext
+ - [deleted]         feature/feature/display-people-section
+```
+
+ถ้าคุณต้องการลบ branch นี้ใน local repository ของคุณด้วย คุณสามารถใช้คำสั่งต่อไปนี้:
+
+```bash
+git branch -d feature/feature/display-people-section
+```
+
+หรือถ้า branch นั้นยังไม่ได้ merge เข้าสู่ branch หลักและคุณยังคงต้องการลบ ใช้คำสั่ง:
+
+```bash
+git branch -D feature/feature/display-people-section
+```
+
+เพียงเท่านี้ branch `feature/feature/display-people-section` จะถูกลบใน local repository ของคุณด้วย
+
+
+
+
+
+
 
 ติดตั้งแพ็คเกจที่เข้ากันได้กับ React เวอร์ชัน 18:
 หาก react-chartist มีเวอร์ชันที่อัปเดตและรองรับ React 18 คุณสามารถติดตั้งเวอร์ชันนั้นแทน:

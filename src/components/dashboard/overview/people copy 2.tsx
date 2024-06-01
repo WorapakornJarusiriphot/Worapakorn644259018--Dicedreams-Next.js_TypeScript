@@ -22,15 +22,15 @@ export interface Product {
   updatedAt: Date;
 }
 
-export interface LatestProductsProps {
+export interface PeopleProps {
   products?: Product[];
   sx?: SxProps;
 }
 
-export function LatestProducts({ products = [], sx }: LatestProductsProps): React.JSX.Element {
+export function People({ products = [], sx }: PeopleProps): React.JSX.Element {
   return (
     <Card sx={sx}>
-      <CardHeader title="Latest products" />
+      <CardHeader title="People" />
       <Divider />
       <List>
         {products.map((product, index) => (
