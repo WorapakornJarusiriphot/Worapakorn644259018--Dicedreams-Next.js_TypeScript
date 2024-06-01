@@ -39,7 +39,7 @@ import { JwtPayload } from "jwt-decode";
 
 import { useEffect, useState } from "react";
 
-import { format, parseISO, compareDesc } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { th } from "date-fns/locale";
 
 const formatDateTime = (dateString) => {
@@ -66,12 +66,52 @@ const formatThaiTime = (timeString) => {
   return formattedTime;
 };
 
-const isPastDateTime = (date, time) => {
-  const [hours, minutes] = time.split(":");
-  const eventDate = new Date(date);
-  eventDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
-  return eventDate < new Date();
-};
+// const items = [
+//   {
+//     id: 1,
+//     date: "วันอาทิตย์ที่ 21 กุมภาพันธ์  พ.ศ. 2566",
+//     date_meet: "วันอาทิตย์ที่ 24 มีนาคม  พ.ศ. 2566",
+//     time_meet: "14:00 น.",
+//     user: "วรปกร จารุศิริพจน์",
+//     title: "Werewolf",
+//     description: "เอา Werewolf ตัวเสริมมาด้วยก็ดีนะ เพราะเรามีแค่ตัวหลัก",
+//     num_people: 5,
+//     participant: 1,
+//     image:
+//       "https://promotions.co.th/wp-content/uploads/2018/06/Lazada-Boardgame-2.jpg",
+//     profile:
+//       "https://scontent.fkdt3-1.fna.fbcdn.net/v/t1.6435-1/128520468_708312693415305_7662898639450323422_n.jpg?stp=cp0_dst-jpg_p40x40&_nc_cat=102&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeEvGCGsdcArxffFEo_CTsIpevnKI8_KTQd6-cojz8pNB_RFB8aAFgtrdC7tmNreCahg44tkLiiF9vuCBD2S08Ga&_nc_ohc=Uw6hP78zOX8Ab7yzKhn&_nc_ht=scontent.fkdt3-1.fna&oh=00_AfD0jl3Q2NBLvhHUH6x2YPsK1-ceW-HjDuvEBfVdhg03Kw&oe=66548C26",
+//   },
+//   {
+//     id: 2,
+//     date: "วันอาทิตย์ที่ 22 กุมภาพันธ์  พ.ศ. 2566",
+//     date_meet: "วันอาทิตย์ที่ 31 มีนาคม  พ.ศ. 2566",
+//     time_meet: "15:00 น.",
+//     user: "ณัฐวุฒิ แก้วมหา",
+//     title: "ซาเลม 1692",
+//     description: "เอา ซาเลม 1692 ตัวเสริมมาด้วยก็ดีนะ เพราะเรามีแค่ตัวหลัก",
+//     num_people: 5,
+//     participant: 1,
+//     image: "https://live.staticflickr.com/65535/49262314468_e307bd2a55_b.jpg",
+//     profile:
+//       "https://scontent.fkdt3-1.fna.fbcdn.net/v/t1.6435-9/64302371_2291674051160875_4818937659546140672_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeHF4xk0-rddhfIOGu4A6ETaMhraglDnixIyGtqCUOeLEkoQnYryeJa9YPA-E8HzB9-nuCR5wGZLAxZhEO_qTdBB&_nc_ohc=Ppnix1PQWx8Q7kNvgFqzbpa&_nc_ht=scontent.fkdt3-1.fna&oh=00_AfCSiyasCgBQsH6Xmg0ziOu_tBrRCrYSdY0q5dai1ocNHQ&oe=6654AB75",
+//   },
+//   {
+//     id: 3,
+//     date: "วันอาทิตย์ที่ 23 กุมภาพันธ์  พ.ศ. 2566",
+//     date_meet: "วันอาทิตย์ที่ 7 เมษายน  พ.ศ. 2566",
+//     time_meet: "16:00 น.",
+//     user: "นวพร บุญก่อน",
+//     title: "Spyfall",
+//     description: "เอา Spyfall ตัวเสริมมาด้วยก็ดีนะ เพราะเรามีแค่ตัวหลัก",
+//     num_people: 5,
+//     participant: 1,
+//     image:
+//       "https://whatsericplaying.files.wordpress.com/2016/01/spyfall-006.jpg?w=1180",
+//     profile:
+//       "https://scontent.fkdt3-1.fna.fbcdn.net/v/t1.6435-9/69261198_442076069735088_3232231141012406272_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeHFaL86TpC1_vVNPWG1a9sA8ifm7PFiOUjyJ-bs8WI5SPf7tix49NIxmVDJWLnsGeLTePhvqTBajsbKjgIVq6Ar&_nc_ohc=d6YjEwdNkRgQ7kNvgHqfUje&_nc_ht=scontent.fkdt3-1.fna&oh=00_AfAvG3bUk9BKuYKdGhXnNoglRZid_wtaaqu-a_ICL2EOeQ&oe=6654B669",
+//   },
+// ];
 
 function PostGames() {
   const [items, setItems] = useState([]);
@@ -139,25 +179,12 @@ function PostGames() {
             userFirstName: userData.first_name,
             userLastName: userData.last_name,
             userProfileImage: userData.user_image,
-            creation_date: post.creation_date,
-            formattedCreationDate: formatDateTime(post.creation_date),
-            date_meet: post.date_meet,
-            time_meet: post.time_meet,
-            isPast: isPastDateTime(post.date_meet, post.time_meet),
+            creation_date: formatDateTime(post.creation_date),
+            date_meet: formatThaiDate(post.date_meet),
+            time_meet: formatThaiTime(post.time_meet),
           };
         });
 
-        // เรียงลำดับโพสต์ตามวันที่สร้างโพสต์ และแยกโพสต์ที่เลยนัดเล่นไปแล้วไปด้านล่าง
-        const sortedPosts = postsWithParticipants.sort((a, b) => {
-          if (a.isPast && !b.isPast) return 1;
-          if (!a.isPast && b.isPast) return -1;
-          return compareDesc(
-            new Date(a.creation_date),
-            new Date(b.creation_date)
-          );
-        });
-
-        setItems(sortedPosts);
         setItems(postsWithParticipants);
       } catch (error) {
         setError("Failed to load data: " + error.message);
@@ -187,8 +214,8 @@ function PostGames() {
             color: "white",
             padding: "16px",
             marginBottom: "16px",
-            backgroundColor: "#121212",
-            zIndex: 0,
+            backgroundColor: "#121212", // Added to match the Figma background
+            zIndex: 0, // กำหนดค่า z-index เพื่อให้การ์ดอยู่เหนือ navbar
           }}
         >
           <Grid
@@ -221,7 +248,7 @@ function PostGames() {
                 {item.userFirstName} {item.userLastName}
               </Typography>
               <Typography variant="body2" sx={{ color: "white" }}>
-                {item.formattedCreationDate}
+                {item.creation_date}
               </Typography>
             </Grid>
             <Grid item>
@@ -236,51 +263,23 @@ function PostGames() {
             </Grid>
           </Grid>
 
-          <div style={{ position: "relative" }}>
-            <Image
-              src={item.games_image}
-              alt={item.name_games}
-              width={526}
-              height={296}
-              layout="responsive"
-              style={{
-                borderRadius: "0%",
-                marginBottom: "16px",
-              }}
-            />
-            {item.isPast && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  backgroundColor: "rgba(0, 0, 0, 0.65)",
-                  borderRadius: "50%",
-                  width: "60%",
-                  height: "60%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  color: "white",
-                  fontSize: "3vw",
-                  zIndex: 20,
-                }}
-              >
-                โพสต์นี้เลยนัดเล่นไปแล้ว
-              </div>
-            )}
-          </div>
-
+          <Image
+            src={item.games_image}
+            alt={item.name_games}
+            width={526} // ควรให้ค่าเป็นตัวเลขพิกเซล
+            height={296} // ควรให้ค่าเป็นตัวเลขพิกเซล
+            layout="responsive" // ใช้ layout แบบ responsive เพื่อให้ภาพปรับขนาดตามขนาดของ container
+            style={{ marginBottom: "16px" }} // กำหนด margin ด้านล่าง
+          />
           <div className="text-left">
             <Typography sx={{ color: "white", fontWeight: "bold" }}>
               {item.name_games}
             </Typography>
             <Typography sx={{ color: "white" }}>
-              วันที่เจอกัน: {formatThaiDate(item.date_meet)}
+              วันที่เจอกัน: {item.date_meet}
             </Typography>
             <Typography sx={{ color: "white" }}>
-              เวลาที่เจอกัน: {formatThaiTime(item.time_meet)}
+              เวลาที่เจอกัน: {item.time_meet}
             </Typography>
 
             <br />
@@ -290,6 +289,8 @@ function PostGames() {
               สถานที่ : 43/5 ถนนราชดำเนิน (ถนนต้นสน)
               ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง
             </Typography>
+            {/* num_people
+                  participant */}
             <Typography sx={{ color: "white" }}>
               จำนวนคนจะไป : {item.participants}/{item.num_people}
             </Typography>
@@ -297,7 +298,7 @@ function PostGames() {
             <br />
 
             <Grid container spacing={2} justifyContent="center">
-              {item.users_id !== userId && !item.isPast && (
+              {item.users_id !== userId && (
                 <Grid item xs={12} sm={6}>
                   <Button
                     variant="contained"
@@ -315,34 +316,30 @@ function PostGames() {
                   </Button>
                 </Grid>
               )}
-              {!item.isPast && (
-                <Grid item xs={12} sm={6}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    startIcon={<CommentIcon />}
-                    sx={{
-                      backgroundColor: "black",
-                      color: "white",
-                      border: "1px solid white",
-                      "&:hover": {
-                        backgroundColor: "#333333",
-                      },
-                      zIndex: 0,
-                    }}
-                  >
-                    พูดคุย
-                  </Button>
-                </Grid>
-              )}
+              <Grid item xs={12} sm={6}>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  startIcon={<CommentIcon />}
+                  sx={{
+                    backgroundColor: "black",
+                    color: "white",
+                    border: "1px solid white",
+                    "&:hover": {
+                      backgroundColor: "#333333",
+                    },
+                    zIndex: 0, // กำหนดค่า z-index เพื่อให้การ์ดอยู่เหนือ navbar
+                  }}
+                >
+                  พูดคุย
+                </Button>
+              </Grid>
             </Grid>
           </div>
         </Box>
       ))}
       {items.length === 0 && (
-        <Typography sx={{ color: "white" }}>
-          ไม่พบโพสต์ที่คุณเคยโพสต์
-        </Typography>
+        <Typography sx={{ color: "white" }}>ไม่พบโพสต์</Typography>
       )}
     </div>
   );

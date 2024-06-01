@@ -42,6 +42,20 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import axios from "axios";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+// สร้าง custom theme
+const theme = createTheme({
+  palette: {
+    // mode: 'dark', // โหมด Dark Mode
+    primary: {
+      main: "#00C853", // สีเขียวสดใสสำหรับปุ่ม "เข้าร่วม"
+    },
+    error: {
+      main: "#D32F2F", // สีแดงสำหรับปุ่ม "ยกเลิก"
+    },
+  },
+});
 
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
@@ -453,22 +467,24 @@ function PostGames() {
           </MuiAlert>
         </Snackbar>
       )}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>ยืนยันการเข้าร่วม</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            คุณแน่ใจนะว่าจะเข้าร่วมโพสต์นัดเล่นโพสต์นี้?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            ยกเลิก
-          </Button>
-          <Button onClick={handleConfirmJoin} color="primary" autoFocus>
-            ตกลง
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ThemeProvider theme={theme}>
+        <Dialog open={openDialog} onClose={handleCloseDialog}>
+          <DialogTitle>ยืนยันการเข้าร่วม</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              คุณแน่ใจนะว่าจะเข้าร่วมโพสต์นัดเล่นโพสต์นี้?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog} color="error">
+              ยกเลิก
+            </Button>
+            <Button onClick={handleConfirmJoin} color="primary" autoFocus>
+              ตกลง
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </ThemeProvider>
     </div>
   );
 }

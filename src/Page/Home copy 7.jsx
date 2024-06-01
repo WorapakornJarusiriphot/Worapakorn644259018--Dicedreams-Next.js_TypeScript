@@ -38,8 +38,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation"; // เพิ่มการใช้ useRouter
 import dayjs from "dayjs";
 import { People } from "@/components/dashboard/overview/people";
-import { useEffect } from "react";
-import axios from "axios";
 
 function Home() {
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -54,28 +52,8 @@ function Home() {
     selectedDate, // เพิ่ม selectedDate
     selectedTime // เพิ่ม selectedTime
   );
-  const [users, setUsers] = useState([]);
-  const [stores, setStores] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const usersResponse = await axios.get(
-          "http://localhost:8080/api/users"
-        );
-        const storesResponse = await axios.get(
-          "http://localhost:8080/api/store"
-        );
-        setUsers(usersResponse.data);
-        setStores(storesResponse.data);
-      } catch (error) {
-        console.error("Error fetching data", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+  // เพิ่มฟังก์ชัน handleDateChange
   const handleDateChange = (newDate) => {
     console.log("Date selected:", newDate);
     setSelectedDate(newDate);
@@ -98,6 +76,11 @@ function Home() {
     setNumber(event.target.value);
   };
 
+  // const filteredData = data; // ใช้ข้อมูลที่ถูกกรองแล้วจาก useFetchPosts
+
+  // console.log("Filtered data HOME:", filteredData);
+
+  // Filter data based on selected date
   const filteredData = data.filter((post) => {
     if (selectedDate) {
       const postDate = post.date_meet || post.date_activity;
@@ -108,25 +91,50 @@ function Home() {
 
   console.log("Filtered data HOME:", filteredData);
 
-  const [value, setValue] = useState(dayjs("2022-04-17T15:30"));
+  // // ตรวจสอบการกรองข้อมูลตามวันที่และประเภทโพสต์
+  // if (selectedDate) {
+  //   filteredData = filteredData.filter((post) => {
+  //     const postDate = post.date_meet || post.date_activity;
+  //     return dayjs(postDate).isSame(selectedDate, "day");
+  //   });
+  //   console.log("Filtered data by date:", filteredData);
+  // }
+
+  const [value, setValue] = React.useState(dayjs("2022-04-17T15:30"));
+  // const [number, setNumber] = useState("");
 
   const handleChange = (event) => {
     setNumber(event.target.value);
   };
 
-  const [selectedCurrency, setSelectedCurrency] = useState("");
+  const [selectedCurrency, setSelectedCurrency] = useState(""); // เพิ่มตัวแปร state นี้
+
+  // const handleNumberChange = (event) => {
+  //   setNumber(event.target.value);
+  // };
 
   const handleCurrencyChange = (event) => {
+    // สร้างฟังก์ชัน handleCurrencyChange
     setSelectedCurrency(event.target.value);
   };
 
+  // const [searchTerm, setSearchTerm] = useState("");
+  // const [selectedCategory, setSelectedCategory] = useState("");
   const router = useRouter();
 
+  // const handleSearchChange = (event) => {
+  //   setSearchTerm(event.target.value);
+  // };
+
+  // const handleCategoryChange = (event) => {
+  //   setSelectedCategory(event.target.value);
+  // };
+
   const handleSearch = () => {
-    console.log("Search term:", searchTerm);
-    console.log("Selected category:", selectedCategory);
-    console.log("Number of participants:", number);
-    console.log("Selected date:", selectedDate);
+    console.log("Search term:", searchTerm); // ตรวจสอบคำที่ใช้ในการค้นหา
+    console.log("Selected category:", selectedCategory); // ตรวจสอบหมวดหมู่ที่เลือก
+    console.log("Number of participants:", number); // ตรวจสอบจำนวนผู้เข้าร่วม
+    console.log("Selected date:", selectedDate); // ตรวจสอบวันที่เลือก
     if (searchTerm.trim()) {
       router.push(`/search?search=${searchTerm}`);
     }
@@ -179,14 +187,60 @@ function Home() {
               number={number}
               handleCurrencyChange={handleCurrencyChange}
               selectedCurrency={selectedCurrency}
-              handleDateChange={handleDateChange}
-              selectedDate={selectedDate}
-              handleTimeChange={handleTimeChange}
-              selectedTime={selectedTime}
+              handleDateChange={handleDateChange} // เพิ่ม handleDateChange
+              selectedDate={selectedDate} // เพิ่ม selectedDate
+              handleTimeChange={handleTimeChange} // เพิ่ม handleTimeChange
+              selectedTime={selectedTime} // เพิ่ม selectedTime
             />
           </Grid>
           <Grid item xs={12} md={8}>
-            <People users={users} stores={stores} />
+            <People
+              products={[
+                {
+                  id: "PRD-005",
+                  name: "Soja & Co. Eucalyptus",
+                  image: "/assets/product-5.png",
+                  updatedAt: dayjs()
+                    .subtract(18, "minutes")
+                    .subtract(5, "hour")
+                    .toDate(),
+                },
+                {
+                  id: "PRD-004",
+                  name: "Necessaire Body Lotion",
+                  image: "/assets/product-4.png",
+                  updatedAt: dayjs()
+                    .subtract(41, "minutes")
+                    .subtract(3, "hour")
+                    .toDate(),
+                },
+                {
+                  id: "PRD-003",
+                  name: "Ritual of Sakura",
+                  image: "/assets/product-3.png",
+                  updatedAt: dayjs()
+                    .subtract(5, "minutes")
+                    .subtract(3, "hour")
+                    .toDate(),
+                },
+                {
+                  id: "PRD-002",
+                  name: "Lancome Rouge",
+                  image: "/assets/product-2.png",
+                  updatedAt: dayjs()
+                    .subtract(23, "minutes")
+                    .subtract(2, "hour")
+                    .toDate(),
+                },
+                {
+                  id: "PRD-001",
+                  name: "Erbology Aloe Vera",
+                  image: "/assets/product-1.png",
+                  updatedAt: dayjs().subtract(10, "minutes").toDate(),
+                },
+              ]}
+              // sx={{ height: "100%" }}
+            />
             {selectedCategory === "postActivity" || selectedCategory === "" ? (
               <PostActivity
                 data={filteredData}

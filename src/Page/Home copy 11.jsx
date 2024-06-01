@@ -45,36 +45,15 @@ function Home() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [number, setNumber] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null); // เพิ่ม useState สำหรับ selectedDate
-  const [selectedTime, setSelectedTime] = useState(null); // เพิ่ม useState สำหรับ selectedTime
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
   const { data, loading, error } = useFetchPosts(
     selectedCategory,
     searchTerm,
     number,
-    selectedDate, // เพิ่ม selectedDate
-    selectedTime // เพิ่ม selectedTime
+    selectedDate,
+    selectedTime
   );
-  const [users, setUsers] = useState([]);
-  const [stores, setStores] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const usersResponse = await axios.get(
-          "http://localhost:8080/api/users"
-        );
-        const storesResponse = await axios.get(
-          "http://localhost:8080/api/store"
-        );
-        setUsers(usersResponse.data);
-        setStores(storesResponse.data);
-      } catch (error) {
-        console.error("Error fetching data", error);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const handleDateChange = (newDate) => {
     console.log("Date selected:", newDate);
@@ -106,19 +85,13 @@ function Home() {
     return true;
   });
 
-  console.log("Filtered data HOME:", filteredData);
-
   const [value, setValue] = useState(dayjs("2022-04-17T15:30"));
-
-  const handleChange = (event) => {
-    setNumber(event.target.value);
-  };
-
-  const [selectedCurrency, setSelectedCurrency] = useState("");
 
   const handleCurrencyChange = (event) => {
     setSelectedCurrency(event.target.value);
   };
+
+  const [selectedCurrency, setSelectedCurrency] = useState("");
 
   const router = useRouter();
 
@@ -186,13 +159,9 @@ function Home() {
             />
           </Grid>
           <Grid item xs={12} md={8}>
-            <People users={users} stores={stores} />
+            <People sx={{ marginBottom: 5 }} />
             {selectedCategory === "postActivity" || selectedCategory === "" ? (
-              <PostActivity
-                data={filteredData}
-                loading={loading}
-                error={error}
-              />
+              <PostActivity data={filteredData} loading={loading} error={error} />
             ) : null}
             {selectedCategory === "postGames" || selectedCategory === "" ? (
               <PostGames data={filteredData} loading={loading} error={error} />
