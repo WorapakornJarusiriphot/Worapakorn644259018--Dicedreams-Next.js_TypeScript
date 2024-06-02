@@ -74,9 +74,14 @@ exports.findAll = async (req, res, next) => {
 exports.findAllStorePosts = async (req, res, next) => {
   try {
     const storeId = req.params.storeId; // รับ ID ร้านค้าจากพารามิเตอร์ URL
+    console.log(`Fetching posts for store ID: ${storeId}`); // เพิ่ม log เพื่อตรวจสอบการดึงโพสต์
+
     const post_activity = await PostActivity.findAll({
       where: { store_id: storeId }, // ค้นหาโพสต์ที่มี store_id ตรงกับ ID ที่ส่งมา
     });
+
+    console.log(`Found posts: ${post_activity.length}`); // เพิ่ม log เพื่อตรวจสอบจำนวนโพสต์ที่พบ
+
     post_activity.forEach((post) => {
       if (post.post_activity_image) {
         post.post_activity_image = `${req.protocol}://${req.get(
@@ -84,11 +89,14 @@ exports.findAllStorePosts = async (req, res, next) => {
         )}/images/${post.post_activity_image}`;
       }
     });
+
     res.status(200).json(post_activity);
   } catch (error) {
+    console.error("Failed to fetch store posts:", error.message); // เพิ่ม log ข้อผิดพลาด
     next(error);
   }
 };
+
 
 exports.findOne = async (req, res, next) => {
   try {

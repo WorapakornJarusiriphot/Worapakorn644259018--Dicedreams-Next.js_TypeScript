@@ -10,11 +10,6 @@ import { jwtDecode } from "jwt-decode";
 import { format, parseISO, isBefore, isValid } from "date-fns";
 import { th } from "date-fns/locale";
 
-import { useRouter, useParams } from "next/navigation";
-import axios from "axios";
-import dayjs from "dayjs";
-import PropTypes from 'prop-types';
-
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
   if (!isValid(date)) return "วันที่ไม่ถูกต้อง";
@@ -50,24 +45,16 @@ const isPastDateTime = (date, time) => {
   return isBefore(eventDate, new Date());
 };
 
-const PostActivity = () => {
-  const router = useRouter();
-  const { id: storeId } = useParams();
+const PostActivity = ({ storeId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!storeId) {
-      console.error("Store ID is undefined");
-      setError("Store ID is undefined");
-      return;
-    }
-
     const fetchUserAndPosts = async () => {
       setLoading(true);
       const accessToken = localStorage.getItem("access_token");
-
+  
       try {
         const postsResponse = await fetch(
           `http://localhost:8080/api/postActivity/store/${storeId}`,
@@ -78,14 +65,14 @@ const PostActivity = () => {
             },
           }
         );
-
+  
         if (!postsResponse.ok) {
           const errorText = await postsResponse.text();
           throw new Error(`Failed to fetch posts: ${postsResponse.status} - ${errorText}`);
         }
-
+  
         const postsData = await postsResponse.json();
-
+  
         const storesResponse = await fetch(
           `http://localhost:8080/api/store/${storeId}`,
           {
@@ -95,29 +82,29 @@ const PostActivity = () => {
             },
           }
         );
-
+  
         if (!storesResponse.ok) {
           const errorText = await storesResponse.text();
           throw new Error(`Failed to fetch store: ${storesResponse.status} - ${errorText}`);
         }
-
+  
         const storeData = await storesResponse.json();
-
+  
         const postsWithStores = postsData
           .filter((post) => post.status_post !== "unActive")
           .map((post) => {
             const postStore = storeData;
-
+  
             const rawCreationDate = parseISO(post.creation_date);
             if (!isValid(rawCreationDate)) {
               console.error("Invalid date format:", post.creation_date);
             }
-
+  
             const isPast = isPastDateTime(
               post.date_activity,
               post.time_activity
             );
-
+  
             return {
               ...post,
               userFirstName: postStore ? postStore.name_store : "Unknown",
@@ -131,13 +118,13 @@ const PostActivity = () => {
               isPast: isPast,
             };
           });
-
+  
         const sortedPosts = postsWithStores.sort((a, b) => {
           if (a.isPast && !b.isPast) return 1;
           if (!a.isPast && b.isPast) return -1;
           return b.rawCreationDate - a.rawCreationDate;
         });
-
+  
         setItems(sortedPosts);
       } catch (error) {
         console.error("Failed to load data: " + error.message);
@@ -146,11 +133,13 @@ const PostActivity = () => {
         setLoading(false);
       }
     };
-
+  
     fetchUserAndPosts();
   }, [storeId]);
+  
 
-  if (loading) return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
+  if (loading)
+    return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
   if (error) return <Typography sx={{ color: "white" }}>{error}</Typography>;
 
   return (
@@ -269,10 +258,6 @@ const PostActivity = () => {
       )}
     </div>
   );
-};
-
-PostActivity.propTypes = {
-  storeId: PropTypes.string.isRequired,
-};
+}
 
 export default PostActivity;

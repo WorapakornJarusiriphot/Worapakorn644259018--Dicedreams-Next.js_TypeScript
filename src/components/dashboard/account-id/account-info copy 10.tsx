@@ -2,41 +2,28 @@
 
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { useRouter } from 'next/navigation'; // แก้ไขจาก next/navigation
 import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { JwtPayload } from 'jwt-decode';
 import Box from '@mui/material/Box';
 import { useUser } from './UserContext';
 import axios from 'axios';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import dayjs, { Dayjs } from 'dayjs';
-// import { JwtPayload } from 'jsonwebtoken';
-import { JwtPayload } from 'jwt-decode';
+
 
 interface AccountInfoProps {
-  userId?: string;
-  storeId?: string;
-}
-
-interface User {
-  userType: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  gender: string;
-  phoneNumber: string;
-  birthday: Dayjs | null;
   userId: string;
-  profilePictureUrl: string;
-  storeAddress: string;
-  username: string;
-  users_id: string;
-  userImage: string;
+  storeId: string;
 }
 
 export default function AccountInfo({ userId, storeId }: AccountInfoProps) {
@@ -47,6 +34,7 @@ export default function AccountInfo({ userId, storeId }: AccountInfoProps) {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertSeverity, setAlertSeverity] = useState<'success' | 'error'>('success');
+  const router = useRouter();
 
   const handleSnackbarClose = () => {
     setOpenSnackbar(false);
@@ -67,51 +55,35 @@ export default function AccountInfo({ userId, storeId }: AccountInfoProps) {
     }
   }, [setUser]);
 
-  const fetchUserProfile = async (id: string, accessToken: string, isStore: boolean) => {
+  const fetchUserProfile = async (userId: string, accessToken: string, decodedToken: { username: string }) => {
     try {
-      const url = isStore ? `http://localhost:8080/api/store/${id}` : `http://localhost:8080/api/users/${id}`;
-      const response = await fetch(url, {
+      const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (response.ok) {
         const data = await response.json();
-        if (isStore) {
-          setUser((prev) => ({
-            ...prev,
-            userType: 'store',
-            firstName: data.name_store,
-            lastName: '',
-            email: '',
-            gender: '',
-            phoneNumber: data.phone_number,
-            birthday: null,
-            userId: data.store_id,
-            profilePictureUrl: data.store_image || '',
-            storeAddress: `${data.house_number} ${data.alley} ${data.road} ${data.district} ${data.sub_district} ${data.province}`,
-          }));
-        } else {
-          setUser((prev) => ({
-            ...prev,
-            userType: data.role,
-            firstName: data.first_name,
-            lastName: data.last_name,
-            email: data.email,
-            gender: data.gender,
-            phoneNumber: data.phone_number,
-            birthday: dayjs(data.birthday),
-            userId: data.users_id,
-            profilePictureUrl: data.user_image || '',
-          }));
-        }
+        setUser((prev) => ({
+          ...prev,
+          username: decodedToken.username,
+          userType: data.role,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          email: data.email,
+          gender: data.gender,
+          phoneNumber: data.phone_number,
+          birthday: dayjs(data.birthday), // แปลงเป็น Dayjs
+          userId: data.users_id,
+          profilePictureUrl: data.user_image || '',
+        }));
       } else {
         console.error(`API Error: ${response.status} ${response.statusText}`);
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.error('Error fetching profile:', error.message);
+        console.error('Error fetching user profile:', error.message);
       } else {
-        console.error('Error fetching profile:', error);
+        console.error('Error fetching user profile:', error);
       }
     }
   };
@@ -119,13 +91,10 @@ export default function AccountInfo({ userId, storeId }: AccountInfoProps) {
   useEffect(() => {
     const accessToken = localStorage.getItem('access_token');
     if (accessToken) {
-      if (userId) {
-        fetchUserProfile(userId, accessToken, false);
-      } else if (storeId) {
-        fetchUserProfile(storeId, accessToken, true);
-      }
+      const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
+      fetchUserProfile(userId, accessToken, decodedToken);
     }
-  }, [setUser, userId, storeId]);
+  }, [setUser, userId]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -149,7 +118,7 @@ export default function AccountInfo({ userId, storeId }: AccountInfoProps) {
         reader.readAsDataURL(selectedFile);
         reader.onload = async () => {
           const base64Image = reader.result as string;
-          const formattedBirthday = user.birthday ? dayjs(user.birthday).format('YYYY-MM-DD') : '';
+          const formattedBirthday = user.birthday ? dayjs(user.birthday).format('YYYY-MM-DD') : ''; // แปลงเป็นรูปแบบที่ถูกต้อง
           const updatedUser = {
             first_name: user.firstName,
             last_name: user.lastName,
@@ -161,12 +130,12 @@ export default function AccountInfo({ userId, storeId }: AccountInfoProps) {
             user_image: base64Image,
           };
 
-          if (!user.userId) {
+          if (!user.users_id) {
             console.error('User ID is missing.');
             return;
           }
 
-          const response = await axios.put(`http://localhost:8080/api/users/${user.userId}`, updatedUser, {
+          const response = await axios.put(`http://localhost:8080/api/users/${user.users_id}`, updatedUser, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
@@ -176,7 +145,7 @@ export default function AccountInfo({ userId, storeId }: AccountInfoProps) {
             setUser((prev) => ({
               ...prev,
               profilePictureUrl: base64Image,
-              birthday: dayjs(formattedBirthday),
+              birthday: dayjs(formattedBirthday), // อัพเดทค่า birthday ใน state ให้ถูกต้อง
             }));
             setPreviewUrl(null);
             setSelectedFile(null);
@@ -232,31 +201,18 @@ export default function AccountInfo({ userId, storeId }: AccountInfoProps) {
             <Typography variant="h5">
               {user.firstName} {user.lastName}
             </Typography>
-            {user.userType === 'store' ? (
-              <>
-                <Typography color="text.secondary" variant="body2">
-                  เบอร์โทรศัพท์ : {user.phoneNumber}
-                </Typography>
-                <Typography color="text.secondary" variant="body2">
-                  ที่อยู่ : {user.storeAddress}
-                </Typography>
-              </>
-            ) : (
-              <>
-                <Typography color="text.secondary" variant="body2">
-                  อีเมล : {user.email}
-                </Typography>
-                <Typography color="text.secondary" variant="body2">
-                  เบอร์โทรศัพท์ : {user.phoneNumber}
-                </Typography>
-                <Typography color="text.secondary" variant="body2">
-                  วันเกิด : {user.birthday ? formatDate(user.birthday) : 'ไม่ระบุวันเกิด'}
-                </Typography>
-                <Typography color="text.secondary" variant="body2">
-                  เพศ : {user.gender}
-                </Typography>
-              </>
-            )}
+            <Typography color="text.secondary" variant="body2">
+              อีเมล : {user.email}
+            </Typography>
+            <Typography color="text.secondary" variant="body2">
+              เบอร์โทรศัพท์ : {user.phoneNumber} {/* แก้ไขชื่อคุณสมบัติ */}
+            </Typography>
+            <Typography color="text.secondary" variant="body2">
+              วันเกิด : {user.birthday ? formatDate(user.birthday) : 'ไม่ระบุวันเกิด'} {/* แก้ไขเพื่อแปลง Dayjs เป็น string */}
+            </Typography>
+            <Typography color="text.secondary" variant="body2">
+              เพศ : {user.gender}
+            </Typography>
           </Stack>
         </Stack>
         {previewUrl && (
