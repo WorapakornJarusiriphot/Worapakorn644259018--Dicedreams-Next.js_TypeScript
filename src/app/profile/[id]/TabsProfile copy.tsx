@@ -10,7 +10,6 @@ import PostActivity from '@/components/post-activity-id/PostActivity'
 
 interface TabsProfileProps {
   userId: string;
-  storeId: string; // เพิ่ม storeId ที่นี่
 }
 
 interface TabPanelProps {
@@ -46,7 +45,7 @@ function a11yProps(index: number) {
   };
 }
 
-export default function TabsProfile({ userId, storeId }: TabsProfileProps) { // เพิ่ม storeId ที่นี่
+export default function TabsProfile({ userId }: TabsProfileProps) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -59,14 +58,19 @@ export default function TabsProfile({ userId, storeId }: TabsProfileProps) { // 
         <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
           <Tab label="โพสต์" {...a11yProps(0)} />
           <Tab label="ประวัติการเข้าร่วม" {...a11yProps(1)} />
+          <Tab label="แก้ไขโปรไฟล์" {...a11yProps(2)} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-        <PostActivity storeId={storeId} /> {/* ใช้ storeId ที่นี่ */}
+        <PostActivity userId={userId} />
         <PostGames userId={userId} />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
         <Participating userId={userId} />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={2}>
+        {/* แทนที่ข้อความด้วยคอมโพเนนต์ AccountDetailsForm */}
+        <AccountDetailsForm />
       </CustomTabPanel>
     </Box>
   );

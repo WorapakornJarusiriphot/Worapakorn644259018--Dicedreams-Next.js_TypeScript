@@ -18,8 +18,6 @@ router.get("/:id",[passportJWT.isLogin,authentication.isUser], participateContro
 // Retrieve all participates by post_games_id
 router.get("/post/:id",[passportJWT.isLogin,authentication.isUser], participateController.findAllByPostGamesId);
 
-// In router file, add this route
-router.get("/user/:userId", [passportJWT.isLogin, authentication.isUser], participateController.findAllByUserId);
 
 // Update a participate with id
 router.put("/:id",[passportJWT.isLogin,authentication.isUser], participateController.update);

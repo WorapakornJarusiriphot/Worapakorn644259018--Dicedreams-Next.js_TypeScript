@@ -261,7 +261,7 @@ exports.findAllByPostGamesId = async (req, res, next) => {
 
 // Retrieve all Participates by user_id
 exports.findAllByUserId = async (req, res, next) => {
-  const user_id = req.params.userId; // Change req.params.id to req.params.userId
+  const user_id = req.params.id;
   try {
     const data = await Participate.findAll({
       where: { user_id: user_id },

@@ -39,10 +39,58 @@ import { JwtPayload } from "jwt-decode";
 
 import { useEffect, useState } from "react";
 
-const Participating = ({ userId }) => {
+// const items = [
+//   {
+//     id: 1,
+//     date: "วันอาทิตย์ที่ 21 กุมภาพันธ์  พ.ศ. 2566",
+//     date_meet: "วันอาทิตย์ที่ 24 มีนาคม  พ.ศ. 2566",
+//     time_meet: "14:00 น.",
+//     user: "วรปกร จารุศิริพจน์",
+//     title: "Werewolf",
+//     description: "เอา Werewolf ตัวเสริมมาด้วยก็ดีนะ เพราะเรามีแค่ตัวหลัก",
+//     num_people: 5,
+//     participant: 1,
+//     image:
+//       "https://promotions.co.th/wp-content/uploads/2018/06/Lazada-Boardgame-2.jpg",
+//     profile:
+//       "https://scontent.fkdt3-1.fna.fbcdn.net/v/t1.6435-1/128520468_708312693415305_7662898639450323422_n.jpg?stp=cp0_dst-jpg_p40x40&_nc_cat=102&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeEvGCGsdcArxffFEo_CTsIpevnKI8_KTQd6-cojz8pNB_RFB8aAFgtrdC7tmNreCahg44tkLiiF9vuCBD2S08Ga&_nc_ohc=Uw6hP78zOX8Ab7yzKhn&_nc_ht=scontent.fkdt3-1.fna&oh=00_AfD0jl3Q2NBLvhHUH6x2YPsK1-ceW-HjDuvEBfVdhg03Kw&oe=66548C26",
+//   },
+//   {
+//     id: 2,
+//     date: "วันอาทิตย์ที่ 22 กุมภาพันธ์  พ.ศ. 2566",
+//     date_meet: "วันอาทิตย์ที่ 31 มีนาคม  พ.ศ. 2566",
+//     time_meet: "15:00 น.",
+//     user: "ณัฐวุฒิ แก้วมหา",
+//     title: "ซาเลม 1692",
+//     description: "เอา ซาเลม 1692 ตัวเสริมมาด้วยก็ดีนะ เพราะเรามีแค่ตัวหลัก",
+//     num_people: 5,
+//     participant: 1,
+//     image: "https://live.staticflickr.com/65535/49262314468_e307bd2a55_b.jpg",
+//     profile:
+//       "https://scontent.fkdt3-1.fna.fbcdn.net/v/t1.6435-9/64302371_2291674051160875_4818937659546140672_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeHF4xk0-rddhfIOGu4A6ETaMhraglDnixIyGtqCUOeLEkoQnYryeJa9YPA-E8HzB9-nuCR5wGZLAxZhEO_qTdBB&_nc_ohc=Ppnix1PQWx8Q7kNvgFqzbpa&_nc_ht=scontent.fkdt3-1.fna&oh=00_AfCSiyasCgBQsH6Xmg0ziOu_tBrRCrYSdY0q5dai1ocNHQ&oe=6654AB75",
+//   },
+//   {
+//     id: 3,
+//     date: "วันอาทิตย์ที่ 23 กุมภาพันธ์  พ.ศ. 2566",
+//     date_meet: "วันอาทิตย์ที่ 7 เมษายน  พ.ศ. 2566",
+//     time_meet: "16:00 น.",
+//     user: "นวพร บุญก่อน",
+//     title: "Spyfall",
+//     description: "เอา Spyfall ตัวเสริมมาด้วยก็ดีนะ เพราะเรามีแค่ตัวหลัก",
+//     num_people: 5,
+//     participant: 1,
+//     image:
+//       "https://whatsericplaying.files.wordpress.com/2016/01/spyfall-006.jpg?w=1180",
+//     profile:
+//       "https://scontent.fkdt3-1.fna.fbcdn.net/v/t1.6435-9/69261198_442076069735088_3232231141012406272_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeHFaL86TpC1_vVNPWG1a9sA8ifm7PFiOUjyJ-bs8WI5SPf7tix49NIxmVDJWLnsGeLTePhvqTBajsbKjgIVq6Ar&_nc_ohc=d6YjEwdNkRgQ7kNvgHqfUje&_nc_ht=scontent.fkdt3-1.fna&oh=00_AfAvG3bUk9BKuYKdGhXnNoglRZid_wtaaqu-a_ICL2EOeQ&oe=6654B669",
+//   },
+// ];
+
+function Participating() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [userId, setUserId] = useState("");
 
   useEffect(() => {
     async function fetchData() {
@@ -53,9 +101,12 @@ const Participating = ({ userId }) => {
         return;
       }
 
+      const decoded = jwtDecode(accessToken);
+      setUserId(decoded.users_id);
+
       try {
         const participantsResponse = await fetch(
-          `http://localhost:8080/api/participate/user/${userId}`,
+          `http://localhost:8080/api/participate`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -67,7 +118,10 @@ const Participating = ({ userId }) => {
           throw new Error("Failed to fetch participants");
         const participants = await participantsResponse.json();
 
-        const postPromises = participants.map(async (participation) => {
+        const myParticipations = participants.filter(
+          (part) => part.user_id === decoded.users_id
+        );
+        const postPromises = myParticipations.map(async (participation) => {
           const postResponse = await fetch(
             `http://localhost:8080/api/postGame/${participation.post_games_id}`,
             {
@@ -79,6 +133,8 @@ const Participating = ({ userId }) => {
           );
           if (!postResponse.ok) throw new Error("Failed to fetch post");
           const post = await postResponse.json();
+
+          console.log("Post data:", post);
 
           if (!post.users_id) {
             console.error("Post does not have users_id", post);
@@ -99,7 +155,7 @@ const Participating = ({ userId }) => {
 
           return {
             ...post,
-            participants: participants.filter(
+            participants: myParticipations.filter(
               (p) => p.post_games_id === post.post_games_id
             ).length,
             userProfileImage: user.user_image,
@@ -119,7 +175,7 @@ const Participating = ({ userId }) => {
     }
 
     fetchData();
-  }, [userId]);
+  }, []);
 
   if (loading)
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;

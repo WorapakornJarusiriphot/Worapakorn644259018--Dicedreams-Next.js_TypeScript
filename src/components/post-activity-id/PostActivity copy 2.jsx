@@ -1,12 +1,36 @@
 "use client";
 
-import { Grid, Typography, Box, Button, IconButton } from "@mui/material";
-import CommentIcon from "@mui/icons-material/Comment"; // สำหรับปุ่มพูดคุย
-import LoginIcon from "@mui/icons-material/Login"; // สำหรับปุ่มเข้าสู่ระบบ
+import {
+  Container,
+  Grid,
+  Paper,
+  TextField,
+  Button,
+  Typography,
+  Checkbox,
+  FormControlLabel,
+  Box,
+  RadioGroup,
+  Radio,
+} from "@mui/material";
+import ImageIcon from "@mui/icons-material/Image";
+import InputLabel from "@mui/material/InputLabel";
+import InputAdornment from "@mui/material/InputAdornment";
+import FormHelperText from "@mui/material/FormHelperText";
+import FormControl from "@mui/material/FormControl";
+import SearchIcon from "@mui/icons-material/Search";
+import CommentIcon from "@mui/icons-material/Comment";
+import LoginIcon from "@mui/icons-material/Login";
+import * as React from "react";
+import InputBase from "@mui/material/InputBase";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import DirectionsIcon from "@mui/icons-material/Directions";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import { useEffect, useState } from "react";
 import { format, parseISO, isBefore, isValid } from "date-fns";
 import { th } from "date-fns/locale";
 
@@ -45,7 +69,8 @@ const isPastDateTime = (date, time) => {
   return isBefore(eventDate, new Date());
 };
 
-const PostActivity = ({ storeId }) => {
+
+const PostActivity = ({ userId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -56,80 +81,133 @@ const PostActivity = ({ storeId }) => {
       const accessToken = localStorage.getItem("access_token");
 
       try {
-        const postsResponse = await fetch(
-          `http://localhost:8080/api/postActivity/store/${storeId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (!postsResponse.ok) throw new Error("Failed to fetch posts");
-        const postsData = await postsResponse.json();
-
-        const storesResponse = await fetch(
-          `http://localhost:8080/api/store/${storeId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (!storesResponse.ok) throw new Error("Failed to fetch store");
-        const storeData = await storesResponse.json();
-
-        const postsWithStores = postsData
-          .filter((post) => post.status_post !== "unActive")
-          .map((post) => {
-            const postStore = storeData;
-
-            const rawCreationDate = parseISO(post.creation_date);
-            if (!isValid(rawCreationDate)) {
-              console.error("Invalid date format:", post.creation_date);
+        if (accessToken) {
+          const decoded = jwtDecode(accessToken);
+          
+          const postsResponse = await fetch(
+            `http://localhost:8080/api/postActivity/store/${decoded.store_id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
             }
+          );
+          if (!postsResponse.ok) throw new Error("Failed to fetch posts");
+          const postsData = await postsResponse.json();
 
-            const isPast = isPastDateTime(
-              post.date_activity,
-              post.time_activity
-            );
+          const storesResponse = await fetch(
+            `http://localhost:8080/api/store/${decoded.store_id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          if (!storesResponse.ok) throw new Error("Failed to fetch store");
+          const storeData = await storesResponse.json(); // คาดว่าข้อมูลนี้เป็น Object
 
-            return {
-              ...post,
-              userFirstName: postStore ? postStore.name_store : "Unknown",
-              userProfileImage: postStore
-                ? postStore.store_image.replace("http}", "http") // แก้ไข URL ของรูปภาพให้ถูกต้อง
-                : "/images/default-profile.png",
-              rawCreationDate: rawCreationDate,
-              creation_date: formatDateTime(post.creation_date),
-              date_activity: formatThaiDate(post.date_activity),
-              time_activity: formatThaiTime(post.time_activity),
-              isPast: isPast,
-            };
+          const postsWithStores = postsData
+            .filter((post) => post.status_post !== "unActive")
+            .map((post) => {
+              const postStore = storeData; // ใช้ storeData แทน storesData.find
+
+              const rawCreationDate = parseISO(post.creation_date);
+              if (!isValid(rawCreationDate)) {
+                console.error("Invalid date format:", post.creation_date);
+              }
+
+              const isPast = isPastDateTime(
+                post.date_activity,
+                post.time_activity
+              );
+
+              return {
+                ...post,
+                userFirstName: postStore ? postStore.name_store : "Unknown",
+                userProfileImage: postStore
+                  ? postStore.store_image.replace("http}", "http") // แก้ไข URL ของรูปภาพให้ถูกต้อง
+                  : "/images/default-profile.png",
+                rawCreationDate: rawCreationDate,
+                creation_date: formatDateTime(post.creation_date),
+                date_activity: formatThaiDate(post.date_activity),
+                time_activity: formatThaiTime(post.time_activity),
+                isPast: isPast,
+              };
+            });
+
+          const sortedPosts = postsWithStores.sort((a, b) => {
+            if (a.isPast && !b.isPast) return 1;
+            if (!a.isPast && b.isPast) return -1;
+            return b.rawCreationDate - a.rawCreationDate;
           });
 
-        const sortedPosts = postsWithStores.sort((a, b) => {
-          if (a.isPast && !b.isPast) return 1;
-          if (!a.isPast && b.isPast) return -1;
-          return b.rawCreationDate - a.rawCreationDate;
-        });
+          setItems(sortedPosts);
+        } else {
+          const postsResponse = await fetch(
+            `http://localhost:8080/api/postActivity`
+          );
+          if (!postsResponse.ok) throw new Error("Failed to fetch posts");
+          const postsData = await postsResponse.json();
 
-        setItems(sortedPosts);
+          const storesResponse = await fetch(`http://localhost:8080/api/store`);
+          if (!storesResponse.ok) throw new Error("Failed to fetch stores");
+          const storesData = await storesResponse.json();
+
+          const postsWithStores = postsData
+            .filter((post) => post.status_post !== "unActive")
+            .map((post) => {
+              const postStore = storesData.find(
+                (store) => store.store_id === post.store_id
+              );
+
+              const rawCreationDate = parseISO(post.creation_date);
+              if (!isValid(rawCreationDate)) {
+                console.error("Invalid date format:", post.creation_date);
+              }
+
+              const isPast = isPastDateTime(
+                post.date_activity,
+                post.time_activity
+              );
+
+              return {
+                ...post,
+                userFirstName: postStore ? postStore.name_store : "Unknown",
+                userProfileImage: postStore
+                  ? postStore.store_image.replace("http}", "http:") // แก้ไข URL ของรูปภาพให้ถูกต้อง
+                  : "/images/default-profile.png",
+                rawCreationDate: rawCreationDate,
+                creation_date: formatDateTime(post.creation_date),
+                date_activity: formatThaiDate(post.date_activity),
+                time_activity: formatThaiTime(post.time_activity),
+                isPast: isPast,
+              };
+            });
+
+          const sortedPosts = postsWithStores.sort((a, b) => {
+            if (a.isPast && !b.isPast) return 1;
+            if (!a.isPast && b.isPast) return -1;
+            return b.rawCreationDate - a.rawCreationDate;
+          });
+
+          setItems(sortedPosts);
+        }
       } catch (error) {
         console.error("Failed to load data: " + error.message);
-        setError(error.message);
       } finally {
         setLoading(false);
       }
     };
 
     fetchUserAndPosts();
-  }, [storeId]);
+  }, [userId]);
 
   if (loading)
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
-  if (error) return <Typography sx={{ color: "white" }}>{error}</Typography>;
+  // ไม่แสดงผลข้อผิดพลาดให้ผู้ใช้เห็น
+  // if (error) return <Typography sx={{ color: "white" }}>{error}</Typography>;
 
   return (
     <div>
@@ -243,7 +321,7 @@ const PostActivity = ({ storeId }) => {
           </Box>
         ))
       ) : (
-        <Typography sx={{ color: "white" }}>ไม่พบโพสต์กิจกรรม</Typography>
+        <Typography sx={{ color: "white" }}></Typography>
       )}
     </div>
   );

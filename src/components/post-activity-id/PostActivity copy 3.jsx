@@ -1,12 +1,36 @@
 "use client";
 
-import { Grid, Typography, Box, Button, IconButton } from "@mui/material";
-import CommentIcon from "@mui/icons-material/Comment"; // สำหรับปุ่มพูดคุย
-import LoginIcon from "@mui/icons-material/Login"; // สำหรับปุ่มเข้าสู่ระบบ
+import {
+  Container,
+  Grid,
+  Paper,
+  TextField,
+  Button,
+  Typography,
+  Checkbox,
+  FormControlLabel,
+  Box,
+  RadioGroup,
+  Radio,
+} from "@mui/material";
+import ImageIcon from "@mui/icons-material/Image";
+import InputLabel from "@mui/material/InputLabel";
+import InputAdornment from "@mui/material/InputAdornment";
+import FormHelperText from "@mui/material/FormHelperText";
+import FormControl from "@mui/material/FormControl";
+import SearchIcon from "@mui/icons-material/Search";
+import CommentIcon from "@mui/icons-material/Comment";
+import LoginIcon from "@mui/icons-material/Login";
+import * as React from "react";
+import InputBase from "@mui/material/InputBase";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import DirectionsIcon from "@mui/icons-material/Directions";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import { useEffect, useState } from "react";
 import { format, parseISO, isBefore, isValid } from "date-fns";
 import { th } from "date-fns/locale";
 
@@ -45,7 +69,7 @@ const isPastDateTime = (date, time) => {
   return isBefore(eventDate, new Date());
 };
 
-const PostActivity = ({ storeId }) => {
+const PostActivity = ({ userId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -57,7 +81,7 @@ const PostActivity = ({ storeId }) => {
 
       try {
         const postsResponse = await fetch(
-          `http://localhost:8080/api/postActivity/store/${storeId}`,
+          `http://localhost:8080/api/postActivity/store/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -69,7 +93,7 @@ const PostActivity = ({ storeId }) => {
         const postsData = await postsResponse.json();
 
         const storesResponse = await fetch(
-          `http://localhost:8080/api/store/${storeId}`,
+          `http://localhost:8080/api/store/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -78,12 +102,12 @@ const PostActivity = ({ storeId }) => {
           }
         );
         if (!storesResponse.ok) throw new Error("Failed to fetch store");
-        const storeData = await storesResponse.json();
+        const storeData = await storesResponse.json(); // คาดว่าข้อมูลนี้เป็น Object
 
         const postsWithStores = postsData
           .filter((post) => post.status_post !== "unActive")
           .map((post) => {
-            const postStore = storeData;
+            const postStore = storeData; // ใช้ storeData แทน storesData.find
 
             const rawCreationDate = parseISO(post.creation_date);
             if (!isValid(rawCreationDate)) {
@@ -125,7 +149,7 @@ const PostActivity = ({ storeId }) => {
     };
 
     fetchUserAndPosts();
-  }, [storeId]);
+  }, [userId]);
 
   if (loading)
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
@@ -247,6 +271,6 @@ const PostActivity = ({ storeId }) => {
       )}
     </div>
   );
-}
+};
 
 export default PostActivity;

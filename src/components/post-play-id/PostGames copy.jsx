@@ -19,8 +19,8 @@ import InputAdornment from "@mui/material/InputAdornment";
 import FormHelperText from "@mui/material/FormHelperText";
 import FormControl from "@mui/material/FormControl";
 import SearchIcon from "@mui/icons-material/Search";
-import CommentIcon from "@mui/icons-material/Comment";
-import LoginIcon from "@mui/icons-material/Login";
+import CommentIcon from "@mui/icons-material/Comment"; // สำหรับปุ่มพูดคุย
+import LoginIcon from "@mui/icons-material/Login"; // สำหรับปุ่มเข้าสู่ระบบ
 import * as React from "react";
 import InputBase from "@mui/material/InputBase";
 import Divider from "@mui/material/Divider";
@@ -29,8 +29,16 @@ import MenuIcon from "@mui/icons-material/Menu";
 import DirectionsIcon from "@mui/icons-material/Directions";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import Image from "next/image";
+
+// import jwtDecode from 'jwt-decode';
 import { jwtDecode } from "jwt-decode";
+// import { JwtPayload } from 'jsonwebtoken';
+import { JwtPayload } from "jwt-decode";
+
+// import { useRouter } from "next/navigator";
+
 import { useEffect, useState } from "react";
+
 import { format, parseISO, compareDesc } from "date-fns";
 import { th } from "date-fns/locale";
 
@@ -80,8 +88,10 @@ const PostGames = ({ userId }) => {
       }
 
       try {
+        const decoded = jwtDecode(accessToken);
+
         const userResponse = await fetch(
-          `http://localhost:8080/api/users/${userId}`,
+          `http://localhost:8080/api/users/${decoded.users_id}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -93,7 +103,7 @@ const PostGames = ({ userId }) => {
         const userData = await userResponse.json();
 
         const postsResponse = await fetch(
-          `http://localhost:8080/api/postGame/user/${userId}`,
+          `http://localhost:8080/api/postGame/user/${decoded.users_id}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -327,7 +337,9 @@ const PostGames = ({ userId }) => {
         </Box>
       ))}
       {items.length === 0 && (
-        <Typography sx={{ color: "white" }}>ไม่พบโพสต์ที่คุณเคยโพสต์</Typography>
+        <Typography sx={{ color: "white" }}>
+          ไม่พบโพสต์ที่คุณเคยโพสต์
+        </Typography>
       )}
     </div>
   );
