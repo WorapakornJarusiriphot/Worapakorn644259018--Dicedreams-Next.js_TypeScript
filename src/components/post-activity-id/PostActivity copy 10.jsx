@@ -13,7 +13,7 @@ import { th } from "date-fns/locale";
 import { useRouter, useParams } from "next/navigation";
 import axios from "axios";
 import dayjs from "dayjs";
-import PropTypes from 'prop-types';
+
 
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
@@ -269,10 +269,6 @@ const PostActivity = () => {
       )}
     </div>
   );
-};
-
-PostActivity.propTypes = {
-  storeId: PropTypes.string.isRequired,
 };
 
 export default PostActivity;

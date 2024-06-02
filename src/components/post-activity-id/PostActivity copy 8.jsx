@@ -10,11 +10,6 @@ import { jwtDecode } from "jwt-decode";
 import { format, parseISO, isBefore, isValid } from "date-fns";
 import { th } from "date-fns/locale";
 
-import { useRouter, useParams } from "next/navigation";
-import axios from "axios";
-import dayjs from "dayjs";
-import PropTypes from 'prop-types';
-
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
   if (!isValid(date)) return "วันที่ไม่ถูกต้อง";
@@ -50,9 +45,7 @@ const isPastDateTime = (date, time) => {
   return isBefore(eventDate, new Date());
 };
 
-const PostActivity = () => {
-  const router = useRouter();
-  const { id: storeId } = useParams();
+const PostActivity = ({ storeId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -269,10 +262,6 @@ const PostActivity = () => {
       )}
     </div>
   );
-};
-
-PostActivity.propTypes = {
-  storeId: PropTypes.string.isRequired,
 };
 
 export default PostActivity;

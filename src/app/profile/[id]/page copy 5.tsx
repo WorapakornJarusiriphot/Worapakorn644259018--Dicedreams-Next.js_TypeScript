@@ -9,6 +9,7 @@ import TabsProfile from './TabsProfile';
 import { UserProvider } from '@/components/dashboard/account-id/UserContext';
 import AccountInfo from '@/components/dashboard/account-id/account-info';
 
+// กำหนดธีมสีเข้ม
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
@@ -45,8 +46,8 @@ const darkTheme = createTheme({
 
 export default function ProfileID() {
   const params = useParams();
-  const id = params?.id as string;
-  const storeId = params?.storeId as string;
+  const id = params?.id as string; // กำหนดชนิดข้อมูลให้กับ id
+  const storeId = params?.storeId as string; // เพิ่มการดึง storeId จาก params
 
   return (
     <>
@@ -59,11 +60,11 @@ export default function ProfileID() {
           <Stack spacing={3}>
             <Grid container spacing={3}>
               <Grid xs={12}>
-                <AccountInfo userId={id} storeId={storeId} />
+                <AccountInfo userId={id} storeId={storeId} /> {/* ส่ง userId และ storeId ไปที่ AccountInfo */}
               </Grid>
 
               <Grid xs={12}>
-                <TabsProfile userId={id} storeId={storeId} />
+                <TabsProfile userId={id} storeId={storeId} /> {/* ส่ง storeId ไปที่ TabsProfile */}
               </Grid>
             </Grid>
           </Stack>

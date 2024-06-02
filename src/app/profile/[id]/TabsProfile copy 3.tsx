@@ -3,13 +3,14 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import AccountDetailsForm from '@/components/dashboard/account-id/account-details-form';
 import PostGames from '@/components/post-play-id/PostGames';
-import Participating from '@/components/participating-id/Participating';
-import PostActivity from '@/components/post-activity-id/PostActivity';
+import Participating from '@/components/participating-id/Participating'
+import PostActivity from '@/components/post-activity-id/PostActivity'
 
 interface TabsProfileProps {
   userId: string;
-  storeId: string;
+  storeId: string; // เพิ่ม storeId ที่นี่
 }
 
 interface TabPanelProps {
@@ -45,7 +46,7 @@ function a11yProps(index: number) {
   };
 }
 
-export default function TabsProfile({ userId, storeId }: TabsProfileProps) {
+export default function TabsProfile({ userId, storeId }: TabsProfileProps) { // เพิ่ม storeId ที่นี่
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {

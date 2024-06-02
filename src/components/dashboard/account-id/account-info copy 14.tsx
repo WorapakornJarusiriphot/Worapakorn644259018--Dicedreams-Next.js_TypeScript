@@ -15,28 +15,10 @@ import axios from 'axios';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import dayjs, { Dayjs } from 'dayjs';
-// import { JwtPayload } from 'jsonwebtoken';
-import { JwtPayload } from 'jwt-decode';
 
 interface AccountInfoProps {
   userId?: string;
   storeId?: string;
-}
-
-interface User {
-  userType: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  gender: string;
-  phoneNumber: string;
-  birthday: Dayjs | null;
-  userId: string;
-  profilePictureUrl: string;
-  storeAddress: string;
-  username: string;
-  users_id: string;
-  userImage: string;
 }
 
 export default function AccountInfo({ userId, storeId }: AccountInfoProps) {
