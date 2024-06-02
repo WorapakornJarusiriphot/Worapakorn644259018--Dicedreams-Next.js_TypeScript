@@ -10,7 +10,6 @@ import PostActivity from '@/components/post-activity-id/PostActivity'
 
 interface TabsProfileProps {
   userId: string;
-  storeId: string; // เพิ่ม storeId ที่นี่
 }
 
 interface TabPanelProps {
@@ -62,7 +61,7 @@ export default function TabsProfile({ userId, storeId }: TabsProfileProps) { // 
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-        <PostActivity storeId={storeId} /> {/* ใช้ storeId ที่นี่ */}
+        <PostActivity storeId={storeId} />
         <PostGames userId={userId} />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>

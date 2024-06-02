@@ -51,7 +51,7 @@ const PostActivity = ({ storeId }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchUserAndPosts = async () => {
+    const fetchStorePosts = async () => {
       setLoading(true);
       const accessToken = localStorage.getItem("access_token");
 
@@ -78,12 +78,12 @@ const PostActivity = ({ storeId }) => {
           }
         );
         if (!storesResponse.ok) throw new Error("Failed to fetch store");
-        const storeData = await storesResponse.json();
+        const storeData = await storesResponse.json(); // คาดว่าข้อมูลนี้เป็น Object
 
         const postsWithStores = postsData
           .filter((post) => post.status_post !== "unActive")
           .map((post) => {
-            const postStore = storeData;
+            const postStore = storeData; // ใช้ storeData แทน storesData.find
 
             const rawCreationDate = parseISO(post.creation_date);
             if (!isValid(rawCreationDate)) {
@@ -124,7 +124,7 @@ const PostActivity = ({ storeId }) => {
       }
     };
 
-    fetchUserAndPosts();
+    fetchStorePosts();
   }, [storeId]);
 
   if (loading)
@@ -247,6 +247,6 @@ const PostActivity = ({ storeId }) => {
       )}
     </div>
   );
-}
+};
 
 export default PostActivity;

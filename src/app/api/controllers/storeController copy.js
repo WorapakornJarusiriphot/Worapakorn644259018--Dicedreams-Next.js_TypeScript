@@ -72,21 +72,16 @@ exports.findOne = (req, res) => {
 
   Store.findByPk(id)
     .then((data) => {
-      if (data) {
-        if (data.store_image) {
-          data.store_image = `${req.protocol}://${req.get("host")}/images/${data.store_image}`;
-        }
-        res.status(200).json(data);
-      } else {
-        res.status(404).send({
-          message: `Cannot find Store with id=${id}.`
-        });
+      if (data.store_image) {
+        data.store_image = `${req.protocol}}://${req.get("host")}/images/${
+          data.store_image
+        }`;
       }
+      res.status(200).json(data);
     })
-    .catch((err) => {
-      console.error("Error retrieving Store with id=", id, "error:", err);
-      res.status(500).send({
-        message: "Error retrieving Store with id=" + id
+    .catch((error) => {
+      res.status(500).json({
+        message: "Error retrieving Store with id=" + id,
       });
     });
 };

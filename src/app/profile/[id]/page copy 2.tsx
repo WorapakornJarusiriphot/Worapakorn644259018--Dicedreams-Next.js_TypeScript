@@ -76,7 +76,6 @@ const darkTheme = createTheme({
 export default function ProfileID() {
   const params = useParams();
   const id = params?.id as string; // กำหนดชนิดข้อมูลให้กับ id
-  const storeId = params?.storeId as string; // เพิ่มการดึง storeId จาก params
 
   return (
     <>
@@ -93,11 +92,11 @@ export default function ProfileID() {
             <Grid container spacing={3}>
               {/* <Grid lg={4} md={6} xs={12}> */}
               <Grid xs={12}>
-                <AccountInfo userId={id} storeId={storeId} /> {/* ส่ง userId และ storeId ไปที่ AccountInfo */}
+                <AccountInfo userId={id} /> {/* ส่ง userId ไปที่ AccountInfo */}
               </Grid>
 
               <Grid xs={12}>
-                <TabsProfile userId={id} storeId={storeId} /> {/* ส่ง storeId ไปที่ TabsProfile */}
+                <TabsProfile userId={id} /> {/* ส่ง userId ไปที่ TabsProfile */}
               </Grid>
 
               {/* <Grid lg={8} md={6} xs={12}> */}

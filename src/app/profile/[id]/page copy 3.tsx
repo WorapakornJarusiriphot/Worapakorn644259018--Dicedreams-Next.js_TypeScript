@@ -93,7 +93,7 @@ export default function ProfileID() {
             <Grid container spacing={3}>
               {/* <Grid lg={4} md={6} xs={12}> */}
               <Grid xs={12}>
-                <AccountInfo userId={id} storeId={storeId} /> {/* ส่ง userId และ storeId ไปที่ AccountInfo */}
+                <AccountInfo userId={id} /> {/* ส่ง userId ไปที่ AccountInfo */}
               </Grid>
 
               <Grid xs={12}>
