@@ -54,19 +54,8 @@ export default function ProfileID() {
 
   React.useEffect(() => {
     const checkId = async () => {
-      const token = localStorage.getItem('access_token'); // เพิ่มการดึง token จาก localStorage
-      if (!token) {
-        console.error('No access token found');
-        setIsStoreId(false);
-        return;
-      }
-
       try {
-        const response = await fetch(`http://localhost:8080/api/store/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`, // เพิ่ม header สำหรับ token
-          },
-        });
+        const response = await fetch(`http://localhost:8080/api/store/${id}`);
         console.log("API response status:", response.status); // แสดงสถานะของการตอบกลับ API
         if (!response.ok) {
           throw new Error(`HTTP status ${response.status}`);

@@ -7,8 +7,8 @@ import PostGames from '@/components/post-play-id/PostGames';
 import Participating from '@/components/participating-id/Participating';
 import PostActivity from '@/components/post-activity-id/PostActivity';
 
-interface TabsProfileProps {
-  userId: string;
+interface TabsProfileStoreProps {
+  storeId: string;
 }
 
 interface TabPanelProps {
@@ -44,7 +44,7 @@ function a11yProps(index: number) {
   };
 }
 
-export default function TabsProfile({ userId }: TabsProfileProps) {
+export default function TabsProfileStore({ storeId }: TabsProfileStoreProps) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -56,14 +56,10 @@ export default function TabsProfile({ userId }: TabsProfileProps) {
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
           <Tab label="โพสต์" {...a11yProps(0)} />
-          <Tab label="ประวัติการเข้าร่วม" {...a11yProps(1)} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-        <PostGames userId={userId} />
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={1}>
-        <Participating userId={userId} />
+        <PostActivity storeId={storeId} />
       </CustomTabPanel>
     </Box>
   );
