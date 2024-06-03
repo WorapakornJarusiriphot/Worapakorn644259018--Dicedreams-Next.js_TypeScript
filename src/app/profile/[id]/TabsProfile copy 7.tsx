@@ -9,6 +9,7 @@ import PostActivity from '@/components/post-activity-id/PostActivity';
 
 interface TabsProfileProps {
   userId: string;
+  storeId: string;
 }
 
 interface TabPanelProps {
@@ -44,7 +45,7 @@ function a11yProps(index: number) {
   };
 }
 
-export default function TabsProfile({ userId }: TabsProfileProps) {
+export default function TabsProfile({ userId, storeId }: TabsProfileProps) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -60,6 +61,7 @@ export default function TabsProfile({ userId }: TabsProfileProps) {
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
+        {/* <PostActivity storeId={storeId} /> */}
         <PostGames userId={userId} />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>

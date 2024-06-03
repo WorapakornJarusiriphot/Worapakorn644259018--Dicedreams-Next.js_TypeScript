@@ -50,40 +50,17 @@ export default function ProfileID() {
   const id = params?.id as string;
   const [isStoreId, setIsStoreId] = React.useState<boolean | null>(null);
 
-  console.log("ID received from URL:", id); // แสดงค่า id ที่ได้รับจาก URL
-
   React.useEffect(() => {
     const checkId = async () => {
-      const token = localStorage.getItem('access_token'); // เพิ่มการดึง token จาก localStorage
-      if (!token) {
-        console.error('No access token found');
-        setIsStoreId(false);
-        return;
-      }
-
       try {
-        const response = await fetch(`http://localhost:8080/api/store/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`, // เพิ่ม header สำหรับ token
-          },
-        });
-        console.log("API response status:", response.status); // แสดงสถานะของการตอบกลับ API
-        if (!response.ok) {
-          throw new Error(`HTTP status ${response.status}`);
-        }
-        const data = await response.json();
-        console.log("API response data:", data); // แสดงผลลัพธ์จาก API
-        if (data && data.store_id) {
+        const response = await fetch(`http://localhost:8080/api/store/${id}`);
+        if (response.ok) {
           setIsStoreId(true);
-          console.log("This is a store_id");
         } else {
           setIsStoreId(false);
-          console.log("This is not a store_id");
         }
       } catch (error) {
         setIsStoreId(false);
-        console.log("This is not a store_id");
-        console.error("Error fetching store data:", error);
       }
     };
 
@@ -104,15 +81,15 @@ export default function ProfileID() {
           <br />
           <Stack spacing={3}>
             <Grid container spacing={3}>
-              {isStoreId ? (
-                <>
+              {/* {isStoreId ? (
+                <> */}
                   <Grid xs={12}>
                     <StoreInfo storeId={id} />
                   </Grid>
                   <Grid xs={12}>
                     <TabsProfileStore storeId={id} />
                   </Grid>
-                </>
+                {/* </>
               ) : (
                 <>
                   <Grid xs={12}>
@@ -122,7 +99,7 @@ export default function ProfileID() {
                     <TabsProfile userId={id} />
                   </Grid>
                 </>
-              )}
+              )} */}
             </Grid>
           </Stack>
         </ThemeProvider>

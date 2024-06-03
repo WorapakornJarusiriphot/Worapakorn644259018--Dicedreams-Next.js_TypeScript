@@ -10,6 +10,7 @@ import TabsProfileStore from './TabsProfileStore';
 import { UserProvider } from '@/components/dashboard/account-id/UserContext';
 import AccountInfo from '@/components/dashboard/account-id/account-info';
 import StoreInfo from '@/components/dashboard/account-id/store-info';
+import axios from 'axios';
 
 const darkTheme = createTheme({
   palette: {
@@ -54,26 +55,11 @@ export default function ProfileID() {
 
   React.useEffect(() => {
     const checkId = async () => {
-      const token = localStorage.getItem('access_token'); // เพิ่มการดึง token จาก localStorage
-      if (!token) {
-        console.error('No access token found');
-        setIsStoreId(false);
-        return;
-      }
-
       try {
-        const response = await fetch(`http://localhost:8080/api/store/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`, // เพิ่ม header สำหรับ token
-          },
-        });
-        console.log("API response status:", response.status); // แสดงสถานะของการตอบกลับ API
-        if (!response.ok) {
-          throw new Error(`HTTP status ${response.status}`);
-        }
+        const response = await fetch(`http://localhost:8080/api/store/${id}`);
         const data = await response.json();
         console.log("API response data:", data); // แสดงผลลัพธ์จาก API
-        if (data && data.store_id) {
+        if (response.ok && data.store_id) {
           setIsStoreId(true);
           console.log("This is a store_id");
         } else {

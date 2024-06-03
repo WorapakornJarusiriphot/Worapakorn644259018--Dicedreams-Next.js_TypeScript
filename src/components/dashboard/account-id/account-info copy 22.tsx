@@ -9,23 +9,23 @@ import CardContent from '@mui/material/CardContent';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useRouter } from 'next/navigation'; // แก้ไขจาก next/navigation
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { JwtPayload } from 'jwt-decode';
 import Box from '@mui/material/Box';
 import { useUser } from './UserContext';
 import axios from 'axios';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import dayjs, { Dayjs } from 'dayjs';
-
+import { JwtPayload } from 'jwt-decode';
 
 interface AccountInfoProps {
   userId: string;
+  storeId: string;
 }
 
-export default function AccountInfo({ userId }: AccountInfoProps) {
+export default function AccountInfo({ storeId }: AccountInfoProps) {
   const { user, setUser } = useUser();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -33,6 +33,7 @@ export default function AccountInfo({ userId }: AccountInfoProps) {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertSeverity, setAlertSeverity] = useState<'success' | 'error'>('success');
+  const [storeInfo, setStoreInfo] = useState<any>(null);
   const router = useRouter();
 
   const handleSnackbarClose = () => {
@@ -42,7 +43,7 @@ export default function AccountInfo({ userId }: AccountInfoProps) {
   useEffect(() => {
     const accessToken = localStorage.getItem('access_token');
     if (accessToken) {
-      const decoded: JwtPayload & { users_id: string } = jwtDecode(accessToken);
+      const decoded: JwtPayload & { users_id: string } = jwtDecode<JwtPayload & { users_id: string }>(accessToken);
       if (decoded && decoded.users_id) {
         setUser((prev) => ({
           ...prev,
@@ -54,7 +55,7 @@ export default function AccountInfo({ userId }: AccountInfoProps) {
     }
   }, [setUser]);
 
-  const fetchUserProfile = async (userId: string, accessToken: string, decodedToken: { username: string }) => {
+  const fetchUserProfile = async (userId: string, accessToken: string) => {
     try {
       const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -63,14 +64,12 @@ export default function AccountInfo({ userId }: AccountInfoProps) {
         const data = await response.json();
         setUser((prev) => ({
           ...prev,
-          username: decodedToken.username,
-          userType: data.role,
           firstName: data.first_name,
           lastName: data.last_name,
           email: data.email,
           gender: data.gender,
           phoneNumber: data.phone_number,
-          birthday: dayjs(data.birthday), // แปลงเป็น Dayjs
+          birthday: dayjs(data.birthday),
           userId: data.users_id,
           profilePictureUrl: data.user_image || '',
         }));
@@ -87,13 +86,35 @@ export default function AccountInfo({ userId }: AccountInfoProps) {
     }
   };
 
+  const fetchStoreInfo = async (storeId: string, accessToken: string) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/store/${storeId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setStoreInfo(data);
+        // ดึงข้อมูลผู้ใช้จาก users_id ที่เชื่อมกับ store_id
+        fetchUserProfile(data.users_id, accessToken);
+      } else {
+        console.error(`API Error: ${response.status} ${response.statusText}`);
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Error fetching store info:', error.message);
+      } else {
+        console.error('Error fetching store info:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     const accessToken = localStorage.getItem('access_token');
     if (accessToken) {
-      const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
-      fetchUserProfile(userId, accessToken, decodedToken);
+      fetchStoreInfo(storeId, accessToken);
     }
-  }, [setUser, userId]);
+  }, [setUser, storeId]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -117,7 +138,7 @@ export default function AccountInfo({ userId }: AccountInfoProps) {
         reader.readAsDataURL(selectedFile);
         reader.onload = async () => {
           const base64Image = reader.result as string;
-          const formattedBirthday = user.birthday ? dayjs(user.birthday).format('YYYY-MM-DD') : ''; // แปลงเป็นรูปแบบที่ถูกต้อง
+          const formattedBirthday = user.birthday ? dayjs(user.birthday).format('YYYY-MM-DD') : '';
           const updatedUser = {
             first_name: user.firstName,
             last_name: user.lastName,
@@ -144,7 +165,7 @@ export default function AccountInfo({ userId }: AccountInfoProps) {
             setUser((prev) => ({
               ...prev,
               profilePictureUrl: base64Image,
-              birthday: dayjs(formattedBirthday), // อัพเดทค่า birthday ใน state ให้ถูกต้อง
+              birthday: dayjs(formattedBirthday),
             }));
             setPreviewUrl(null);
             setSelectedFile(null);
@@ -192,8 +213,8 @@ export default function AccountInfo({ userId }: AccountInfoProps) {
       <CardContent>
         <Stack spacing={2} sx={{ alignItems: 'center' }}>
           <div>
-            <Avatar src={previewUrl || user.profilePictureUrl} sx={{ height: '80px', width: '80px' }}>
-              {!previewUrl && !user.profilePictureUrl && `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`}
+            <Avatar src={previewUrl || (storeInfo ? storeInfo.store_image : user.profilePictureUrl)} sx={{ height: '80px', width: '80px' }}>
+              {!previewUrl && !(storeInfo ? storeInfo.store_image : user.profilePictureUrl) && `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`}
             </Avatar>
           </div>
           <Stack spacing={1} sx={{ textAlign: 'center' }}>
@@ -204,10 +225,10 @@ export default function AccountInfo({ userId }: AccountInfoProps) {
               อีเมล : {user.email}
             </Typography>
             <Typography color="text.secondary" variant="body2">
-              เบอร์โทรศัพท์ : {user.phoneNumber} {/* แก้ไขชื่อคุณสมบัติ */}
+              เบอร์โทรศัพท์ : {user.phoneNumber}
             </Typography>
             <Typography color="text.secondary" variant="body2">
-              วันเกิด : {user.birthday ? formatDate(user.birthday) : 'ไม่ระบุวันเกิด'} {/* แก้ไขเพื่อแปลง Dayjs เป็น string */}
+              วันเกิด : {user.birthday ? formatDate(user.birthday) : 'ไม่ระบุวันเกิด'}
             </Typography>
             <Typography color="text.secondary" variant="body2">
               เพศ : {user.gender}
@@ -218,6 +239,23 @@ export default function AccountInfo({ userId }: AccountInfoProps) {
           <Box mt={2} display="flex" justifyContent="center">
             <img src={previewUrl} alt="Preview" style={{ maxHeight: '200px', maxWidth: '100%' }} />
           </Box>
+        )}
+        {storeInfo && (
+          <Stack spacing={2} sx={{ mt: 3 }}>
+            <Typography variant="h6">ข้อมูลร้านค้า</Typography>
+            <Typography color="text.secondary" variant="body2">
+              ชื่อร้าน : {storeInfo.name_store}
+            </Typography>
+            <Typography color="text.secondary" variant="body2">
+              เบอร์โทรร้าน : {storeInfo.phone_number}
+            </Typography>
+            <Typography color="text.secondary" variant="body2">
+              ที่อยู่ : {`${storeInfo.house_number} ${storeInfo.alley} ${storeInfo.road} ${storeInfo.district} ${storeInfo.sub_district} ${storeInfo.province}`}
+            </Typography>
+            <Box display="flex" justifyContent="center">
+              <img src={storeInfo.store_image} alt="Store" style={{ maxHeight: '200px', maxWidth: '100%' }} />
+            </Box>
+          </Stack>
         )}
       </CardContent>
       <Divider />

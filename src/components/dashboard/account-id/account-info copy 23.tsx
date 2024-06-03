@@ -23,9 +23,10 @@ import dayjs, { Dayjs } from 'dayjs';
 
 interface AccountInfoProps {
   userId: string;
+  storeId: string;
 }
 
-export default function AccountInfo({ userId }: AccountInfoProps) {
+export default function AccountInfo({ userId, storeId }: AccountInfoProps) {
   const { user, setUser } = useUser();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
