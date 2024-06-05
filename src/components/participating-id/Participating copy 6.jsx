@@ -39,45 +39,10 @@ import { JwtPayload } from "jwt-decode";
 
 import { useEffect, useState } from "react";
 
-import { format, parseISO, compareDesc } from "date-fns";
-import { th } from "date-fns/locale";
-
-const formatDateTime = (dateString) => {
-  const date = parseISO(dateString);
-  const formattedDate = format(
-    date,
-    "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'",
-    {
-      locale: th,
-    }
-  );
-  return formattedDate;
-};
-
-const formatThaiDate = (dateString) => {
-  const date = parseISO(dateString);
-  const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy", { locale: th });
-  return formattedDate;
-};
-
-const formatThaiTime = (timeString) => {
-  const [hours, minutes] = timeString.split(":");
-  const formattedTime = `เวลา ${hours}.${minutes} น.`;
-  return formattedTime;
-};
-
-const isPastDateTime = (date, time) => {
-  const [hours, minutes] = time.split(":");
-  const eventDate = new Date(date);
-  eventDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
-  return eventDate < new Date();
-};
-
-function Participating() {
+const Participating = ({ userId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userId, setUserId] = useState("");
 
   useEffect(() => {
     async function fetchData() {
@@ -88,13 +53,9 @@ function Participating() {
         return;
       }
 
-      const decoded = jwtDecode(accessToken);
-      const userIdFromUrl = window.location.pathname.split("/").pop();
-      setUserId(userIdFromUrl);
-
       try {
         const participantsResponse = await fetch(
-          `http://localhost:8080/api/participate`,
+          `http://localhost:8080/api/participate/user/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -106,10 +67,7 @@ function Participating() {
           throw new Error("Failed to fetch participants");
         const participants = await participantsResponse.json();
 
-        const myParticipations = participants.filter(
-          (part) => part.user_id === userIdFromUrl
-        );
-        const postPromises = myParticipations.map(async (participation) => {
+        const postPromises = participants.map(async (participation) => {
           const postResponse = await fetch(
             `http://localhost:8080/api/postGame/${participation.post_games_id}`,
             {
@@ -123,6 +81,7 @@ function Participating() {
           const post = await postResponse.json();
 
           if (!post.users_id) {
+            console.error("Post does not have users_id", post);
             throw new Error("Post does not have users_id");
           }
 
@@ -140,39 +99,27 @@ function Participating() {
 
           return {
             ...post,
-            participants: myParticipations.filter(
+            participants: participants.filter(
               (p) => p.post_games_id === post.post_games_id
             ).length,
             userProfileImage: user.user_image,
             userFirstName: user.first_name,
             userLastName: user.last_name,
             hasParticipated: true, // เพิ่มสถานะการเข้าร่วม
-            formattedCreationDate: formatDateTime(post.creation_date),
-            date_meet: post.date_meet,
-            time_meet: post.time_meet,
-            isPast: isPastDateTime(post.date_meet, post.time_meet),
           };
         });
 
         const posts = await Promise.all(postPromises);
-        const sortedPosts = posts.sort((a, b) => {
-          if (a.isPast && !b.isPast) return 1;
-          if (!a.isPast && b.isPast) return -1;
-          return compareDesc(
-            new Date(a.creation_date),
-            new Date(b.creation_date)
-          );
-        });
-
-        setItems(sortedPosts);
+        setItems(posts);
       } catch (error) {
+        console.error("Error fetching data:", error);
         setError(error.message);
       }
       setLoading(false);
     }
 
     fetchData();
-  }, []);
+  }, [userId]);
 
   if (loading)
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
@@ -192,8 +139,8 @@ function Participating() {
             color: "white",
             padding: "16px",
             marginBottom: "16px",
-            backgroundColor: "#121212",
-            zIndex: 0,
+            backgroundColor: "#121212", // Added to match the Figma background
+            zIndex: 0, // กำหนดค่า z-index เพื่อให้การ์ดอยู่เหนือ navbar
           }}
         >
           <Grid
@@ -226,7 +173,7 @@ function Participating() {
                 {`${item.userFirstName} ${item.userLastName}`}
               </Typography>
               <Typography variant="body2" sx={{ color: "white" }}>
-                {item.formattedCreationDate}
+                {item.creation_date}
               </Typography>
             </Grid>
             <Grid item>
@@ -241,49 +188,25 @@ function Participating() {
             </Grid>
           </Grid>
 
-          <div style={{ position: "relative" }}>
-            <Image
-              src={item.games_image}
-              alt={item.name_games}
-              width={526}
-              height={296}
-              layout="responsive"
-              style={{
-                borderRadius: "0%",
-                marginBottom: "16px",
-              }}
-            />
-            {item.isPast && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  backgroundColor: "rgba(0, 0, 0, 0.65)",
-                  borderRadius: "50%",
-                  width: "60%",
-                  height: "60%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  color: "white",
-                  fontSize: "3vw",
-                  zIndex: 20,
-                }}
-              >
-                โพสต์นี้เลยนัดเล่นไปแล้ว
-              </div>
-            )}
-          </div>
-
+          <Image
+            src={item.games_image}
+            alt={item.name_games}
+            width={526} // ควรให้ค่าเป็นตัวเลขพิกเซล
+            height={296} // ควรให้ค่าเป็นตัวเลขพิกเซล
+            layout="responsive" // ใช้ layout แบบ responsive เพื่อให้ภาพปรับขนาดตามขนาดของ container
+            style={{ marginBottom: "16px" }} // กำหนด margin ด้านล่าง
+          />
           <div className="text-left">
             <Typography sx={{ color: "white", fontWeight: "bold" }}>
               {item.name_games}
             </Typography>
             <Typography sx={{ color: "white" }}>
-              วันที่เจอกัน: {formatThaiDate(item.date_meet)}
+              วันที่เจอกัน: {item.date_meet}
             </Typography>
+            <Typography sx={{ color: "white" }}>
+              เวลาที่เจอกัน: {item.time_meet}
+            </Typography>
+
             <br />
             <Typography sx={{ color: "white" }}>{item.detail_post}</Typography>
 
@@ -291,6 +214,8 @@ function Participating() {
               สถานที่ : 43/5 ถนนราชดำเนิน (ถนนต้นสน)
               ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง
             </Typography>
+            {/* num_people
+                  participant */}
             <Typography sx={{ color: "white" }}>
               จำนวนคนจะไป : {item.participants}/{item.num_people}
             </Typography>
@@ -298,7 +223,7 @@ function Participating() {
             <br />
 
             <Grid container spacing={2} justifyContent="center">
-              {!item.hasParticipated && !item.isPast && (
+              {!item.hasParticipated && ( // ตรวจสอบสถานะการเข้าร่วม
                 <Grid item xs={12} sm={6}>
                   <Button
                     variant="contained"
@@ -316,26 +241,24 @@ function Participating() {
                   </Button>
                 </Grid>
               )}
-              {!item.isPast && (
-                <Grid item xs={12} sm={6}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    startIcon={<CommentIcon />}
-                    sx={{
-                      backgroundColor: "black",
-                      color: "white",
-                      border: "1px solid white",
-                      "&:hover": {
-                        backgroundColor: "#333333",
-                      },
-                      zIndex: 0,
-                    }}
-                  >
-                    พูดคุย
-                  </Button>
-                </Grid>
-              )}
+              <Grid item xs={12} sm={6}>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  startIcon={<CommentIcon />}
+                  sx={{
+                    backgroundColor: "black",
+                    color: "white",
+                    border: "1px solid white",
+                    "&:hover": {
+                      backgroundColor: "#333333",
+                    },
+                    zIndex: 0, // กำหนดค่า z-index เพื่อให้การ์ดอยู่เหนือ navbar
+                  }}
+                >
+                  พูดคุย
+                </Button>
+              </Grid>
             </Grid>
           </div>
         </Box>

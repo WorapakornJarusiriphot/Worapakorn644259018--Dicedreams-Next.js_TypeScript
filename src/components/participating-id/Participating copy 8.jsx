@@ -35,22 +35,20 @@ import { jwtDecode } from "jwt-decode";
 // import { JwtPayload } from 'jsonwebtoken';
 import { JwtPayload } from "jwt-decode";
 
-// import { useRouter } from "next/navigator";
-
+import { useRouter } from "next/navigation";
+//import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 import { format, parseISO, compareDesc } from "date-fns";
 import { th } from "date-fns/locale";
 
+
+
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
-  const formattedDate = format(
-    date,
-    "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'",
-    {
-      locale: th,
-    }
-  );
+  const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'", {
+    locale: th,
+  });
   return formattedDate;
 };
 
@@ -77,9 +75,12 @@ function Participating() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userId, setUserId] = useState("");
+  const router = useRouter();
+  const { userId } = router.query;
 
   useEffect(() => {
+    if (!userId) return; // ตรวจสอบว่ามีการตั้งค่า userId ก่อน
+
     async function fetchData() {
       const accessToken = localStorage.getItem("access_token");
       if (!accessToken) {
@@ -87,10 +88,6 @@ function Participating() {
         setLoading(false);
         return;
       }
-
-      const decoded = jwtDecode(accessToken);
-      const userIdFromUrl = window.location.pathname.split("/").pop();
-      setUserId(userIdFromUrl);
 
       try {
         const participantsResponse = await fetch(
@@ -102,13 +99,13 @@ function Participating() {
             },
           }
         );
-        if (!participantsResponse.ok)
-          throw new Error("Failed to fetch participants");
+        if (!participantsResponse.ok) throw new Error("Failed to fetch participants");
         const participants = await participantsResponse.json();
 
         const myParticipations = participants.filter(
-          (part) => part.user_id === userIdFromUrl
+          (part) => part.user_id === userId
         );
+
         const postPromises = myParticipations.map(async (participation) => {
           const postResponse = await fetch(
             `http://localhost:8080/api/postGame/${participation.post_games_id}`,
@@ -146,7 +143,7 @@ function Participating() {
             userProfileImage: user.user_image,
             userFirstName: user.first_name,
             userLastName: user.last_name,
-            hasParticipated: true, // เพิ่มสถานะการเข้าร่วม
+            hasParticipated: true,
             formattedCreationDate: formatDateTime(post.creation_date),
             date_meet: post.date_meet,
             time_meet: post.time_meet,
@@ -158,10 +155,7 @@ function Participating() {
         const sortedPosts = posts.sort((a, b) => {
           if (a.isPast && !b.isPast) return 1;
           if (!a.isPast && b.isPast) return -1;
-          return compareDesc(
-            new Date(a.creation_date),
-            new Date(b.creation_date)
-          );
+          return compareDesc(new Date(a.creation_date), new Date(b.creation_date));
         });
 
         setItems(sortedPosts);
@@ -172,10 +166,9 @@ function Participating() {
     }
 
     fetchData();
-  }, []);
+  }, [userId]);
 
-  if (loading)
-    return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
+  if (loading) return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
   if (error) return <Typography sx={{ color: "white" }}>{error}</Typography>;
 
   return (
@@ -196,12 +189,7 @@ function Participating() {
             zIndex: 0,
           }}
         >
-          <Grid
-            container
-            spacing={2}
-            alignItems="center"
-            sx={{ marginBottom: "16px" }}
-          >
+          <Grid container spacing={2} alignItems="center" sx={{ marginBottom: "16px" }}>
             <Grid item>
               <img
                 src={item.userProfileImage}
@@ -218,11 +206,7 @@ function Participating() {
               />
             </Grid>
             <Grid item xs>
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-                sx={{ color: "white" }}
-              >
+              <Typography variant="subtitle1" gutterBottom sx={{ color: "white" }}>
                 {`${item.userFirstName} ${item.userLastName}`}
               </Typography>
               <Typography variant="body2" sx={{ color: "white" }}>
@@ -230,12 +214,7 @@ function Participating() {
               </Typography>
             </Grid>
             <Grid item>
-              <IconButton
-                sx={{
-                  color: "white",
-                }}
-                aria-label="settings"
-              >
+              <IconButton sx={{ color: "white" }} aria-label="settings">
                 <MoreVertOutlinedIcon />
               </IconButton>
             </Grid>
@@ -278,23 +257,16 @@ function Participating() {
           </div>
 
           <div className="text-left">
-            <Typography sx={{ color: "white", fontWeight: "bold" }}>
-              {item.name_games}
-            </Typography>
-            <Typography sx={{ color: "white" }}>
-              วันที่เจอกัน: {formatThaiDate(item.date_meet)}
-            </Typography>
+            <Typography sx={{ color: "white", fontWeight: "bold" }}>{item.name_games}</Typography>
+            <Typography sx={{ color: "white" }}>วันที่เจอกัน: {formatThaiDate(item.date_meet)}</Typography>
             <br />
             <Typography sx={{ color: "white" }}>{item.detail_post}</Typography>
-
             <Typography sx={{ color: "white" }}>
-              สถานที่ : 43/5 ถนนราชดำเนิน (ถนนต้นสน)
-              ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง
+              สถานที่ : 43/5 ถนนราชดำเนิน (ถนนต้นสน) ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง
             </Typography>
             <Typography sx={{ color: "white" }}>
               จำนวนคนจะไป : {item.participants}/{item.num_people}
             </Typography>
-
             <br />
 
             <Grid container spacing={2} justifyContent="center">
@@ -341,9 +313,7 @@ function Participating() {
         </Box>
       ))}
       {items.length === 0 && (
-        <Typography sx={{ color: "white" }}>
-          ไม่พบโพสต์ที่คุณเข้าร่วม
-        </Typography>
+        <Typography sx={{ color: "white" }}>ไม่พบโพสต์ที่คุณเข้าร่วม</Typography>
       )}
     </div>
   );
