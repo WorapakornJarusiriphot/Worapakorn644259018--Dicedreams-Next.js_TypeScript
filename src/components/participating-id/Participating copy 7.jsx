@@ -89,8 +89,7 @@ function Participating() {
       }
 
       const decoded = jwtDecode(accessToken);
-      const userIdFromUrl = window.location.pathname.split("/").pop();
-      setUserId(userIdFromUrl);
+      setUserId(decoded.users_id);
 
       try {
         const participantsResponse = await fetch(
@@ -107,7 +106,7 @@ function Participating() {
         const participants = await participantsResponse.json();
 
         const myParticipations = participants.filter(
-          (part) => part.user_id === userIdFromUrl
+          (part) => part.user_id === decoded.users_id
         );
         const postPromises = myParticipations.map(async (participation) => {
           const postResponse = await fetch(
