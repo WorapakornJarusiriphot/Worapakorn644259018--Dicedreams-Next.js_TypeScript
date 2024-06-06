@@ -47,8 +47,7 @@ function Home() {
   const [number, setNumber] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
-  const [postGames, setPostGames] = useState([]);
-  const [postActivities, setPostActivities] = useState([]);
+  const [data, setData] = useState([]);
   const [users, setUsers] = useState([]);
   const [stores, setStores] = useState([]);
   const router = useRouter();
@@ -65,13 +64,9 @@ function Home() {
         const postGamesResponse = await axios.get(
           "http://localhost:8080/api/postGame"
         );
-        const postActivitiesResponse = await axios.get(
-          "http://localhost:8080/api/postActivity"
-        );
         setUsers(usersResponse.data);
         setStores(storesResponse.data);
-        setPostGames(postGamesResponse.data);
-        setPostActivities(postActivitiesResponse.data);
+        setData(postGamesResponse.data);
       } catch (error) {
         console.error("Error fetching data", error);
       }
@@ -112,17 +107,9 @@ function Home() {
     }
   };
 
-  const filteredPostGames = postGames.filter((post) => {
+  const filteredData = data.filter((post) => {
     if (selectedDate) {
-      const postDate = post.date_meet;
-      return dayjs(postDate).isSame(selectedDate, "day");
-    }
-    return true;
-  });
-
-  const filteredPostActivities = postActivities.filter((post) => {
-    if (selectedDate) {
-      const postDate = post.date_activity;
+      const postDate = post.date_meet || post.date_activity;
       return dayjs(postDate).isSame(selectedDate, "day");
     }
     return true;
@@ -134,10 +121,6 @@ function Home() {
       user.last_name.includes(searchTerm) ||
       user.username.includes(searchTerm)
     );
-  });
-
-  const filteredStores = stores.filter((store) => {
-    return store.name_store.includes(searchTerm);
   });
 
   return (
@@ -171,19 +154,13 @@ function Home() {
           </Grid>
           <Grid item xs={12} md={8}>
             {selectedCategory === "postActivity" || selectedCategory === "" ? (
-              <PostActivity data={filteredPostActivities} />
+              <PostActivity data={filteredData} />
             ) : null}
             {selectedCategory === "postGames" || selectedCategory === "" ? (
-              <PostGames data={filteredPostGames} />
-            ) : null}
-            {selectedCategory === "people" ? (
-              <People users={filteredUsers} stores={[]} />
-            ) : null}
-            {selectedCategory === "store" ? (
-              <People users={[]} stores={filteredStores} />
+              <PostGames data={filteredData} />
             ) : null}
             {selectedCategory === "peopleStore" ? (
-              <People users={filteredUsers} stores={filteredStores} />
+              <People users={filteredUsers} stores={stores} />
             ) : null}
           </Grid>
         </Grid>
