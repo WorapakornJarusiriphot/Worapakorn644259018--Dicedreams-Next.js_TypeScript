@@ -20,9 +20,6 @@ const routParticipate = require("./routers/participate");
 const routerStore = require("./routers/store");
 const routerNotification = require("./routers/notification");
 
-// Import Swagger configuration
-const { swaggerUi, specs } = require('./configs/swaggerConfig');
-
 db.sequelize.sync();
 // db.sequelize.sync({ force: true }).then(() => {
 //     console.log("Drop and resync DB");
@@ -72,9 +69,6 @@ app.get('/testnotification', (req, res) => {
 
   res.sendFile(path.join(__dirname + '/index.html'))
 })
-
-// Add Swagger UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use('/api/auth', routerAuth);
 app.use('/api/users', routerUser);
