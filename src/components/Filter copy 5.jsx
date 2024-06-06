@@ -158,21 +158,20 @@ function Filter({
 
         <FormControl fullWidth sx={{ marginTop: "10px" }}>
           <InputLabel id="category-select-label">
-            ค้นหาประเภทโพสต์และผู้คนและและร้านค้า
+            ค้นหาประเภทโพสต์และผู้คน
           </InputLabel>
           <Select
             labelId="category-select-label"
             id="category-select"
             value={selectedCategory}
-            label="โพสต์ทั้งหมดและผู้คนและร้านค้า"
+            label="ค้นหาประเภทโพสต์และผู้คน"
             onChange={handleCategoryChange}
           >
-            <MenuItem value="">โพสต์ทั้งหมดและผู้คนและร้านค้า</MenuItem>
+            <MenuItem value="">โพสต์ทั้งหมดและผู้คน</MenuItem>
+            <MenuItem value="post">โพสต์ทั้งหมด</MenuItem>
             <MenuItem value="postGames">โพสต์นัดเล่น</MenuItem>
             <MenuItem value="postActivity">โพสต์กิจกรรม</MenuItem>
-            <MenuItem value="peopleStore">ผู้คนและร้านค้า</MenuItem>
             <MenuItem value="people">ผู้คน</MenuItem>
-            <MenuItem value="store">ร้านค้า</MenuItem>
           </Select>
         </FormControl>
 

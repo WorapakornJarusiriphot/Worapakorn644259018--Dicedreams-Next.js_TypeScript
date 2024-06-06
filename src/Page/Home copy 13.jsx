@@ -45,13 +45,17 @@ function Home() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [number, setNumber] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
-  const [postGames, setPostGames] = useState([]);
-  const [postActivities, setPostActivities] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null); // เพิ่ม useState สำหรับ selectedDate
+  const [selectedTime, setSelectedTime] = useState(null); // เพิ่ม useState สำหรับ selectedTime
+  const { data, loading, error } = useFetchPosts(
+    selectedCategory,
+    searchTerm,
+    number,
+    selectedDate, // เพิ่ม selectedDate
+    selectedTime // เพิ่ม selectedTime
+  );
   const [users, setUsers] = useState([]);
   const [stores, setStores] = useState([]);
-  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,16 +66,8 @@ function Home() {
         const storesResponse = await axios.get(
           "http://localhost:8080/api/store"
         );
-        const postGamesResponse = await axios.get(
-          "http://localhost:8080/api/postGame"
-        );
-        const postActivitiesResponse = await axios.get(
-          "http://localhost:8080/api/postActivity"
-        );
         setUsers(usersResponse.data);
         setStores(storesResponse.data);
-        setPostGames(postGamesResponse.data);
-        setPostActivities(postActivitiesResponse.data);
       } catch (error) {
         console.error("Error fetching data", error);
       }
@@ -102,6 +98,30 @@ function Home() {
     setNumber(event.target.value);
   };
 
+  const filteredData = data.filter((post) => {
+    if (selectedDate) {
+      const postDate = post.date_meet || post.date_activity;
+      return dayjs(postDate).isSame(selectedDate, "day");
+    }
+    return true;
+  });
+
+  console.log("Filtered data HOME:", filteredData);
+
+  const [value, setValue] = useState(dayjs("2022-04-17T15:30"));
+
+  const handleChange = (event) => {
+    setNumber(event.target.value);
+  };
+
+  const [selectedCurrency, setSelectedCurrency] = useState("");
+
+  const handleCurrencyChange = (event) => {
+    setSelectedCurrency(event.target.value);
+  };
+
+  const router = useRouter();
+
   const handleSearch = () => {
     console.log("Search term:", searchTerm);
     console.log("Selected category:", selectedCategory);
@@ -112,33 +132,26 @@ function Home() {
     }
   };
 
-  const filteredPostGames = postGames.filter((post) => {
-    if (selectedDate) {
-      const postDate = post.date_meet;
-      return dayjs(postDate).isSame(selectedDate, "day");
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      handleSearch();
     }
-    return true;
-  });
+  };
 
-  const filteredPostActivities = postActivities.filter((post) => {
-    if (selectedDate) {
-      const postDate = post.date_activity;
-      return dayjs(postDate).isSame(selectedDate, "day");
-    }
-    return true;
-  });
-
-  const filteredUsers = users.filter((user) => {
-    return (
-      user.first_name.includes(searchTerm) ||
-      user.last_name.includes(searchTerm) ||
-      user.username.includes(searchTerm)
-    );
-  });
-
-  const filteredStores = stores.filter((store) => {
-    return store.name_store.includes(searchTerm);
-  });
+  const currencies = [
+    {
+      value: "โพสต์ทั้งหมด",
+      label: "โพสต์ทั้งหมด",
+    },
+    {
+      value: "โพสต์นัดเล่น",
+      label: "โพสต์นัดเล่น",
+    },
+    {
+      value: "โพสต์กิจกรรม",
+      label: "โพสต์กิจกรรม",
+    },
+  ];
 
   return (
     <div>
@@ -150,6 +163,7 @@ function Home() {
               นัดเล่นบอร์ดเกมแบบออนไซต์
             </Typography>
           </Grid>
+          <Grid item xs={12} md={3} sx={{ textAlign: "right" }}></Grid>
         </Grid>
 
         <hr className=" mt-5 mb-5" sx={{ background: "grey.800" }} />
@@ -163,6 +177,8 @@ function Home() {
               searchTerm={searchTerm}
               handleNumberChange={handleNumberChange}
               number={number}
+              handleCurrencyChange={handleCurrencyChange}
+              selectedCurrency={selectedCurrency}
               handleDateChange={handleDateChange}
               selectedDate={selectedDate}
               handleTimeChange={handleTimeChange}
@@ -170,20 +186,16 @@ function Home() {
             />
           </Grid>
           <Grid item xs={12} md={8}>
+            <People users={users} stores={stores} />
             {selectedCategory === "postActivity" || selectedCategory === "" ? (
-              <PostActivity data={filteredPostActivities} />
+              <PostActivity
+                data={filteredData}
+                loading={loading}
+                error={error}
+              />
             ) : null}
             {selectedCategory === "postGames" || selectedCategory === "" ? (
-              <PostGames data={filteredPostGames} />
-            ) : null}
-            {selectedCategory === "people" ? (
-              <People users={filteredUsers} stores={[]} />
-            ) : null}
-            {selectedCategory === "store" ? (
-              <People users={[]} stores={filteredStores} />
-            ) : null}
-            {selectedCategory === "peopleStore" ? (
-              <People users={filteredUsers} stores={filteredStores} />
+              <PostGames data={filteredData} loading={loading} error={error} />
             ) : null}
           </Grid>
         </Grid>
