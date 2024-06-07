@@ -7,51 +7,6 @@ const db = require("../models");
 const User = db.user;
 const Store = db.store; // ต้องมีการอ้างอิงไปยัง model Store
 
-/**
- * @swagger
- * tags:
- *   name: Auth
- *   description: Authentication management
- */
-
-/**
- * @swagger
- * /auth:
- *   post:
- *     summary: User login
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               identifier:
- *                 type: string
- *                 description: The username or email of the user
- *               password:
- *                 type: string
- *                 description: The password of the user
- *     responses:
- *       200:
- *         description: Login successful
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 access_token:
- *                   type: string
- *                 expires_in:
- *                   type: integer
- *                 token_type:
- *                   type: string
- *       400:
- *         description: User Not Exist or Incorrect Password
- *       500:
- *         description: Server Error
- */
 // login route
 router.post("/", async (req, res) => {
   const { identifier, password } = req.body; // เปลี่ยน `username` เป็น `identifier`
