@@ -85,7 +85,11 @@ app.use('/api/participate', routParticipate);
 app.use('/api/store', routerStore);
 app.use('/api/notification', routerNotification);
 
-
+// Serve swagger.json
+app.get('/swagger.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(specs);
+});
 
 
 app.use(errorHandler);
