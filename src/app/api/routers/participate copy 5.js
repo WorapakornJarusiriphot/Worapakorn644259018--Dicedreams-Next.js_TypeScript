@@ -28,17 +28,12 @@ const passportJWT = require('../middleware/passportJWT');
  *             properties:
  *               participant_apply_datetime:
  *                 type: string
- *                 format: date-time
- *                 example: "2024-06-07T12:34:56Z"
  *               participant_status:
  *                 type: string
- *                 example: "pending"
  *               user_id:
  *                 type: string
- *                 example: "217affca-a63a-429d-abed-c3c34498a1a8"
  *               post_games_id:
  *                 type: string
- *                 example: "8c2ff04c-4cc6-42b4-aae4-262891b9d970"
  *     responses:
  *       201:
  *         description: The participation was successfully created
@@ -78,7 +73,6 @@ router.get("/", participateController.findAll);
  *           type: string
  *         required: true
  *         description: The participate ID
- *         example: "8c2ff04c-4cc6-42b4-aae4-262891b9d970"
  *     responses:
  *       200:
  *         description: A participate object
@@ -86,24 +80,6 @@ router.get("/", participateController.findAll);
  *           application/json:
  *             schema:
  *               type: object
- *               properties:
- *                 participant_id:
- *                   type: string
- *                 participant_apply_datetime:
- *                   type: string
- *                   format: date-time
- *                 participant_status:
- *                   type: string
- *                 user_id:
- *                   type: string
- *                 post_games_id:
- *                   type: string
- *                 createdAt:
- *                   type: string
- *                   format: date-time
- *                 updatedAt:
- *                   type: string
- *                   format: date-time
  *       404:
  *         description: Participate not found
  */
@@ -122,7 +98,6 @@ router.get("/:id", [passportJWT.isLogin, authentication.isUser], participateCont
  *           type: string
  *         required: true
  *         description: The post_games ID
- *         example: "8c2ff04c-4cc6-42b4-aae4-262891b9d970"
  *     responses:
  *       200:
  *         description: A list of participates
@@ -132,24 +107,6 @@ router.get("/:id", [passportJWT.isLogin, authentication.isUser], participateCont
  *               type: array
  *               items:
  *                 type: object
- *                 properties:
- *                   participant_id:
- *                     type: string
- *                   participant_apply_datetime:
- *                     type: string
- *                     format: date-time
- *                   participant_status:
- *                     type: string
- *                   user_id:
- *                     type: string
- *                   post_games_id:
- *                     type: string
- *                   createdAt:
- *                     type: string
- *                     format: date-time
- *                   updatedAt:
- *                     type: string
- *                     format: date-time
  */
 router.get("/post/:id", [passportJWT.isLogin, authentication.isUser], participateController.findAllByPostGamesId);
 
@@ -166,7 +123,6 @@ router.get("/post/:id", [passportJWT.isLogin, authentication.isUser], participat
  *           type: string
  *         required: true
  *         description: The participate ID
- *         example: "8c2ff04c-4cc6-42b4-aae4-262891b9d970"
  *     requestBody:
  *       required: true
  *       content:
@@ -176,17 +132,12 @@ router.get("/post/:id", [passportJWT.isLogin, authentication.isUser], participat
  *             properties:
  *               participant_apply_datetime:
  *                 type: string
- *                 format: date-time
- *                 example: "2024-06-07T12:34:56Z"
  *               participant_status:
  *                 type: string
- *                 example: "approved"
  *               user_id:
  *                 type: string
- *                 example: "217affca-a63a-429d-abed-c3c34498a1a8"
  *               post_games_id:
  *                 type: string
- *                 example: "8c2ff04c-4cc6-42b4-aae4-262891b9d970"
  *     responses:
  *       200:
  *         description: Participate was updated successfully.
@@ -210,7 +161,6 @@ router.put("/:id", [passportJWT.isLogin, authentication.isUser], participateCont
  *           type: string
  *         required: true
  *         description: The participate ID
- *         example: "8c2ff04c-4cc6-42b4-aae4-262891b9d970"
  *     responses:
  *       200:
  *         description: Participate was deleted successfully.

@@ -28,17 +28,12 @@ const passportJWT = require('../middleware/passportJWT');
  *             properties:
  *               message:
  *                 type: string
- *                 example: "ผมไม่มีภาคเสริมผมไปเล่นด้วยได้หรือป่าว"
  *               datetime_chat:
  *                 type: string
- *                 format: date-time
- *                 example: "2023-06-01T14:30:00Z"
  *               user_id:
  *                 type: string
- *                 example: "3cb8cba9-874c-482e-bb5e-c5d523d77b7a"
  *               post_games_id:
  *                 type: string
- *                 example: "e2743413-ac96-4884-b645-9ee77b43d571"
  *     responses:
  *       201:
  *         description: The chat was successfully created
@@ -62,18 +57,6 @@ router.post("/", [passportJWT.isLogin, authentication.isUser], chatController.cr
  *               type: array
  *               items:
  *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                   message:
- *                     type: string
- *                   datetime_chat:
- *                     type: string
- *                     format: date-time
- *                   user_id:
- *                     type: string
- *                   post_games_id:
- *                     type: string
  */
 router.get("/", [passportJWT.isLogin, authentication.isUser], chatController.findAll);
 
@@ -97,18 +80,6 @@ router.get("/", [passportJWT.isLogin, authentication.isUser], chatController.fin
  *           application/json:
  *             schema:
  *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                 message:
- *                   type: string
- *                 datetime_chat:
- *                   type: string
- *                   format: date-time
- *                 user_id:
- *                   type: string
- *                 post_games_id:
- *                   type: string
  *       404:
  *         description: Chat not found
  */
@@ -136,11 +107,8 @@ router.get("/:id", [passportJWT.isLogin, authentication.isUser], chatController.
  *             properties:
  *               message:
  *                 type: string
- *                 example: "อัปเดตข้อความแชทแล้วผมไม่มีภาคเสริมผมไปเล่นด้วยได้หรือป่าว"
  *               datetime_chat:
  *                 type: string
- *                 format: date-time
- *                 example: "2023-06-01T15:00:00Z"
  *     responses:
  *       200:
  *         description: Chat was updated successfully.
@@ -206,18 +174,6 @@ router.delete("/", [passportJWT.isLogin, authentication.isUser], chatController.
  *               type: array
  *               items:
  *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                   message:
- *                     type: string
- *                   datetime_chat:
- *                     type: string
- *                     format: date-time
- *                   user_id:
- *                     type: string
- *                   post_games_id:
- *                     type: string
  */
 router.get("/post/:id", [passportJWT.isLogin, authentication.isUser], chatController.findAllByPostGamesId);
 

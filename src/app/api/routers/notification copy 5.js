@@ -27,19 +27,6 @@ const passportJWT = require('../middleware/passportJWT');
  *               type: array
  *               items:
  *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                   message:
- *                     type: string
- *                   is_read:
- *                     type: boolean
- *                   createdAt:
- *                     type: string
- *                     format: date-time
- *                   updatedAt:
- *                     type: string
- *                     format: date-time
  */
 router.get("/", [passportJWT.isLogin, authentication.isStoreOrUser], notificationController.findAll);
 
@@ -60,7 +47,6 @@ router.get("/", [passportJWT.isLogin, authentication.isStoreOrUser], notificatio
  *                 type: array
  *                 items:
  *                   type: string
- *                 example: ["c99f7bba-8e5f-4481-aaad-ace179f27ab2"]
  *     responses:
  *       200:
  *         description: Notification was updated successfully.
