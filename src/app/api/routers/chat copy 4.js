@@ -28,17 +28,17 @@ const passportJWT = require('../middleware/passportJWT');
  *             properties:
  *               message:
  *                 type: string
- *                 example: "ผมไม่มีภาคเสริมผมไปเล่นด้วยได้หรือป่าว"
+ *                 example: "Hello, this is a chat message."
  *               datetime_chat:
  *                 type: string
  *                 format: date-time
  *                 example: "2023-06-01T14:30:00Z"
  *               user_id:
  *                 type: string
- *                 example: "3cb8cba9-874c-482e-bb5e-c5d523d77b7a"
+ *                 example: "123e4567-e89b-12d3-a456-426614174000"
  *               post_games_id:
  *                 type: string
- *                 example: "e2743413-ac96-4884-b645-9ee77b43d571"
+ *                 example: "123e4567-e89b-12d3-a456-426614174001"
  *     responses:
  *       201:
  *         description: The chat was successfully created
@@ -136,7 +136,7 @@ router.get("/:id", [passportJWT.isLogin, authentication.isUser], chatController.
  *             properties:
  *               message:
  *                 type: string
- *                 example: "อัปเดตข้อความแชทแล้วผมไม่มีภาคเสริมผมไปเล่นด้วยได้หรือป่าว"
+ *                 example: "Updated chat message."
  *               datetime_chat:
  *                 type: string
  *                 format: date-time

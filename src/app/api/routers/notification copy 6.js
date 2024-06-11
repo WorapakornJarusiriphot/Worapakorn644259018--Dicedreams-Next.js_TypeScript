@@ -60,7 +60,7 @@ router.get("/", [passportJWT.isLogin, authentication.isStoreOrUser], notificatio
  *                 type: array
  *                 items:
  *                   type: string
- *                 example: ["c99f7bba-8e5f-4481-aaad-ace179f27ab2"]
+ *                 example: ["123e4567-e89b-12d3-a456-426614174000"]
  *     responses:
  *       200:
  *         description: Notification was updated successfully.
