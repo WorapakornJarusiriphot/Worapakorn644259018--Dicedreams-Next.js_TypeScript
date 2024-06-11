@@ -24,20 +24,6 @@ const options = {
         description: "Development server",
       },
     ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-        },
-      },
-    },
-    security: [
-      {
-        bearerAuth: [],
-      },
-    ],
   },
   apis: ['./src/app/api/routers/*.js'], // ที่อยู่ของไฟล์ที่มีคอมเมนต์ Swagger
 };
