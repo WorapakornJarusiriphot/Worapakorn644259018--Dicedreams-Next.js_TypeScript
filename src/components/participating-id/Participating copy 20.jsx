@@ -73,11 +73,12 @@ const isPastDateTime = (date, time) => {
   return eventDate < new Date();
 };
 
-function Participating({ userId }) {
+function Participating() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [loggedInUserId, setLoggedInUserId] = useState("");
+  const [userId, setUserId] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
@@ -95,6 +96,9 @@ function Participating({ userId }) {
       const decoded = jwtDecode(accessToken);
       setLoggedInUserId(decoded.users_id);
 
+      const userIdFromUrl = window.location.pathname.split("/").pop();
+      setUserId(userIdFromUrl);
+
       try {
         const participantsResponse = await fetch(
           `http://localhost:8080/api/participate`,
@@ -111,7 +115,8 @@ function Participating({ userId }) {
 
         const myParticipations = participants.filter(
           (part) =>
-            part.user_id === userId && part.participant_status !== "unActive"
+            part.user_id === userIdFromUrl &&
+            part.participant_status !== "unActive"
         );
 
         const postPromises = myParticipations.map(async (participation) => {
@@ -182,7 +187,7 @@ function Participating({ userId }) {
     }
 
     fetchData();
-  }, [loggedInUserId, userId]);
+  }, [loggedInUserId]);
 
   const handleJoinClick = (post) => {
     setSelectedPost(post);
