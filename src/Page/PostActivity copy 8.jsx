@@ -37,8 +37,6 @@ import { JwtPayload } from "jwt-decode";
 import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { th } from "date-fns/locale";
-import Link from "next/link"; // นำเข้า Link
-import { useRouter } from "next/navigation"; // นำเข้า useRouter
 
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
@@ -69,7 +67,6 @@ function PostActivity() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState("");
-  const router = useRouter(); // สร้าง instance ของ useRouter
 
   useEffect(() => {
     const fetchUserAndPosts = async () => {
@@ -203,10 +200,6 @@ function PostActivity() {
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
   if (error) return <Typography sx={{ color: "white" }}>{error}</Typography>;
 
-  const handleProfileClick = (userId) => {
-    router.push(`/profile/${userId}`);
-  };
-
   return (
     <div>
       {items.map((item) => (
@@ -231,24 +224,17 @@ function PostActivity() {
             sx={{ marginBottom: "16px" }}
           >
             <Grid item>
-              <div onClick={() => handleProfileClick(item.store_id)}>
-                <Image
-                  src={item.userProfileImage}
-                  alt={`${item.userFirstName}`}
-                  width={50} // ปรับขนาดตามที่ต้องการ
-                  height={50}
-                  layout="fixed"
-                  style={{ borderRadius: "50%", cursor: "pointer" }} // เพิ่ม cursor: pointer
-                />
-              </div>
+              <Image
+                src={item.userProfileImage}
+                alt={`${item.userFirstName}`}
+                width={50} // ปรับขนาดตามที่ต้องการ
+                height={50}
+                layout="fixed"
+                style={{ borderRadius: "50%" }}
+              />
             </Grid>
             <Grid item xs>
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-                onClick={() => handleProfileClick(item.store_id)}
-                style={{ cursor: "pointer" }} // เพิ่ม cursor: pointer
-              >
+              <Typography variant="subtitle1" gutterBottom>
                 {item.userFirstName}
               </Typography>
               <Typography variant="body2" sx={{ color: "white" }}>

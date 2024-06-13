@@ -19,8 +19,8 @@ import InputAdornment from "@mui/material/InputAdornment";
 import FormHelperText from "@mui/material/FormHelperText";
 import FormControl from "@mui/material/FormControl";
 import SearchIcon from "@mui/icons-material/Search";
-import CommentIcon from "@mui/icons-material/Comment"; // สำหรับปุ่มพูดคุย
-import LoginIcon from "@mui/icons-material/Login"; // สำหรับปุ่มเข้าสู่ระบบ
+import CommentIcon from "@mui/icons-material/Comment";
+import LoginIcon from "@mui/icons-material/Login";
 import * as React from "react";
 import InputBase from "@mui/material/InputBase";
 import Divider from "@mui/material/Divider";
@@ -29,16 +29,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import DirectionsIcon from "@mui/icons-material/Directions";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import Image from "next/image";
-
-// import jwtDecode from 'jwt-decode';
 import { jwtDecode } from "jwt-decode";
-// import { JwtPayload } from 'jsonwebtoken';
-import { JwtPayload } from "jwt-decode";
-
-// import { useRouter } from "next/navigator";
-
 import { useEffect, useState } from "react";
-
 import { format, parseISO, compareDesc } from "date-fns";
 import { th } from "date-fns/locale";
 
@@ -73,11 +65,10 @@ const isPastDateTime = (date, time) => {
   return eventDate < new Date();
 };
 
-function PostGames() {
+const PostGames = ({ userId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userId, setUserId] = useState("");
 
   useEffect(() => {
     const fetchUserAndPosts = async () => {
@@ -89,11 +80,8 @@ function PostGames() {
       }
 
       try {
-        const decoded = jwtDecode(accessToken);
-        setUserId(decoded.users_id);
-
         const userResponse = await fetch(
-          `http://localhost:8080/api/users/${decoded.users_id}`,
+          `http://localhost:8080/api/users/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -105,7 +93,7 @@ function PostGames() {
         const userData = await userResponse.json();
 
         const postsResponse = await fetch(
-          `http://localhost:8080/api/postGame/user/${decoded.users_id}`,
+          `http://localhost:8080/api/postGame/user/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -129,12 +117,7 @@ function PostGames() {
           throw new Error("Failed to fetch participants");
         const participantsData = await participantsResponse.json();
 
-        // กรองโพสต์ที่มีสถานะเป็น unActive
-        const activePosts = postsData.filter(
-          (post) => post.status_post !== "unActive"
-        );
-
-        const postsWithParticipants = activePosts.map((post) => {
+        const postsWithParticipants = postsData.map((post) => {
           const postParticipants = participantsData.filter(
             (participant) => participant.post_games_id === post.post_games_id
           );
@@ -171,7 +154,7 @@ function PostGames() {
     };
 
     fetchUserAndPosts();
-  }, []);
+  }, [userId]);
 
   if (loading)
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
@@ -344,9 +327,7 @@ function PostGames() {
         </Box>
       ))}
       {items.length === 0 && (
-        <Typography sx={{ color: "white" }}>
-          ไม่พบโพสต์นัดเล่นที่คุณเคยโพสต์
-        </Typography>
+        <Typography sx={{ color: "white" }}>ไม่พบโพสต์ที่คุณเคยโพสต์</Typography>
       )}
     </div>
   );

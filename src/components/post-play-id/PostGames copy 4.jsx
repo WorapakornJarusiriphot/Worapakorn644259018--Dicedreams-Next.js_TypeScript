@@ -29,16 +29,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import DirectionsIcon from "@mui/icons-material/Directions";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import Image from "next/image";
-
-// import jwtDecode from 'jwt-decode';
 import { jwtDecode } from "jwt-decode";
-// import { JwtPayload } from 'jsonwebtoken';
-import { JwtPayload } from "jwt-decode";
-
-// import { useRouter } from "next/navigator";
-
 import { useEffect, useState } from "react";
-
 import { format, parseISO, compareDesc } from "date-fns";
 import { th } from "date-fns/locale";
 
@@ -73,11 +65,11 @@ const isPastDateTime = (date, time) => {
   return eventDate < new Date();
 };
 
-function PostGames() {
+const PostGames = ({ userId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userId, setUserId] = useState("");
+  const [loggedInUserId, setLoggedInUserId] = useState("");
 
   useEffect(() => {
     const fetchUserAndPosts = async () => {
@@ -88,12 +80,12 @@ function PostGames() {
         return;
       }
 
-      try {
-        const decoded = jwtDecode(accessToken);
-        setUserId(decoded.users_id);
+      const decoded = jwtDecode(accessToken);
+      setLoggedInUserId(decoded.users_id);
 
+      try {
         const userResponse = await fetch(
-          `http://localhost:8080/api/users/${decoded.users_id}`,
+          `http://localhost:8080/api/users/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -105,7 +97,7 @@ function PostGames() {
         const userData = await userResponse.json();
 
         const postsResponse = await fetch(
-          `http://localhost:8080/api/postGame/user/${decoded.users_id}`,
+          `http://localhost:8080/api/postGame/user/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -136,7 +128,9 @@ function PostGames() {
 
         const postsWithParticipants = activePosts.map((post) => {
           const postParticipants = participantsData.filter(
-            (participant) => participant.post_games_id === post.post_games_id
+            (participant) =>
+              participant.post_games_id === post.post_games_id &&
+              participant.participant_status !== "unActive"
           );
           return {
             ...post,
@@ -149,6 +143,9 @@ function PostGames() {
             date_meet: post.date_meet,
             time_meet: post.time_meet,
             isPast: isPastDateTime(post.date_meet, post.time_meet),
+            hasParticipated: postParticipants.some(
+              (p) => p.user_id === loggedInUserId
+            ),
           };
         });
 
@@ -171,7 +168,7 @@ function PostGames() {
     };
 
     fetchUserAndPosts();
-  }, []);
+  }, [userId]);
 
   if (loading)
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
@@ -301,7 +298,7 @@ function PostGames() {
             <br />
 
             <Grid container spacing={2} justifyContent="center">
-              {item.users_id !== userId && !item.isPast && (
+              {!item.hasParticipated && !item.isPast && (
                 <Grid item xs={12} sm={6}>
                   <Button
                     variant="contained"
@@ -345,7 +342,7 @@ function PostGames() {
       ))}
       {items.length === 0 && (
         <Typography sx={{ color: "white" }}>
-          ไม่พบโพสต์นัดเล่นที่คุณเคยโพสต์
+          ไม่พบโพสต์ที่คุณเคยโพสต์
         </Typography>
       )}
     </div>

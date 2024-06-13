@@ -162,9 +162,9 @@ export default function StoreInfo({ storeId }: StoreInfoProps) {
             <Typography color="text.secondary" variant="body2">
               ที่อยู่ : {`${storeInfo.house_number} ${storeInfo.alley} ${storeInfo.road} ${storeInfo.district} ${storeInfo.sub_district} ${storeInfo.province}`}
             </Typography>
-            {/* <Box display="flex" justifyContent="center">
+            <Box display="flex" justifyContent="center">
               <img src={storeInfo.store_image} alt="Store" style={{ maxHeight: '200px', maxWidth: '100%' }} />
-            </Box> */}
+            </Box>
           </Stack>
         )}
       </CardContent>

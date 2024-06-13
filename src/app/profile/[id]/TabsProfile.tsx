@@ -55,7 +55,7 @@ export default function TabsProfile({ userId }: TabsProfileProps) {
     <Box sx={{ width: '100%' }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-          <Tab label="โพสต์" {...a11yProps(0)} />
+          <Tab label="โพสต์นัดเล่น" {...a11yProps(0)} />
           <Tab label="ประวัติการเข้าร่วม" {...a11yProps(1)} />
         </Tabs>
       </Box>

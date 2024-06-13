@@ -42,6 +42,53 @@ import { useEffect, useState } from "react";
 import { format, parseISO, compareDesc } from "date-fns";
 import { th } from "date-fns/locale";
 
+// const items = [
+//   {
+//     id: 1,
+//     date: "วันอาทิตย์ที่ 21 กุมภาพันธ์  พ.ศ. 2566",
+//     date_meet: "วันอาทิตย์ที่ 24 มีนาคม  พ.ศ. 2566",
+//     time_meet: "14:00 น.",
+//     user: "วรปกร จารุศิริพจน์",
+//     title: "Werewolf",
+//     description: "เอา Werewolf ตัวเสริมมาด้วยก็ดีนะ เพราะเรามีแค่ตัวหลัก",
+//     num_people: 5,
+//     participant: 1,
+//     image:
+//       "https://promotions.co.th/wp-content/uploads/2018/06/Lazada-Boardgame-2.jpg",
+//     profile:
+//       "https://scontent.fkdt3-1.fna.fbcdn.net/v/t1.6435-1/128520468_708312693415305_7662898639450323422_n.jpg?stp=cp0_dst-jpg_p40x40&_nc_cat=102&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeEvGCGsdcArxffFEo_CTsIpevnKI8_KTQd6-cojz8pNB_RFB8aAFgtrdC7tmNreCahg44tkLiiF9vuCBD2S08Ga&_nc_ohc=Uw6hP78zOX8Ab7yzKhn&_nc_ht=scontent.fkdt3-1.fna&oh=00_AfD0jl3Q2NBLvhHUH6x2YPsK1-ceW-HjDuvEBfVdhg03Kw&oe=66548C26",
+//   },
+//   {
+//     id: 2,
+//     date: "วันอาทิตย์ที่ 22 กุมภาพันธ์  พ.ศ. 2566",
+//     date_meet: "วันอาทิตย์ที่ 31 มีนาคม  พ.ศ. 2566",
+//     time_meet: "15:00 น.",
+//     user: "ณัฐวุฒิ แก้วมหา",
+//     title: "ซาเลม 1692",
+//     description: "เอา ซาเลม 1692 ตัวเสริมมาด้วยก็ดีนะ เพราะเรามีแค่ตัวหลัก",
+//     num_people: 5,
+//     participant: 1,
+//     image: "https://live.staticflickr.com/65535/49262314468_e307bd2a55_b.jpg",
+//     profile:
+//       "https://scontent.fkdt3-1.fna.fbcdn.net/v/t1.6435-9/64302371_2291674051160875_4818937659546140672_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeHF4xk0-rddhfIOGu4A6ETaMhraglDnixIyGtqCUOeLEkoQnYryeJa9YPA-E8HzB9-nuCR5wGZLAxZhEO_qTdBB&_nc_ohc=Ppnix1PQWx8Q7kNvgFqzbpa&_nc_ht=scontent.fkdt3-1.fna&oh=00_AfCSiyasCgBQsH6Xmg0ziOu_tBrRCrYSdY0q5dai1ocNHQ&oe=6654AB75",
+//   },
+//   {
+//     id: 3,
+//     date: "วันอาทิตย์ที่ 23 กุมภาพันธ์  พ.ศ. 2566",
+//     date_meet: "วันอาทิตย์ที่ 7 เมษายน  พ.ศ. 2566",
+//     time_meet: "16:00 น.",
+//     user: "นวพร บุญก่อน",
+//     title: "Spyfall",
+//     description: "เอา Spyfall ตัวเสริมมาด้วยก็ดีนะ เพราะเรามีแค่ตัวหลัก",
+//     num_people: 5,
+//     participant: 1,
+//     image:
+//       "https://whatsericplaying.files.wordpress.com/2016/01/spyfall-006.jpg?w=1180",
+//     profile:
+//       "https://scontent.fkdt3-1.fna.fbcdn.net/v/t1.6435-9/69261198_442076069735088_3232231141012406272_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeHFaL86TpC1_vVNPWG1a9sA8ifm7PFiOUjyJ-bs8WI5SPf7tix49NIxmVDJWLnsGeLTePhvqTBajsbKjgIVq6Ar&_nc_ohc=d6YjEwdNkRgQ7kNvgHqfUje&_nc_ht=scontent.fkdt3-1.fna&oh=00_AfAvG3bUk9BKuYKdGhXnNoglRZid_wtaaqu-a_ICL2EOeQ&oe=6654B669",
+//   },
+// ];
+
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
   const formattedDate = format(
@@ -73,14 +120,14 @@ const isPastDateTime = (date, time) => {
   return eventDate < new Date();
 };
 
-function PostGames() {
+function Participating() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState("");
 
   useEffect(() => {
-    const fetchUserAndPosts = async () => {
+    async function fetchData() {
       const accessToken = localStorage.getItem("access_token");
       if (!accessToken) {
         setError("Access token is not available.");
@@ -88,34 +135,10 @@ function PostGames() {
         return;
       }
 
+      const decoded = jwtDecode(accessToken);
+      setUserId(decoded.users_id);
+
       try {
-        const decoded = jwtDecode(accessToken);
-        setUserId(decoded.users_id);
-
-        const userResponse = await fetch(
-          `http://localhost:8080/api/users/${decoded.users_id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (!userResponse.ok) throw new Error("Failed to fetch user details");
-        const userData = await userResponse.json();
-
-        const postsResponse = await fetch(
-          `http://localhost:8080/api/postGame/user/${decoded.users_id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (!postsResponse.ok) throw new Error("Failed to fetch posts");
-        const postsData = await postsResponse.json();
-
         const participantsResponse = await fetch(
           `http://localhost:8080/api/participate`,
           {
@@ -127,24 +150,52 @@ function PostGames() {
         );
         if (!participantsResponse.ok)
           throw new Error("Failed to fetch participants");
-        const participantsData = await participantsResponse.json();
+        const participants = await participantsResponse.json();
 
-        // กรองโพสต์ที่มีสถานะเป็น unActive
-        const activePosts = postsData.filter(
-          (post) => post.status_post !== "unActive"
+        const myParticipations = participants.filter(
+          (part) => part.user_id === decoded.users_id
         );
-
-        const postsWithParticipants = activePosts.map((post) => {
-          const postParticipants = participantsData.filter(
-            (participant) => participant.post_games_id === post.post_games_id
+        const postPromises = myParticipations.map(async (participation) => {
+          const postResponse = await fetch(
+            `http://localhost:8080/api/postGame/${participation.post_games_id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+            }
           );
+          if (!postResponse.ok) throw new Error("Failed to fetch post");
+          const post = await postResponse.json();
+
+          console.log("Post data:", post);
+
+          if (!post.users_id) {
+            console.error("Post does not have users_id", post);
+            throw new Error("Post does not have users_id");
+          }
+
+          const userResponse = await fetch(
+            `http://localhost:8080/api/users/${post.users_id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          if (!userResponse.ok) throw new Error("Failed to fetch user");
+          const user = await userResponse.json();
+
           return {
             ...post,
-            participants: postParticipants.length + 1, // Adding 1 to the count of participants
-            userFirstName: userData.first_name,
-            userLastName: userData.last_name,
-            userProfileImage: userData.user_image,
-            creation_date: post.creation_date,
+            participants: myParticipations.filter(
+              (p) => p.post_games_id === post.post_games_id
+            ).length,
+            userProfileImage: user.user_image,
+            userFirstName: user.first_name,
+            userLastName: user.last_name,
+            hasParticipated: true, // เพิ่มสถานะการเข้าร่วม
             formattedCreationDate: formatDateTime(post.creation_date),
             date_meet: post.date_meet,
             time_meet: post.time_meet,
@@ -152,8 +203,8 @@ function PostGames() {
           };
         });
 
-        // เรียงลำดับโพสต์ตามวันที่สร้างโพสต์ และแยกโพสต์ที่เลยนัดเล่นไปแล้วไปด้านล่าง
-        const sortedPosts = postsWithParticipants.sort((a, b) => {
+        const posts = await Promise.all(postPromises);
+        const sortedPosts = posts.sort((a, b) => {
           if (a.isPast && !b.isPast) return 1;
           if (!a.isPast && b.isPast) return -1;
           return compareDesc(
@@ -164,13 +215,13 @@ function PostGames() {
 
         setItems(sortedPosts);
       } catch (error) {
-        setError("Failed to load data: " + error.message);
-      } finally {
-        setLoading(false);
+        console.error("Error fetching data:", error);
+        setError(error.message);
       }
-    };
+      setLoading(false);
+    }
 
-    fetchUserAndPosts();
+    fetchData();
   }, []);
 
   if (loading)
@@ -222,7 +273,7 @@ function PostGames() {
                 gutterBottom
                 sx={{ color: "white" }}
               >
-                {item.userFirstName} {item.userLastName}
+                {`${item.userFirstName} ${item.userLastName}`}
               </Typography>
               <Typography variant="body2" sx={{ color: "white" }}>
                 {item.formattedCreationDate}
@@ -283,10 +334,6 @@ function PostGames() {
             <Typography sx={{ color: "white" }}>
               วันที่เจอกัน: {formatThaiDate(item.date_meet)}
             </Typography>
-            <Typography sx={{ color: "white" }}>
-              เวลาที่เจอกัน: {formatThaiTime(item.time_meet)}
-            </Typography>
-
             <br />
             <Typography sx={{ color: "white" }}>{item.detail_post}</Typography>
 
@@ -301,7 +348,7 @@ function PostGames() {
             <br />
 
             <Grid container spacing={2} justifyContent="center">
-              {item.users_id !== userId && !item.isPast && (
+              {!item.hasParticipated && !item.isPast && (
                 <Grid item xs={12} sm={6}>
                   <Button
                     variant="contained"
@@ -345,11 +392,11 @@ function PostGames() {
       ))}
       {items.length === 0 && (
         <Typography sx={{ color: "white" }}>
-          ไม่พบโพสต์นัดเล่นที่คุณเคยโพสต์
+          ไม่พบโพสต์ที่คุณเข้าร่วม
         </Typography>
       )}
     </div>
   );
 }
 
-export default PostGames;
+export default Participating;
