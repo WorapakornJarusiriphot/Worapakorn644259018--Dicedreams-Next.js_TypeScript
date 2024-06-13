@@ -111,7 +111,8 @@ function Participating({ userId }) {
 
         const myParticipations = participants.filter(
           (part) =>
-            part.user_id === userId && part.participant_status !== "unActive"
+            part.user_id === userId &&
+            part.participant_status !== "unActive"
         );
 
         const postPromises = myParticipations.map(async (participation) => {
