@@ -129,12 +129,7 @@ function PostGames() {
           throw new Error("Failed to fetch participants");
         const participantsData = await participantsResponse.json();
 
-        // กรองโพสต์ที่มีสถานะเป็น unActive
-        const activePosts = postsData.filter(
-          (post) => post.status_post !== "unActive"
-        );
-
-        const postsWithParticipants = activePosts.map((post) => {
+        const postsWithParticipants = postsData.map((post) => {
           const postParticipants = participantsData.filter(
             (participant) => participant.post_games_id === post.post_games_id
           );
@@ -163,6 +158,7 @@ function PostGames() {
         });
 
         setItems(sortedPosts);
+        setItems(postsWithParticipants);
       } catch (error) {
         setError("Failed to load data: " + error.message);
       } finally {
@@ -345,7 +341,7 @@ function PostGames() {
       ))}
       {items.length === 0 && (
         <Typography sx={{ color: "white" }}>
-          ไม่พบโพสต์นัดเล่นที่คุณเคยโพสต์
+          ไม่พบโพสต์ที่คุณเคยโพสต์
         </Typography>
       )}
     </div>

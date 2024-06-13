@@ -277,10 +277,6 @@ function PostGames() {
     setSuccessMessage("");
   };
 
-  const handleProfileClick = (userId) => {
-    router.push(`/profile/${userId}`);
-  };
-
   if (loading)
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
   if (error) return <Typography sx={{ color: "white" }}>{error}</Typography>;
@@ -310,29 +306,25 @@ function PostGames() {
             sx={{ marginBottom: "16px" }}
           >
             <Grid item>
-              <div onClick={() => handleProfileClick(item.users_id)}>
-                <img
-                  src={item.userProfileImage}
-                  alt={`${item.userFirstName} ${item.userLastName}`}
-                  width="50"
-                  height="50"
-                  style={{
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    objectPosition: "center",
-                    width: "50px",
-                    height: "50px",
-                    cursor: "pointer", // เพิ่ม cursor: pointer
-                  }}
-                />
-              </div>
+              <img
+                src={item.userProfileImage}
+                alt={`${item.userFirstName} ${item.userLastName}`}
+                width="50"
+                height="50"
+                style={{
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  objectPosition: "center",
+                  width: "50px",
+                  height: "50px",
+                }}
+              />
             </Grid>
             <Grid item xs>
               <Typography
                 variant="subtitle1"
                 gutterBottom
-                sx={{ color: "white", cursor: "pointer" }} // เพิ่ม cursor: pointer
-                onClick={() => handleProfileClick(item.users_id)}
+                sx={{ color: "white" }}
               >
                 {item.userFirstName} {item.userLastName}
               </Typography>

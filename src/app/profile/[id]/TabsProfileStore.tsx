@@ -55,7 +55,7 @@ export default function TabsProfileStore({ storeId }: TabsProfileStoreProps) {
     <Box sx={{ width: '100%' }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-          <Tab label="โพสต์" {...a11yProps(0)} />
+          <Tab label="โพสต์กิจกรรม" {...a11yProps(0)} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
