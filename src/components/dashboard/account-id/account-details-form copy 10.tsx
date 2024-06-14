@@ -84,6 +84,7 @@ import {
   Alert,
 } from '@mui/material';
 
+// กำหนด interface สำหรับข้อมูลผู้ใช้
 interface UserData {
   users_id: string;
   role: string;
@@ -125,7 +126,7 @@ interface User {
   gender: string;
   birthday: Dayjs;
   users_id: string;
-  userImage: string; 
+  userImage: string; // Add the 'userImage' property
 }
 
 const AccountDetailsForm: React.FC = () => {
@@ -296,11 +297,15 @@ const AccountDetailsForm: React.FC = () => {
         setUserData((prev) => ({
           ...prev,
           users_id: decoded.users_id,
-          role: decoded.store_id ? 'store' : 'user', // Ensure role is set to 'store' if it's a store user
+          role: 'store', // Ensure role is set to 'store' if it's a store user
         }));
 
+        // Fetch store data if store_id is available
         if (decoded.store_id) {
-          fetchStoreData(decoded.store_id);
+          setStoreData({
+            ...storeData,
+            store_id: decoded.store_id,
+          });
         }
       }
     }
@@ -312,7 +317,7 @@ const AccountDetailsForm: React.FC = () => {
     <>
       <form onSubmit={handleSubmit}>
         <Card>
-          <CardHeader title="โปรไฟล์ผู้ใช้555555" subheader="ข้อมูลสามารถแก้ไขได้55555" />
+          <CardHeader title="โปรไฟล์ผู้ใช้" subheader="ข้อมูลสามารถแก้ไขได้" />
           <Divider />
           <CardContent>
             <Grid container spacing={3}>

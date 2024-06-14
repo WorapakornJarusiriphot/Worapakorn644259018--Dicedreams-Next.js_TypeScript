@@ -62,7 +62,7 @@ export function AccountInfo(): React.JSX.Element {
         setUser((prev) => ({
           ...prev,
           username: decodedToken.username,
-          role: data.role,
+          userType: data.role,
           firstName: data.first_name,
           lastName: data.last_name,
           email: data.email,
@@ -175,7 +175,7 @@ export function AccountInfo(): React.JSX.Element {
   //     lastName: '',
   //     email: '',
   //     username: '',
-  //     role: '',
+  //     userType: '',
   //     profilePictureUrl: '',
   //     users_id: '',
   //     phoneNumber: '',

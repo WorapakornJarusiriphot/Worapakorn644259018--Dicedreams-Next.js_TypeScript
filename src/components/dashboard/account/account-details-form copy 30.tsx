@@ -129,40 +129,40 @@ const AccountDetailsForm: React.FC = () => {
   const [storeData, setStoreData] = useState<Store | null>(null);
 
   useEffect(() => {
-    if (user) {
-      setUserData(user);
-    }
+    const fetchUserProfile = async () => {
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        throw new Error('Access token is missing');
+      }
 
-    const fetchStoreData = async () => {
+      const decodedToken: { users_id: string; store_id: string } = jwtDecode(accessToken);
+      console.log("Decoded Token:", decodedToken);
+
       try {
-        const accessToken = localStorage.getItem('access_token');
-        if (!accessToken) {
-          throw new Error('Access token is missing');
-        }
-
-        const decoded: { store_id: string; users_id: string } = jwtDecode(accessToken);
-
-        const storeId = decoded.store_id;
-        if (!storeId) {
-          throw new Error('Store ID is missing');
-        }
-
-        // Fetch store data using store_id
-        const storeResponse = await axios.get(`http://localhost:8080/api/store/${storeId}`, {
+        const userResponse = await axios.get(`http://localhost:8080/api/users/${decodedToken.users_id}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           }
         });
+        setUser(userResponse.data);
+        setUserData(userResponse.data);
 
-        setStoreData(storeResponse.data);
-        console.log('Store Data:', storeResponse.data);
+        if (decodedToken.store_id) {
+          const storeResponse = await axios.get(`http://localhost:8080/api/store/${decodedToken.store_id}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            }
+          });
+          setStoreData(storeResponse.data);
+          console.log('Store Data:', storeResponse.data);
+        }
       } catch (error) {
-        console.error('Error fetching store data:', error);
+        console.error('Error fetching user/store data:', error);
       }
     };
 
-    fetchStoreData();
-  }, [user]);
+    fetchUserProfile();
+  }, [setUser]);
 
   // const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
   //   const { name, value } = event.target;
@@ -545,18 +545,18 @@ const AccountDetailsForm: React.FC = () => {
                 </FormControl>
               </Grid>
               <Grid item md={6} xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel htmlFor="outlined-username" shrink>ชื่อผู้ใช้</InputLabel>
-                  <OutlinedInput
-                    id="outlined-username"
-                    label="ชื่อผู้ใช้"
-                    name="username"
-                    value={userData.username}
-                    onChange={handleChange}
-                  />
-                </FormControl>
-              </Grid>
-              {storeData && (
+              <FormControl fullWidth>
+                <InputLabel htmlFor="outlined-username" shrink>ชื่อผู้ใช้</InputLabel>
+                <OutlinedInput
+                  id="outlined-username"
+                  label="ชื่อผู้ใช้"
+                  name="username"
+                  value={userData.username}
+                  onChange={handleChange}
+                />
+              </FormControl>
+            </Grid>
+            {storeData && (
                 <>
                   <Grid item md={6} xs={12}>
                     <FormControl fullWidth required>

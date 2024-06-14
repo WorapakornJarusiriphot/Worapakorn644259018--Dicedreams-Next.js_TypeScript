@@ -1,9 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
 
 interface User {
-  role: string;
-  role: string;
   firstName: string;
   lastName: string;
   email: string;

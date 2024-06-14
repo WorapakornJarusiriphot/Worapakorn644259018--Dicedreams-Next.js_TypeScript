@@ -3,7 +3,6 @@ import dayjs, { Dayjs } from 'dayjs';
 
 interface User {
   role: string;
-  role: string;
   firstName: string;
   lastName: string;
   email: string;

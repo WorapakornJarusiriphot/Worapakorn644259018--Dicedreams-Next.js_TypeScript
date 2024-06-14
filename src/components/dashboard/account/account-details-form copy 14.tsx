@@ -91,7 +91,7 @@ interface User {
   lastName: string;
   email: string;
   username: string;
-  role: string;
+  userType: string;
   profilePictureUrl: string;
   phoneNumber: string;
   gender: string;
@@ -140,28 +140,21 @@ const AccountDetailsForm: React.FC = () => {
           throw new Error('Access token is missing');
         }
 
-        const decoded: { store_id: string; users_id: string } = jwtDecode(accessToken);
-
-        const storeId = decoded.store_id;
-        if (!storeId) {
-          throw new Error('Store ID is missing');
-        }
-
-        // Fetch store data using store_id
-        const storeResponse = await axios.get(`http://localhost:8080/api/store/${storeId}`, {
+        const response = await axios.get<Store>(`http://localhost:8080/api/store/${user.users_id}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           }
         });
 
-        setStoreData(storeResponse.data);
-        console.log('Store Data:', storeResponse.data);
+        setStoreData(response.data);
       } catch (error) {
         console.error('Error fetching store data:', error);
       }
     };
 
-    fetchStoreData();
+    if (user.userType === 'store') {
+      fetchStoreData();
+    }
   }, [user]);
 
   // const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -292,7 +285,7 @@ const AccountDetailsForm: React.FC = () => {
 
   // const [user, setUserData] = useState({
   //   username: "",
-  //   role: "",
+  //   userType: "",
   //   firstName: "",
   //   lastName: "",
   //   profilePictureUrl: "",
@@ -347,7 +340,7 @@ const AccountDetailsForm: React.FC = () => {
   //     lastName: "",
   //     email: "",
   //     username: "",
-  //     role: "",
+  //     userType: "",
   //     profilePictureUrl: "",
   //     phoneNumber: "",
   //     users_id: ""
@@ -398,7 +391,7 @@ const AccountDetailsForm: React.FC = () => {
         setUserData(prev => ({
           ...prev,
           username: data.username,
-          role: data.role,
+          userType: data.role,
           firstName: data.first_name,
           lastName: data.last_name,
           email: data.email, // Add the missing 'email' property
@@ -455,7 +448,8 @@ const AccountDetailsForm: React.FC = () => {
 
             setUserData({
               username: data.username,
-              role: data.role,
+              userType: data.role,
+              // role: data.role, // Changed from userType to role
               firstName: data.first_name,
               lastName: data.last_name,
               email: data.email,
@@ -485,8 +479,6 @@ const AccountDetailsForm: React.FC = () => {
   // const handleDateChange = (newDate: Dayjs | null) => {
   //   setUserData((prev) => ({ ...prev, birthday: newDate }));
   // };
-
-  console.log("User Role:", user.role); // เพิ่มการแสดงผล User Role
 
   return (
     <>
@@ -544,19 +536,7 @@ const AccountDetailsForm: React.FC = () => {
                   />
                 </FormControl>
               </Grid>
-              <Grid item md={6} xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel htmlFor="outlined-username" shrink>ชื่อผู้ใช้</InputLabel>
-                  <OutlinedInput
-                    id="outlined-username"
-                    label="ชื่อผู้ใช้"
-                    name="username"
-                    value={userData.username}
-                    onChange={handleChange}
-                  />
-                </FormControl>
-              </Grid>
-              {storeData && (
+              {user.userType === 'store' && storeData && (
                 <>
                   <Grid item md={6} xs={12}>
                     <FormControl fullWidth required>
@@ -570,7 +550,7 @@ const AccountDetailsForm: React.FC = () => {
                       />
                     </FormControl>
                   </Grid>
-                  {/* <Grid item md={6} xs={12}>
+                  <Grid item md={6} xs={12}>
                     <FormControl fullWidth>
                       <InputLabel htmlFor="store_image">รูปภาพร้าน</InputLabel>
                       <OutlinedInput
@@ -581,76 +561,24 @@ const AccountDetailsForm: React.FC = () => {
                         onChange={(e) => setStoreData({ ...storeData, store_image: e.target.value })}
                       />
                     </FormControl>
-                  </Grid> */}
-                  <Grid item md={6} xs={12}>
-                    <FormControl fullWidth>
-                      <InputLabel htmlFor="house_number">บ้านเลขที่</InputLabel>
-                      <OutlinedInput
-                        id="house_number"
-                        label="บ้านเลขที่"
-                        name="house_number"
-                        value={storeData.house_number}
-                        onChange={(e) => setStoreData({ ...storeData, house_number: e.target.value })}
-                      />
-                    </FormControl>
                   </Grid>
-                  <Grid item md={6} xs={12}>
+                  <Grid item md={12} xs={12}>
                     <FormControl fullWidth>
-                      <InputLabel htmlFor="alley">ตรอก/ซอย</InputLabel>
+                      <InputLabel htmlFor="address">ที่อยู่</InputLabel>
                       <OutlinedInput
-                        id="alley"
-                        label="ตรอก/ซอย"
-                        name="alley"
-                        value={storeData.alley}
-                        onChange={(e) => setStoreData({ ...storeData, alley: e.target.value })}
-                      />
-                    </FormControl>
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <FormControl fullWidth>
-                      <InputLabel htmlFor="road">ถนน</InputLabel>
-                      <OutlinedInput
-                        id="road"
-                        label="ถนน"
-                        name="road"
-                        value={storeData.road}
-                        onChange={(e) => setStoreData({ ...storeData, road: e.target.value })}
-                      />
-                    </FormControl>
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <FormControl fullWidth>
-                      <InputLabel htmlFor="sub_district">ตำบล/แขวง</InputLabel>
-                      <OutlinedInput
-                        id="sub_district"
-                        label="ตำบล/แขวง"
-                        name="sub_district"
-                        value={storeData.sub_district}
-                        onChange={(e) => setStoreData({ ...storeData, sub_district: e.target.value })}
-                      />
-                    </FormControl>
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <FormControl fullWidth>
-                      <InputLabel htmlFor="district">อำเภอ/เขต</InputLabel>
-                      <OutlinedInput
-                        id="district"
-                        label="อำเภอ/เขต"
-                        name="district"
-                        value={storeData.district}
-                        onChange={(e) => setStoreData({ ...storeData, district: e.target.value })}
-                      />
-                    </FormControl>
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <FormControl fullWidth>
-                      <InputLabel htmlFor="province">จังหวัด</InputLabel>
-                      <OutlinedInput
-                        id="province"
-                        label="จังหวัด"
-                        name="province"
-                        value={storeData.province}
-                        onChange={(e) => setStoreData({ ...storeData, province: e.target.value })}
+                        id="address"
+                        label="ที่อยู่"
+                        name="address"
+                        value={`${storeData.house_number} ${storeData.alley} ${storeData.road} ${storeData.sub_district} ${storeData.district} ${storeData.province}`}
+                        onChange={(e) => setStoreData({
+                          ...storeData,
+                          house_number: e.target.value.split(' ')[0],
+                          alley: e.target.value.split(' ')[1],
+                          road: e.target.value.split(' ')[2],
+                          sub_district: e.target.value.split(' ')[3],
+                          district: e.target.value.split(' ')[4],
+                          province: e.target.value.split(' ')[5],
+                        })}
                       />
                     </FormControl>
                   </Grid>

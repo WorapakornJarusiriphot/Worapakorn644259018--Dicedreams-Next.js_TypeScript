@@ -62,7 +62,7 @@ export function AccountInfo(): React.JSX.Element {
         setUser((prev) => ({
           ...prev,
           username: decodedToken.username,
-          role: data.role,
+          userType: data.role,
           firstName: data.first_name,
           lastName: data.last_name,
           email: data.email,
@@ -175,7 +175,7 @@ export function AccountInfo(): React.JSX.Element {
   //     lastName: '',
   //     email: '',
   //     username: '',
-  //     role: '',
+  //     userType: '',
   //     profilePictureUrl: '',
   //     users_id: '',
   //     phoneNumber: '',
@@ -188,13 +188,12 @@ export function AccountInfo(): React.JSX.Element {
 
   const altText = `${user.firstName || 'User'} ${user.lastName || ''}`;
 
-  const formatDate = (date: any) => {
-    const dayjsDate = dayjs(date);
-    if (!dayjsDate.isValid()) return 'ไม่ระบุวันเกิด';
+  const formatDate = (date: Dayjs) => {
+    if (!date) return 'ไม่ระบุวันเกิด';
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const formattedDate = new Intl.DateTimeFormat('th-TH', options).format(dayjsDate.toDate());
-    const yearBuddhistEra = dayjsDate.year() + 543;
-    return formattedDate.replace(dayjsDate.year().toString(), yearBuddhistEra.toString());
+    const formattedDate = new Intl.DateTimeFormat('th-TH', options).format(date.toDate());
+    const yearBuddhistEra = date.year() + 543;
+    return formattedDate.replace(date.year().toString(), yearBuddhistEra.toString());
   };
 
   return (
