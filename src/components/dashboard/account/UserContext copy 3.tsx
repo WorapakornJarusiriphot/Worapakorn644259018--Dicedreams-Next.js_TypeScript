@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
 
 interface User {
-  role: string;
   role: string;
   firstName: string;
   lastName: string;
@@ -26,6 +25,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User>({
+    role: '',
     firstName: '',
     lastName: '',
     email: '',

@@ -84,6 +84,7 @@ import {
   Alert,
 } from '@mui/material';
 
+// กำหนด interface สำหรับข้อมูลผู้ใช้
 interface UserData {
   users_id: string;
   role: string;
@@ -125,46 +126,45 @@ interface User {
   gender: string;
   birthday: Dayjs;
   users_id: string;
-  userImage: string; 
+  userImage: string; // Add the 'userImage' property
 }
 
 const AccountDetailsForm: React.FC = () => {
   const { user, setUser } = useUser();
   const [userData, setUserData] = useState<UserData>({
     ...user,
-    role: user.role || '',
-    createdAt: '',
-    updatedAt: '',
+    role: user.role || "",
+    createdAt: "",
+    updatedAt: "",
   });
   const [storeData, setStoreData] = useState<StoreData | null>(null);
   const [cleared, setCleared] = React.useState<boolean>(false);
 
   useEffect(() => {
-    const fetchStoreData = async (storeId: string) => {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) {
-        setAlertMessage('Access token is missing');
-        setAlertSeverity('error');
-        setOpenSnackbar(true);
-        return;
-      }
-      try {
-        const response = await axios.get(`http://localhost:8080/api/store/${storeId}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        setStoreData(response.data);
-      } catch (error) {
-        console.error('Error fetching store data:', error);
-        setAlertMessage('Error fetching store data');
-        setAlertSeverity('error');
-        setOpenSnackbar(true);
-      }
-    };
-
-    if (user.role === 'store' && user.users_id) {
-      fetchStoreData(user.users_id);
+    if (user.role === "store") {
+      const fetchStoreData = async () => {
+        const accessToken = localStorage.getItem("access_token");
+        if (!accessToken) {
+          setAlertMessage('Access token is missing');
+          setAlertSeverity('error');
+          setOpenSnackbar(true);
+          return;
+        }
+        try {
+          const response = await axios.get(`http://localhost:8080/api/store/${user.users_id}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            }
+          });
+          setStoreData(response.data);
+        } catch (error) {
+          console.error('Error fetching store data:', error);
+          setAlertMessage('Error fetching store data');
+          setAlertSeverity('error');
+          setOpenSnackbar(true);
+        }
+      };
+      fetchStoreData();
     }
   }, [user]);
 
@@ -176,7 +176,7 @@ const AccountDetailsForm: React.FC = () => {
 
       return () => clearTimeout(timeout);
     }
-    return () => {};
+    return () => { };
   }, [cleared]);
 
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -187,8 +187,8 @@ const AccountDetailsForm: React.FC = () => {
     if (user) {
       setUserData({
         ...user,
-        createdAt: '',
-        updatedAt: '',
+        createdAt: "",
+        updatedAt: "",
       });
     }
   }, [user]);
@@ -221,7 +221,7 @@ const AccountDetailsForm: React.FC = () => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const accessToken = localStorage.getItem('access_token');
+      const accessToken = localStorage.getItem("access_token");
       if (!accessToken) {
         throw new Error('Access token is missing');
       }
@@ -235,45 +235,37 @@ const AccountDetailsForm: React.FC = () => {
         userImage: userImage || '',
       };
 
-      await axios.put(
-        `http://localhost:8080/api/users/${userData.users_id}`,
-        {
-          first_name: updatedUser.firstName,
-          last_name: updatedUser.lastName,
-          username: updatedUser.username,
-          email: updatedUser.email,
-          birthday: updatedUser.birthday?.format('MM/DD/YYYY'),
-          phone_number: updatedUser.phoneNumber,
-          gender: updatedUser.gender,
-          user_image: updatedUser.userImage,
-        },
-        {
+      await axios.put(`http://localhost:8080/api/users/${userData.users_id}`, {
+        first_name: updatedUser.firstName,
+        last_name: updatedUser.lastName,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        birthday: updatedUser.birthday?.format('MM/DD/YYYY'),
+        phone_number: updatedUser.phoneNumber,
+        gender: updatedUser.gender,
+        user_image: updatedUser.userImage,
+      }, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        }
+      });
+
+      if (user.role === "store" && storeData) {
+        await axios.put(`http://localhost:8080/api/store/${storeData.store_id}`, {
+          name_store: storeData.name_store,
+          phone_number: storeData.phone_number,
+          house_number: storeData.house_number,
+          alley: storeData.alley,
+          road: storeData.road,
+          district: storeData.district,
+          sub_district: storeData.sub_district,
+          province: storeData.province,
+          store_image: storeData.store_image,
+        }, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (user.role === 'store' && storeData) {
-        await axios.put(
-          `http://localhost:8080/api/store/${storeData.store_id}`,
-          {
-            name_store: storeData.name_store,
-            phone_number: storeData.phone_number,
-            house_number: storeData.house_number,
-            alley: storeData.alley,
-            road: storeData.road,
-            district: storeData.district,
-            sub_district: storeData.sub_district,
-            province: storeData.province,
-            store_image: storeData.store_image,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
           }
-        );
+        });
       }
 
       setUser(updatedUser);
@@ -289,63 +281,136 @@ const AccountDetailsForm: React.FC = () => {
   };
 
   useEffect(() => {
-    const accessToken = localStorage.getItem('access_token');
+    const accessToken = localStorage.getItem("access_token");
     if (accessToken) {
-      const decoded: JwtPayload & { users_id: string; lastName: string; email: string; store_id: string } = jwtDecode(accessToken);
+      const decoded: JwtPayload & { users_id: string; lastName: string; email: string } = jwtDecode(accessToken);
       if (decoded && decoded.users_id) {
-        setUserData((prev) => ({
+        setUserData(prev => ({
           ...prev,
-          users_id: decoded.users_id,
-          role: decoded.store_id ? 'store' : 'user', // Ensure role is set to 'store' if it's a store user
+          users_id: decoded.users_id
         }));
-
-        if (decoded.store_id) {
-          fetchStoreData(decoded.store_id);
-        }
       }
     }
   }, []);
 
-  const altText = `${userData.firstName || 'User'} ${userData.lastName || ''}`;
+  const [openNav, setOpenNav] = useState(false);
+
+  const fetchUserProfile = async (users_id: any, accessToken: string, decodedToken: { username: any; }) => {
+    try {
+      console.log(`Requesting URL: http://localhost:8080/api/users/${users_id}`);
+      const response = await fetch(
+        `http://localhost:8080/api/users/${users_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      console.log("API Response Status:", response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Profile Data:", data);
+        setUserData(prev => ({
+          ...prev,
+          username: data.username,
+          userType: data.role,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          email: data.email, // Add the missing 'email' property
+          gender: data.gender,
+          phoneNumber: data.phone_number,
+          birthday: dayjs(data.birthday),
+          users_id: data.users_id, // Add the missing 'users_id' property
+          profilePictureUrl: data.user_image || "",
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+        }));
+      } else {
+        console.error(`API Error: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    }
+  };
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access_token");
+    if (accessToken) {
+      const decodedToken = JSON.parse(atob(accessToken.split(".")[1]));
+      const users_id = decodedToken.users_id;
+      fetchUserProfile(users_id, accessToken, decodedToken);
+    }
+  }, []);
+
+  const altText = `${userData.firstName || "User"} ${userData.lastName || ""}`;
 
   return (
     <>
       <form onSubmit={handleSubmit}>
         <Card>
-          <CardHeader title="โปรไฟล์ผู้ใช้555555" subheader="ข้อมูลสามารถแก้ไขได้55555" />
+          <CardHeader title="โปรไฟล์ผู้ใช้" subheader="ข้อมูลสามารถแก้ไขได้" />
           <Divider />
           <CardContent>
             <Grid container spacing={3}>
               <Grid item md={6} xs={12}>
                 <FormControl fullWidth required>
                   <InputLabel htmlFor="firstName">ชื่อจริง</InputLabel>
-                  <OutlinedInput id="firstName" label="ชื่อจริง" name="firstName" value={userData.firstName} onChange={handleChange} />
+                  <OutlinedInput
+                    id="firstName"
+                    label="ชื่อจริง"
+                    name="firstName"
+                    value={userData.firstName}
+                    onChange={handleChange}
+                  />
                 </FormControl>
               </Grid>
               <Grid item md={6} xs={12}>
                 <FormControl fullWidth required>
                   <InputLabel htmlFor="lastName">นามสกุล</InputLabel>
-                  <OutlinedInput id="lastName" label="นามสกุล" name="lastName" value={userData.lastName} onChange={handleChange} />
+                  <OutlinedInput
+                    id="lastName"
+                    label="นามสกุล"
+                    name="lastName"
+                    value={userData.lastName}
+                    onChange={handleChange}
+                  />
                 </FormControl>
               </Grid>
               <Grid item md={6} xs={12}>
                 <FormControl fullWidth required>
                   <InputLabel htmlFor="email">อีเมล</InputLabel>
-                  <OutlinedInput id="email" label="อีเมล" name="email" value={userData.email} onChange={handleChange} />
+                  <OutlinedInput
+                    id="email"
+                    label="อีเมล"
+                    name="email"
+                    value={userData.email}
+                    onChange={handleChange}
+                  />
                 </FormControl>
               </Grid>
               <Grid item md={6} xs={12}>
                 <FormControl fullWidth>
                   <InputLabel htmlFor="phoneNumber">หมายเลขโทรศัพท์</InputLabel>
-                  <OutlinedInput id="phoneNumber" label="หมายเลขโทรศัพท์" name="phoneNumber" value={userData.phoneNumber} onChange={handleChange} />
+                  <OutlinedInput
+                    id="phoneNumber"
+                    label="หมายเลขโทรศัพท์"
+                    name="phoneNumber"
+                    value={userData.phoneNumber}
+                    onChange={handleChange}
+                  />
                 </FormControl>
               </Grid>
               <Grid item md={6} xs={12}>
                 <FormControl fullWidth>
-                  <InputLabel htmlFor="outlined-username" shrink>
-                    ชื่อผู้ใช้
-                  </InputLabel>
-                  <OutlinedInput id="outlined-username" label="ชื่อผู้ใช้" name="username" value={userData.username} onChange={handleChange} />
+                  <InputLabel htmlFor="outlined-username" shrink>ชื่อผู้ใช้</InputLabel>
+                  <OutlinedInput
+                    id="outlined-username"
+                    label="ชื่อผู้ใช้"
+                    name="username"
+                    value={userData.username}
+                    onChange={handleChange}
+                  />
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
@@ -363,12 +428,18 @@ const AccountDetailsForm: React.FC = () => {
                   </RadioGroup>
                 </FormControl>
               </Grid>
-              {user.role === 'store' && storeData && (
+              {user.role === "store" && storeData && (
                 <>
                   <Grid item md={6} xs={12}>
                     <FormControl fullWidth required>
                       <InputLabel htmlFor="name_store">ชื่อร้านค้า</InputLabel>
-                      <OutlinedInput id="name_store" label="ชื่อร้านค้า" name="name_store" value={storeData.name_store} onChange={handleStoreChange} />
+                      <OutlinedInput
+                        id="name_store"
+                        label="ชื่อร้านค้า"
+                        name="name_store"
+                        value={storeData.name_store}
+                        onChange={handleStoreChange}
+                      />
                     </FormControl>
                   </Grid>
                   <Grid item md={6} xs={12}>
@@ -386,37 +457,73 @@ const AccountDetailsForm: React.FC = () => {
                   <Grid item md={6} xs={12}>
                     <FormControl fullWidth>
                       <InputLabel htmlFor="house_number">เลขที่บ้าน</InputLabel>
-                      <OutlinedInput id="house_number" label="เลขที่บ้าน" name="house_number" value={storeData.house_number} onChange={handleStoreChange} />
+                      <OutlinedInput
+                        id="house_number"
+                        label="เลขที่บ้าน"
+                        name="house_number"
+                        value={storeData.house_number}
+                        onChange={handleStoreChange}
+                      />
                     </FormControl>
                   </Grid>
                   <Grid item md={6} xs={12}>
                     <FormControl fullWidth>
                       <InputLabel htmlFor="alley">ซอย</InputLabel>
-                      <OutlinedInput id="alley" label="ซอย" name="alley" value={storeData.alley} onChange={handleStoreChange} />
+                      <OutlinedInput
+                        id="alley"
+                        label="ซอย"
+                        name="alley"
+                        value={storeData.alley}
+                        onChange={handleStoreChange}
+                      />
                     </FormControl>
                   </Grid>
                   <Grid item md={6} xs={12}>
                     <FormControl fullWidth>
                       <InputLabel htmlFor="road">ถนน</InputLabel>
-                      <OutlinedInput id="road" label="ถนน" name="road" value={storeData.road} onChange={handleStoreChange} />
+                      <OutlinedInput
+                        id="road"
+                        label="ถนน"
+                        name="road"
+                        value={storeData.road}
+                        onChange={handleStoreChange}
+                      />
                     </FormControl>
                   </Grid>
                   <Grid item md={6} xs={12}>
                     <FormControl fullWidth>
                       <InputLabel htmlFor="district">อำเภอ</InputLabel>
-                      <OutlinedInput id="district" label="อำเภอ" name="district" value={storeData.district} onChange={handleStoreChange} />
+                      <OutlinedInput
+                        id="district"
+                        label="อำเภอ"
+                        name="district"
+                        value={storeData.district}
+                        onChange={handleStoreChange}
+                      />
                     </FormControl>
                   </Grid>
                   <Grid item md={6} xs={12}>
                     <FormControl fullWidth>
                       <InputLabel htmlFor="sub_district">ตำบล</InputLabel>
-                      <OutlinedInput id="sub_district" label="ตำบล" name="sub_district" value={storeData.sub_district} onChange={handleStoreChange} />
+                      <OutlinedInput
+                        id="sub_district"
+                        label="ตำบล"
+                        name="sub_district"
+                        value={storeData.sub_district}
+                        onChange={handleStoreChange}
+                      />
                     </FormControl>
                   </Grid>
                   <Grid item md={6} xs={12}>
                     <FormControl fullWidth>
                       <InputLabel htmlFor="province">จังหวัด</InputLabel>
-                      <OutlinedInput id="province" label="จังหวัด" name="province" value={storeData.province} onChange={handleStoreChange} />
+                      <OutlinedInput
+                        id="province"
+                        label="จังหวัด"
+                        name="province"
+                        value={storeData.province}
+                        onChange={handleStoreChange}
+                      />
                     </FormControl>
                   </Grid>
                 </>
@@ -425,9 +532,7 @@ const AccountDetailsForm: React.FC = () => {
           </CardContent>
           <Divider />
           <CardActions>
-            <Button type="submit" variant="contained">
-              บันทึกข้อมูล
-            </Button>
+            <Button type="submit" variant="contained">บันทึกข้อมูล</Button>
           </CardActions>
         </Card>
         <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleSnackbarClose}>
@@ -438,6 +543,6 @@ const AccountDetailsForm: React.FC = () => {
       </form>
     </>
   );
-};
+}
 
 export default AccountDetailsForm;

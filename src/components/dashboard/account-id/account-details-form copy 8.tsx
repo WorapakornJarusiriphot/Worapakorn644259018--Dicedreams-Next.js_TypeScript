@@ -85,22 +85,23 @@ import {
 } from '@mui/material';
 
 
-
-interface User {
+// กำหนด interface สำหรับข้อมูลผู้ใช้
+interface UserData {
+  users_id: string;
+  role: string;
   firstName: string;
   lastName: string;
-  email: string;
+  birthday: Dayjs | null;
   username: string;
-  role: string;
-  profilePictureUrl: string;
+  email: string;
   phoneNumber: string;
   gender: string;
-  birthday: Dayjs;
-  users_id: string;
-  userImage: string; // Add the 'userImage' property
+  userImage: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-interface Store {
+interface StoreData {
   store_id: string;
   name_store: string;
   phone_number: string;
@@ -112,8 +113,21 @@ interface Store {
   province: string;
   store_image: string;
   users_id: string;
-  createdAt: string;
-  updatedAt: string;
+}
+
+interface User {
+  role: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  userType: string;
+  profilePictureUrl: string;
+  phoneNumber: string;
+  gender: string;
+  birthday: Dayjs;
+  users_id: string;
+  userImage: string; // Add the 'userImage' property
 }
 
 interface AccountDetailsFormProps {
@@ -122,93 +136,38 @@ interface AccountDetailsFormProps {
 
 const AccountDetailsForm: React.FC = () => {
   const { user, setUser } = useUser();
-  const [userData, setUserData] = useState(user);
-
+  // const [userData, setUserData] = useState(user);
+  const [userData, setUserData] = useState<UserData>({...user, role: user.role || ""});
+  const [storeData, setStoreData] = useState<StoreData | null>(null);
   const [cleared, setCleared] = React.useState<boolean>(false);
 
-  const [storeData, setStoreData] = useState<Store | null>(null);
-
   useEffect(() => {
-    if (user) {
-      setUserData(user);
-    }
-
-    const fetchStoreData = async () => {
-      try {
-        const accessToken = localStorage.getItem('access_token');
+    if (user.role === "store") {
+      const fetchStoreData = async () => {
+        const accessToken = localStorage.getItem("access_token");
         if (!accessToken) {
-          throw new Error('Access token is missing');
+          setAlertMessage('Access token is missing');
+          setAlertSeverity('error');
+          setOpenSnackbar(true);
+          return;
         }
-
-        const decoded: { store_id: string; users_id: string } = jwtDecode(accessToken);
-
-        const storeId = decoded.store_id;
-        if (!storeId) {
-          throw new Error('Store ID is missing');
+        try {
+          const response = await axios.get(`http://localhost:8080/api/store/${user.users_id}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            }
+          });
+          setStoreData(response.data);
+        } catch (error) {
+          console.error('Error fetching store data:', error);
+          setAlertMessage('Error fetching store data');
+          setAlertSeverity('error');
+          setOpenSnackbar(true);
         }
-
-        // Fetch store data using store_id
-        const storeResponse = await axios.get(`http://localhost:8080/api/store/${storeId}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          }
-        });
-
-        setStoreData(storeResponse.data);
-        console.log('Store Data:', storeResponse.data);
-      } catch (error) {
-        console.error('Error fetching store data:', error);
-      }
-    };
-
-    fetchStoreData();
+      };
+      fetchStoreData();
+    }
   }, [user]);
-
-  // const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-  //   const { name, value } = event.target;
-  //   setUserData((prevUser) => ({
-  //     ...prevUser,
-  //     [name]: value,
-  //   }));
-  // };
-
-  // const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-  //   if (reason === 'clickaway') {
-  //     return;
-  //   }
-  //   setOpenSnackbar(false);
-  // };
-
-  // const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-  //   event.preventDefault();
-  //   try {
-  //     const accessToken = localStorage.getItem("access_token");
-  //     if (!accessToken) {
-  //       throw new Error('Access token is missing');
-  //     }
-
-  //     const updatedUser = {
-  //       ...userData,
-  //     };
-
-  //     await axios.put(`http://localhost:8080/api/users/${userData.users_id}`, updatedUser, {
-  //       headers: {
-  //         Authorization: `Bearer ${accessToken}`,
-  //       }
-  //     });
-
-  //     setUser(updatedUser);
-  //     setAlertMessage('ข้อมูลถูกอัพเดทเรียบร้อยแล้ว');
-  //     setAlertSeverity('success');
-  //     setOpenSnackbar(true);
-  //   } catch (error) {
-  //     console.error('Error updating user data:', error);
-  //     setAlertMessage('เกิดข้อผิดพลาดในการอัพเดทข้อมูล');
-  //     setAlertSeverity('error');
-  //     setOpenSnackbar(true);
-  //   }
-  // };
-
 
   useEffect(() => {
     if (cleared) {
@@ -237,6 +196,16 @@ const AccountDetailsForm: React.FC = () => {
       ...prevUser,
       [name]: value,
     }));
+  };
+
+  const handleStoreChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (storeData) {
+      const { name, value } = event.target;
+      setStoreData((prevStore) => ({
+        ...prevStore,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -268,7 +237,7 @@ const AccountDetailsForm: React.FC = () => {
         last_name: updatedUser.lastName,
         username: updatedUser.username,
         email: updatedUser.email,
-        birthday: updatedUser.birthday.format('MM/DD/YYYY'),
+        birthday: updatedUser.birthday?.format('MM/DD/YYYY'),
         phone_number: updatedUser.phoneNumber,
         gender: updatedUser.gender,
         user_image: updatedUser.userImage,
@@ -278,7 +247,25 @@ const AccountDetailsForm: React.FC = () => {
         }
       });
 
-      setUser(updatedUser); // อัปเดต context ทันทีหลังจากอัปเดตข้อมูลสำเร็จ
+      if (user.role === "store" && storeData) {
+        await axios.put(`http://localhost:8080/api/store/${storeData.store_id}`, {
+          name_store: storeData.name_store,
+          phone_number: storeData.phone_number,
+          house_number: storeData.house_number,
+          alley: storeData.alley,
+          road: storeData.road,
+          district: storeData.district,
+          sub_district: storeData.sub_district,
+          province: storeData.province,
+          store_image: storeData.store_image,
+        }, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          }
+        });
+      }
+
+      setUser(updatedUser);
       setAlertMessage('ข้อมูลถูกอัพเดทเรียบร้อยแล้ว');
       setAlertSeverity('success');
       setOpenSnackbar(true);
@@ -292,7 +279,7 @@ const AccountDetailsForm: React.FC = () => {
 
   // const [user, setUserData] = useState({
   //   username: "",
-  //   role: "",
+  //   userType: "",
   //   firstName: "",
   //   lastName: "",
   //   profilePictureUrl: "",
@@ -347,7 +334,7 @@ const AccountDetailsForm: React.FC = () => {
   //     lastName: "",
   //     email: "",
   //     username: "",
-  //     role: "",
+  //     userType: "",
   //     profilePictureUrl: "",
   //     phoneNumber: "",
   //     users_id: ""
@@ -398,7 +385,7 @@ const AccountDetailsForm: React.FC = () => {
         setUserData(prev => ({
           ...prev,
           username: data.username,
-          role: data.role,
+          userType: data.role,
           firstName: data.first_name,
           lastName: data.last_name,
           email: data.email, // Add the missing 'email' property
@@ -455,7 +442,7 @@ const AccountDetailsForm: React.FC = () => {
 
             setUserData({
               username: data.username,
-              role: data.role,
+              userType: data.role,
               firstName: data.first_name,
               lastName: data.last_name,
               email: data.email,
@@ -485,8 +472,6 @@ const AccountDetailsForm: React.FC = () => {
   // const handleDateChange = (newDate: Dayjs | null) => {
   //   setUserData((prev) => ({ ...prev, birthday: newDate }));
   // };
-
-  console.log("User Role:", user.role); // เพิ่มการแสดงผล User Role
 
   return (
     <>
@@ -556,53 +541,68 @@ const AccountDetailsForm: React.FC = () => {
                   />
                 </FormControl>
               </Grid>
-              {storeData && (
+              <Grid item xs={12}>
+                <FormControl component="fieldset">
+                  <FormLabel component="legend">เพศ</FormLabel>
+                  <RadioGroup
+                    row
+                    aria-label="เพศ"
+                    name="gender"
+                    value={userData.gender}
+                    onChange={(event) => setUserData({ ...userData, gender: event.target.value })}
+                  >
+                    <FormControlLabel value="ชาย" control={<Radio />} label="ชาย" />
+                    <FormControlLabel value="หญิง" control={<Radio />} label="หญิง" />
+                  </RadioGroup>
+                </FormControl>
+              </Grid>
+              {user.role === "store" && storeData && (
                 <>
                   <Grid item md={6} xs={12}>
                     <FormControl fullWidth required>
-                      <InputLabel htmlFor="name_store">ชื่อร้าน</InputLabel>
+                      <InputLabel htmlFor="name_store">ชื่อร้านค้า</InputLabel>
                       <OutlinedInput
                         id="name_store"
-                        label="ชื่อร้าน"
+                        label="ชื่อร้านค้า"
                         name="name_store"
                         value={storeData.name_store}
-                        onChange={(e) => setStoreData({ ...storeData, name_store: e.target.value })}
+                        onChange={handleStoreChange}
                       />
                     </FormControl>
                   </Grid>
-                  {/* <Grid item md={6} xs={12}>
-                    <FormControl fullWidth>
-                      <InputLabel htmlFor="store_image">รูปภาพร้าน</InputLabel>
-                      <OutlinedInput
-                        id="store_image"
-                        label="รูปภาพร้าน"
-                        name="store_image"
-                        value={storeData.store_image}
-                        onChange={(e) => setStoreData({ ...storeData, store_image: e.target.value })}
-                      />
-                    </FormControl>
-                  </Grid> */}
                   <Grid item md={6} xs={12}>
                     <FormControl fullWidth>
-                      <InputLabel htmlFor="house_number">บ้านเลขที่</InputLabel>
+                      <InputLabel htmlFor="store_phone_number">หมายเลขโทรศัพท์</InputLabel>
+                      <OutlinedInput
+                        id="store_phone_number"
+                        label="หมายเลขโทรศัพท์"
+                        name="phone_number"
+                        value={storeData.phone_number}
+                        onChange={handleStoreChange}
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid item md={6} xs={12}>
+                    <FormControl fullWidth>
+                      <InputLabel htmlFor="house_number">เลขที่บ้าน</InputLabel>
                       <OutlinedInput
                         id="house_number"
-                        label="บ้านเลขที่"
+                        label="เลขที่บ้าน"
                         name="house_number"
                         value={storeData.house_number}
-                        onChange={(e) => setStoreData({ ...storeData, house_number: e.target.value })}
+                        onChange={handleStoreChange}
                       />
                     </FormControl>
                   </Grid>
                   <Grid item md={6} xs={12}>
                     <FormControl fullWidth>
-                      <InputLabel htmlFor="alley">ตรอก/ซอย</InputLabel>
+                      <InputLabel htmlFor="alley">ซอย</InputLabel>
                       <OutlinedInput
                         id="alley"
-                        label="ตรอก/ซอย"
+                        label="ซอย"
                         name="alley"
                         value={storeData.alley}
-                        onChange={(e) => setStoreData({ ...storeData, alley: e.target.value })}
+                        onChange={handleStoreChange}
                       />
                     </FormControl>
                   </Grid>
@@ -614,31 +614,31 @@ const AccountDetailsForm: React.FC = () => {
                         label="ถนน"
                         name="road"
                         value={storeData.road}
-                        onChange={(e) => setStoreData({ ...storeData, road: e.target.value })}
+                        onChange={handleStoreChange}
                       />
                     </FormControl>
                   </Grid>
                   <Grid item md={6} xs={12}>
                     <FormControl fullWidth>
-                      <InputLabel htmlFor="sub_district">ตำบล/แขวง</InputLabel>
-                      <OutlinedInput
-                        id="sub_district"
-                        label="ตำบล/แขวง"
-                        name="sub_district"
-                        value={storeData.sub_district}
-                        onChange={(e) => setStoreData({ ...storeData, sub_district: e.target.value })}
-                      />
-                    </FormControl>
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <FormControl fullWidth>
-                      <InputLabel htmlFor="district">อำเภอ/เขต</InputLabel>
+                      <InputLabel htmlFor="district">อำเภอ</InputLabel>
                       <OutlinedInput
                         id="district"
-                        label="อำเภอ/เขต"
+                        label="อำเภอ"
                         name="district"
                         value={storeData.district}
-                        onChange={(e) => setStoreData({ ...storeData, district: e.target.value })}
+                        onChange={handleStoreChange}
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid item md={6} xs={12}>
+                    <FormControl fullWidth>
+                      <InputLabel htmlFor="sub_district">ตำบล</InputLabel>
+                      <OutlinedInput
+                        id="sub_district"
+                        label="ตำบล"
+                        name="sub_district"
+                        value={storeData.sub_district}
+                        onChange={handleStoreChange}
                       />
                     </FormControl>
                   </Grid>
@@ -650,7 +650,7 @@ const AccountDetailsForm: React.FC = () => {
                         label="จังหวัด"
                         name="province"
                         value={storeData.province}
-                        onChange={(e) => setStoreData({ ...storeData, province: e.target.value })}
+                        onChange={handleStoreChange}
                       />
                     </FormControl>
                   </Grid>
