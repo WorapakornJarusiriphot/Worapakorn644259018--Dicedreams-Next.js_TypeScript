@@ -16,7 +16,6 @@ import Grid from '@mui/material/Unstable_Grid2';
 // import { config } from '@/config';
 import AccountDetailsForm from '@/components/dashboard/account/account-details-form';
 import { AccountInfo } from '@/components/dashboard/account/account-info';
-import { StoreProvider } from '@/components/dashboard/account/UserContext';
 
 // export const metadata = { title: `Account | Dashboard | ${config.site.name}` } satisfies Metadata;
 
@@ -72,34 +71,32 @@ export default function Profile() {
   return (
     <>
       <UserProvider>
-        <StoreProvider>
-          <ThemeProvider theme={darkTheme}>
-            <br />
-            <br />
-            <br />
-            <br />
-            <Stack spacing={3}>
-              {/* <div>
+        <ThemeProvider theme={darkTheme}>
+          <br />
+          <br />
+          <br />
+          <br />
+          <Stack spacing={3}>
+            {/* <div>
             <Typography variant="h4" style={{ color: 'white', textAlign: 'center' }}>โปรไฟล์</Typography>
           </div> */}
-              <Grid container spacing={3}>
-                {/* <Grid lg={4} md={6} xs={12}> */}
-                <Grid xs={12}>
-                  <AccountInfo />
-                </Grid>
+            <Grid container spacing={3}>
+              {/* <Grid lg={4} md={6} xs={12}> */}
+              <Grid xs={12}>
+                <AccountInfo />
+              </Grid>
 
-                <Grid xs={12}>
-                  <TabsProfile />
-                </Grid>
+              <Grid xs={12}>
+                <TabsProfile />
+              </Grid>
 
-                {/* <Grid lg={8} md={6} xs={12}> */}
-                {/* <Grid xs={12}>
+              {/* <Grid lg={8} md={6} xs={12}> */}
+              {/* <Grid xs={12}>
               <AccountDetailsForm />
             </Grid> */}
-              </Grid>
-            </Stack>
-          </ThemeProvider>
-        </StoreProvider>
+            </Grid>
+          </Stack>
+        </ThemeProvider>
       </UserProvider>
     </>
   );

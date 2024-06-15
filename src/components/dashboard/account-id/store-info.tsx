@@ -154,13 +154,13 @@ export default function StoreInfo({ storeId }: StoreInfoProps) {
           <Stack spacing={2} sx={{ mt: 3 }}>
             <Typography variant="h6">ข้อมูลร้านค้า</Typography>
             <Typography color="text.secondary" variant="body2">
-              ชื่อร้าน : {storeInfo.name_store}
+              ชื่อร้านค้า : {storeInfo.name_store}
             </Typography>
             <Typography color="text.secondary" variant="body2">
-              เบอร์โทรร้าน : {storeInfo.phone_number}
+              เบอร์โทรร้านค้า : {storeInfo.phone_number}
             </Typography>
             <Typography color="text.secondary" variant="body2">
-              ที่อยู่ : {`${storeInfo.house_number} ${storeInfo.alley} ${storeInfo.road} ${storeInfo.district} ${storeInfo.sub_district} ${storeInfo.province}`}
+              ที่อยู่ร้านค้า : {`${storeInfo.house_number} ${storeInfo.alley} ${storeInfo.road} ${storeInfo.district} ${storeInfo.sub_district} ${storeInfo.province}`}
             </Typography>
             {/* <Box display="flex" justifyContent="center">
               <img src={storeInfo.store_image} alt="Store" style={{ maxHeight: '200px', maxWidth: '100%' }} />
