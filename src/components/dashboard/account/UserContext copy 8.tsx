@@ -70,14 +70,28 @@ export const useUser = () => {
 
 // Store Context
 interface StoreContextType {
-  store: Store | null;
-  setStore: React.Dispatch<React.SetStateAction<Store | null>>;
+  store: Store;
+  setStore: React.Dispatch<React.SetStateAction<Store>>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [store, setStore] = useState<Store | null>(null);
+  const [store, setStore] = useState<Store>({
+    store_id: '',
+    name_store: '',
+    phone_number: '',
+    house_number: '',
+    alley: '',
+    road: '',
+    district: '',
+    sub_district: '',
+    province: '',
+    store_image: '',
+    users_id: '',
+    createdAt: '',
+    updatedAt: ''
+  });
 
   return (
     <StoreContext.Provider value={{ store, setStore }}>

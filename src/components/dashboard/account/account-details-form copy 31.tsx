@@ -558,53 +558,21 @@ const AccountDetailsForm: React.FC = () => {
               </Grid>
               {storeData && (
                 <>
-                  <Grid item xs={12}>
-                    <CardHeader title="ข้อมูลร้านค้า" />
-                    <Divider />
-                    <CardContent>
-                      <Grid container spacing={3}> {/* เพิ่ม spacing={3} เพื่อเพิ่มระยะห่างระหว่าง items */}
-                        <Grid item md={6} xs={12}>
-                          <FormControl fullWidth required>
-                            <InputLabel htmlFor="name_store">ชื่อร้าน</InputLabel>
-                            <OutlinedInput
-                              id="name_store"
-                              label="ชื่อร้าน"
-                              name="name_store"
-                              value={storeData.name_store}
-                              onChange={(e) => setStoreData({ ...storeData, name_store: e.target.value })}
-                            />
-                          </FormControl>
-                        </Grid>
-                        <Grid item md={6} xs={12}>
-                          <FormControl fullWidth required>
-                            <InputLabel htmlFor="phone_number">หมายเลขโทรศัพท์ร้านค้า</InputLabel>
-                            <OutlinedInput
-                              id="phone_number"
-                              label="หมายเลขโทรศัพท์ร้านค้า"
-                              name="phone_number"
-                              value={storeData.phone_number}
-                              onChange={(e) => setStoreData({ ...storeData, phone_number: e.target.value })}
-                            />
-                          </FormControl>
-                        </Grid>
-                      </Grid>
-
-                      {/* <Grid item md={6} xs={12}>
-                    <FormControl fullWidth>
-                      <InputLabel htmlFor="store_image">รูปร้านค้า</InputLabel>
+                  <Grid item md={6} xs={12}>
+                    <FormControl fullWidth required>
+                      <InputLabel htmlFor="name_store">ชื่อร้าน</InputLabel>
                       <OutlinedInput
-                        id="store_image"
-                        label="รูปร้านค้า"
-                        name="store_image"
-                        value={storeData.store_image}
-                        onChange={(e) => setStoreData({ ...storeData, store_image: e.target.value })}
+                        id="name_store"
+                        label="ชื่อร้าน"
+                        name="name_store"
+                        value={storeData.name_store}
+                        onChange={(e) => setStoreData({ ...storeData, name_store: e.target.value })}
                       />
                     </FormControl>
-                  </Grid> */}
-                    </CardContent>
                   </Grid>
+
                   <Grid item xs={12}>
-                    <CardHeader subheader="ที่อยู่ร้านค้า" />
+                    <CardHeader subheader="ที่อยู่" />
                     <Divider />
                     <CardContent>
                       <Grid container spacing={3}>

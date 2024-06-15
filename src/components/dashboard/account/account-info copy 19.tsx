@@ -52,8 +52,6 @@ export function AccountInfo(): React.JSX.Element {
 
         if (decoded.store_id) {
           fetchStoreProfile(decoded.store_id, accessToken); // Fetch store data
-        } else {
-          setStore(null); // If no store_id, set store to null
         }
       } else {
         console.error('User ID is missing in the token');

@@ -16,6 +16,7 @@ import { JwtPayload } from 'jwt-decode';
 import Box from '@mui/material/Box';
 import { useUser } from './UserContext';
 import { useStore } from './UserContext';
+import { StoreContextType } from './UserContext';
 import axios from 'axios';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
@@ -34,7 +35,7 @@ export function AccountInfo(): React.JSX.Element {
   const [alertSeverity, setAlertSeverity] = useState<'success' | 'error'>('success');
   const router = useRouter();
   const { store, setStore } = useStore();
-
+  
 
   const handleSnackbarClose = () => {
     setOpenSnackbar(false);
@@ -43,38 +44,17 @@ export function AccountInfo(): React.JSX.Element {
   useEffect(() => {
     const accessToken = localStorage.getItem('access_token');
     if (accessToken) {
-      const decoded: JwtPayload & { users_id: string; store_id: string } = jwtDecode(accessToken);
+      const decoded: JwtPayload & { users_id: string } = jwtDecode(accessToken);
       if (decoded && decoded.users_id) {
         setUser((prev) => ({
           ...prev,
           users_id: decoded.users_id,
         }));
-
-        if (decoded.store_id) {
-          fetchStoreProfile(decoded.store_id, accessToken); // Fetch store data
-        } else {
-          setStore(null); // If no store_id, set store to null
-        }
       } else {
         console.error('User ID is missing in the token');
       }
     }
   }, []);
-
-  const fetchStoreProfile = async (storeId: string, accessToken: string) => {
-    try {
-      const response = await axios.get(`http://localhost:8080/api/store/${storeId}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (response.status === 200) {
-        setStore(response.data);
-      } else {
-        console.error(`API Error: ${response.status} ${response.statusText}`);
-      }
-    } catch (error) {
-      console.error('Error fetching store profile:', error);
-    }
-  };
 
   const fetchUserProfile = async (userId: string, accessToken: string, decodedToken: { username: string }) => {
     try {
@@ -252,23 +232,6 @@ export function AccountInfo(): React.JSX.Element {
           <Box mt={2} display="flex" justifyContent="center">
             <img src={previewUrl} alt="Preview" style={{ maxHeight: '200px', maxWidth: '100%' }} />
           </Box>
-        )}
-        {store && (
-          <Stack spacing={2} sx={{ mt: 3 }}>
-            <Typography variant="h6">ข้อมูลร้านค้า</Typography>
-            <Typography color="text.secondary" variant="body2">
-              ชื่อร้านค้า : {store.name_store}
-            </Typography>
-            <Typography color="text.secondary" variant="body2">
-              เบอร์โทรร้านค้า : {store.phone_number}
-            </Typography>
-            <Typography color="text.secondary" variant="body2">
-              ที่อยู่ร้านค้า : {`${store.house_number} ${store.alley} ${store.road} ${store.district} ${store.sub_district} ${store.province}`}
-            </Typography>
-            {/* <Box display="flex" justifyContent="center">
-              <img src={store.store_image} alt="Store" style={{ maxHeight: '200px', maxWidth: '100%' }} />
-            </Box> */}
-          </Stack>
         )}
       </CardContent>
       <Divider />
