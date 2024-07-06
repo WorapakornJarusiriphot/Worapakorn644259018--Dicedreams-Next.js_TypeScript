@@ -43,7 +43,7 @@ export default function StoreInfo({ storeId }: StoreInfoProps) {
 
   const fetchUserProfile = async (userId: string, accessToken: string) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
+      const response = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (response.ok) {
@@ -74,7 +74,7 @@ export default function StoreInfo({ storeId }: StoreInfoProps) {
 
   const fetchStoreInfo = async (storeId: string, accessToken: string) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/store/${storeId}`, {
+      const response = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/store/${storeId}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (response.ok) {

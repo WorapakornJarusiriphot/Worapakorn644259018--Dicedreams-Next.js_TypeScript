@@ -76,7 +76,7 @@ function PostGames() {
 
         // ดึงโพสต์ทั้งหมดโดยไม่ตรวจสอบ access token
         const postsResponse = await fetch(
-          `http://localhost:8080/api/postGame`,
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -88,7 +88,7 @@ function PostGames() {
         const postsData = await postsResponse.json();
 
         // ดึงข้อมูลผู้ใช้ทั้งหมด
-        const usersResponse = await fetch(`http://localhost:8080/api/users`, {
+        const usersResponse = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users`, {
           headers: {
             "Content-Type": "application/json",
           },
@@ -99,7 +99,7 @@ function PostGames() {
 
         // ดึงข้อมูล participants
         const participantsResponse = await fetch(
-          `http://localhost:8080/api/participate`,
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/participate`,
           {
             headers: {
               "Content-Type": "application/json",

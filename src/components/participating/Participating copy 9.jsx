@@ -85,7 +85,7 @@ function Participating() {
 
       try {
         const participantsResponse = await fetch(
-          `http://localhost:8080/api/participate`,
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/participate`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -102,7 +102,7 @@ function Participating() {
         );
         const postPromises = myParticipations.map(async (participation) => {
           const postResponse = await fetch(
-            `http://localhost:8080/api/postGame/${participation.post_games_id}`,
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/${participation.post_games_id}`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -118,7 +118,7 @@ function Participating() {
           }
 
           const userResponse = await fetch(
-            `http://localhost:8080/api/users/${post.users_id}`,
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${post.users_id}`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,

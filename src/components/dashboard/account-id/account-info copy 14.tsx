@@ -51,7 +51,7 @@ export default function AccountInfo({ userId, storeId }: AccountInfoProps) {
 
   const fetchUserProfile = async (id: string, accessToken: string, isStore: boolean) => {
     try {
-      const url = isStore ? `http://localhost:8080/api/store/${id}` : `http://localhost:8080/api/users/${id}`;
+      const url = isStore ? `https://dicedreams-backend-deploy-to-render.onrender.com/api/store/${id}` : `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${id}`;
       const response = await fetch(url, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
@@ -148,7 +148,7 @@ export default function AccountInfo({ userId, storeId }: AccountInfoProps) {
             return;
           }
 
-          const response = await axios.put(`http://localhost:8080/api/users/${user.userId}`, updatedUser, {
+          const response = await axios.put(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${user.userId}`, updatedUser, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },

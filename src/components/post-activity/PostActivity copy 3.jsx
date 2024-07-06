@@ -86,7 +86,7 @@ function PostActivity() {
           setUserId(decoded.users_id);
 
           const postsResponse = await fetch(
-            `http://localhost:8080/api/postActivity`, // ดึงโพสต์ทั้งหมด
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity`, // ดึงโพสต์ทั้งหมด
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -98,7 +98,7 @@ function PostActivity() {
           const postsData = await postsResponse.json();
 
           const storesResponse = await fetch(
-            `http://localhost:8080/api/store`,
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/store`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -147,12 +147,12 @@ function PostActivity() {
           setItems(sortedPosts);
         } else {
           const postsResponse = await fetch(
-            `http://localhost:8080/api/postActivity` // ดึงโพสต์ทั้งหมดโดยไม่ต้องใช้ accessToken
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity` // ดึงโพสต์ทั้งหมดโดยไม่ต้องใช้ accessToken
           );
           if (!postsResponse.ok) throw new Error("Failed to fetch posts");
           const postsData = await postsResponse.json();
 
-          const storesResponse = await fetch(`http://localhost:8080/api/store`);
+          const storesResponse = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/store`);
           if (!storesResponse.ok) throw new Error("Failed to fetch stores");
           const storesData = await storesResponse.json();
 

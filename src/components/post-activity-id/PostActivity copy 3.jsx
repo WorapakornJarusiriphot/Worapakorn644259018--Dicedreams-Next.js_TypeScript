@@ -81,7 +81,7 @@ const PostActivity = ({ userId }) => {
 
       try {
         const postsResponse = await fetch(
-          `http://localhost:8080/api/postActivity/store/${userId}`,
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/store/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -93,7 +93,7 @@ const PostActivity = ({ userId }) => {
         const postsData = await postsResponse.json();
 
         const storesResponse = await fetch(
-          `http://localhost:8080/api/store/${userId}`,
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/store/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

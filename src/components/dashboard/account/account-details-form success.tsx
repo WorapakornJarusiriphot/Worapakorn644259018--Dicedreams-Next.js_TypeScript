@@ -196,7 +196,7 @@ const AccountDetailsForm: React.FC<AccountDetailsFormProps> = ({ user }) => {
         ? userData.userImage.split('/').pop()
         : userData.userImage;
 
-      await axios.put(`http://localhost:8080/api/users/${userData.users_id}`, {
+      await axios.put(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userData.users_id}`, {
         first_name: userData.firstName,
         last_name: userData.lastName,
         username: userData.username,
@@ -316,9 +316,9 @@ const AccountDetailsForm: React.FC<AccountDetailsFormProps> = ({ user }) => {
   // ประกาศฟังก์ชัน fetchUserProfile ก่อนใช้งานใน useEffect
   const fetchUserProfile = async (users_id: any, accessToken: string, decodedToken: { username: any; }) => {
     try {
-      console.log(`Requesting URL: http://localhost:8080/api/users/${users_id}`);
+      console.log(`Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${users_id}`);
       const response = await fetch(
-        `http://localhost:8080/api/users/${users_id}`,
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${users_id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -374,9 +374,9 @@ const AccountDetailsForm: React.FC<AccountDetailsFormProps> = ({ user }) => {
             return;
           }
 
-          console.log(`Requesting URL: http://localhost:8080/api/users/${users_id}`);
+          console.log(`Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${users_id}`);
 
-          const response = await fetch(`http://localhost:8080/api/users/${users_id}`, {
+          const response = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${users_id}`, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },

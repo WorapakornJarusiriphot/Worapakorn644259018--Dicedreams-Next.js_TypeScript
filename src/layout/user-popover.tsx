@@ -51,7 +51,7 @@ export function UserPopover({ anchorEl, onClose, open, userId }: UserPopoverProp
     const fetchUser = async () => {
       const token = localStorage.getItem('access_token');  // ตรวจสอบและรับ token จาก localStorage
       try {
-        const response = await axios.get(`http://localhost:8080/api/users/${userId}`, {
+        const response = await axios.get(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`, {
           headers: {
             Authorization: `Bearer ${token}`  // ส่ง token ไปกับ headers ของคำร้องขอ
           }

@@ -131,7 +131,7 @@ const validationSchema = Yup.object({
     .test('checkDuplicateUsername', 'Username นี้มีคนใช้แล้ว', async function (value) {
       if (!value) return true;
       try {
-        const response = await axios.get('http://localhost:8080/api/users');
+        const response = await axios.get('https://dicedreams-backend-deploy-to-render.onrender.com/api/users');
         const users = response.data;
         return !users.some((user: { username: string }) => user.username === value);
       } catch (error) {
@@ -139,12 +139,12 @@ const validationSchema = Yup.object({
       }
     }),
   email: Yup.string()
-    .email('กรุณากรอกอีเมลที่ถูกต้อง')
+    .email('กรุณากรอกอีเมลให้ถูกต้อง')
     .required('กรุณากรอกอีเมล')
     .test('checkDuplicateEmail', 'Email นี้มีคนใช้แล้ว', async function (value) {
       if (!value) return true;
       try {
-        const response = await axios.get('http://localhost:8080/api/users');
+        const response = await axios.get('https://dicedreams-backend-deploy-to-render.onrender.com/api/users');
         const users = response.data;
         const existsInAPI = users.some((user: { email: string }) => user.email === value);
 
@@ -221,7 +221,7 @@ export default function SignUp() {
         console.log('Firebase user created:', firebaseUser);
 
         // Save user data in MySQL
-        const response = await axios.post('http://localhost:8080/api/users', {
+        const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/users', {
           first_name: values.firstName,
           last_name: values.lastName,
           username: values.username,

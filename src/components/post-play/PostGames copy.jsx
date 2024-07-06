@@ -106,7 +106,7 @@ function PostGames() {
 
   useEffect(() => {
     const fetchItems = async () => {
-      const response = await fetch('http://localhost:8080/api/postGame');
+      const response = await fetch('https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame');
       if (response.ok) {
         const data = await response.json();
         setItems(data); // สมมุติว่า API ส่งกลับมาเป็น array ของ objects
@@ -183,9 +183,9 @@ function PostGames() {
   // ประกาศฟังก์ชัน fetchUserProfile ก่อนใช้งานใน useEffect
   const fetchUserProfile = async (userId, accessToken) => {
     try {
-      console.log(`Requesting URL: http://localhost:8080/api/postGame`);
+      console.log(`Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame`);
       const response = await fetch(
-        `http://localhost:8080/api/postGame`,
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -236,11 +236,11 @@ function PostGames() {
           const userId = decodedToken.users_id;
 
           console.log(
-            `Requesting URL: http://localhost:8080/api/postGame`
+            `Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame`
           );
 
           const response = await fetch(
-            `http://localhost:8080/api/postGame`,
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,

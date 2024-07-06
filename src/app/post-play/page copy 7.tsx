@@ -210,7 +210,7 @@ export default function PostPlay() {
       console.log('Firebase user created:', firebaseUser);
 
       // Save user data in MySQL
-      const response = await axios.post('http://localhost:8080/api/users', userData);
+      const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/users', userData);
       console.log('Response from server:', response.data);
 
       setAlertMessage('สร้างโพสต์สำเร็จ!');

@@ -130,9 +130,9 @@ function Header() {
   // ประกาศฟังก์ชัน fetchUserProfile ก่อนใช้งานใน useEffect
   const fetchUserProfile = async (userId, accessToken, decodedToken) => {
     try {
-      console.log(`Requesting URL: http://localhost:8080/api/users/${userId}`);
+      console.log(`Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`);
       const response = await fetch(
-        `http://localhost:8080/api/users/${userId}`,
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -178,11 +178,11 @@ function Header() {
           const userId = decodedToken.users_id;
 
           console.log(
-            `Requesting URL: http://localhost:8080/api/users/${userId}`
+            `Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`
           );
 
           const response = await fetch(
-            `http://localhost:8080/api/users/${userId}`,
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,

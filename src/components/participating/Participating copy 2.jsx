@@ -105,7 +105,7 @@ function Participating() {
 
     const fetchDetails = async () => {
       try {
-        const participantsResponse = await fetch(`http://localhost:8080/api/participate`, {
+        const participantsResponse = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/participate`, {
           headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" }
         });
         if (!participantsResponse.ok) throw new Error("Failed to fetch participants");
@@ -120,7 +120,7 @@ function Participating() {
         }
 
         const postsData = await Promise.all(myParticipations.map(async part => {
-          const postResponse = await fetch(`http://localhost:8080/api/postGame/${part.post_games_id}`, {
+          const postResponse = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/${part.post_games_id}`, {
             headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" }
           });
           return postResponse.ok ? await postResponse.json() : Promise.reject("Failed to fetch post data");

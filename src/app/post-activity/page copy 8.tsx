@@ -252,7 +252,7 @@ export default function PostActivity() {
     };
 
     try {
-      const response = await axios.post('http://localhost:8080/api/postActivity', data, {
+      const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity', data, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

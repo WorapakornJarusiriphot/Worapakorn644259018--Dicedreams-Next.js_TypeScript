@@ -82,7 +82,7 @@ function PostActivity() {
           setStoreId(decoded.store_id); // แก้ไขตรงนี้เพื่อให้ได้ store_id จาก JWT token
 
           const postsResponse = await fetch(
-            `http://localhost:8080/api/postActivity`, // ใช้ URL เดิมที่ดึงข้อมูลโพสต์ทั้งหมด
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity`, // ใช้ URL เดิมที่ดึงข้อมูลโพสต์ทั้งหมด
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -94,7 +94,7 @@ function PostActivity() {
           const postsData = await postsResponse.json();
 
           const storesResponse = await fetch(
-            `http://localhost:8080/api/store/${decoded.store_id}`, // ใช้ store_id จาก JWT token
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/store/${decoded.store_id}`, // ใช้ store_id จาก JWT token
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -136,12 +136,12 @@ function PostActivity() {
           setItems(sortedPosts);
         } else {
           const postsResponse = await fetch(
-            `http://localhost:8080/api/postActivity`
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity`
           );
           if (!postsResponse.ok) throw new Error("Failed to fetch posts");
           const postsData = await postsResponse.json();
 
-          const storesResponse = await fetch(`http://localhost:8080/api/store`);
+          const storesResponse = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/store`);
           if (!storesResponse.ok) throw new Error("Failed to fetch stores");
           const storesData = await storesResponse.json();
 

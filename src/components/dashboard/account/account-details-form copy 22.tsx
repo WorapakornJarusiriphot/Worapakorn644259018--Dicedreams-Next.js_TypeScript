@@ -148,7 +148,7 @@ const AccountDetailsForm: React.FC = () => {
         }
 
         // Fetch store data using store_id
-        const storeResponse = await axios.get(`http://localhost:8080/api/store/${storeId}`, {
+        const storeResponse = await axios.get(`https://dicedreams-backend-deploy-to-render.onrender.com/api/store/${storeId}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           }
@@ -193,7 +193,7 @@ const AccountDetailsForm: React.FC = () => {
   //       ...userData,
   //     };
 
-  //     await axios.put(`http://localhost:8080/api/users/${userData.users_id}`, updatedUser, {
+  //     await axios.put(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userData.users_id}`, updatedUser, {
   //       headers: {
   //         Authorization: `Bearer ${accessToken}`,
   //       }
@@ -265,7 +265,7 @@ const AccountDetailsForm: React.FC = () => {
         userImage: userImage || '',
       };
 
-      await axios.put(`http://localhost:8080/api/users/${userData.users_id}`, {
+      await axios.put(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userData.users_id}`, {
         first_name: updatedUser.firstName,
         last_name: updatedUser.lastName,
         username: updatedUser.username,
@@ -383,9 +383,9 @@ const AccountDetailsForm: React.FC = () => {
   // ประกาศฟังก์ชัน fetchUserProfile ก่อนใช้งานใน useEffect
   const fetchUserProfile = async (users_id: any, accessToken: string, decodedToken: { username: any; }) => {
     try {
-      console.log(`Requesting URL: http://localhost:8080/api/users/${users_id}`);
+      console.log(`Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${users_id}`);
       const response = await fetch(
-        `http://localhost:8080/api/users/${users_id}`,
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${users_id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -441,9 +441,9 @@ const AccountDetailsForm: React.FC = () => {
             return;
           }
 
-          console.log(`Requesting URL: http://localhost:8080/api/users/${users_id}`);
+          console.log(`Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${users_id}`);
 
-          const response = await fetch(`http://localhost:8080/api/users/${users_id}`, {
+          const response = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${users_id}`, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },

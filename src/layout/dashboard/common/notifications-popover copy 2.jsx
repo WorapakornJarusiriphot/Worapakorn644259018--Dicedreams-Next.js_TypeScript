@@ -39,7 +39,7 @@ export default function NotificationsPopover() {
       }
 
       try {
-        const response = await fetch("http://localhost:8080/api/notification", {
+        const response = await fetch("https://dicedreams-backend-deploy-to-render.onrender.com/api/notification", {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },

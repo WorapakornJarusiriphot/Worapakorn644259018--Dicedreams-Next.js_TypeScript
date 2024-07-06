@@ -4,6 +4,7 @@ const nextConfig = {
   images: {
     domains: [
       'localhost',
+      'dicedreams-backend-deploy-to-render.onrender.com',
       "promotions.co.th",
       "scontent.fkdt3-1.fna.fbcdn.net",
       "live.staticflickr.com",

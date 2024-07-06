@@ -61,10 +61,10 @@ function Home() {
     const fetchData = async () => {
       try {
         const usersResponse = await axios.get(
-          "http://localhost:8080/api/users"
+          "https://dicedreams-backend-deploy-to-render.onrender.com/api/users"
         );
         const storesResponse = await axios.get(
-          "http://localhost:8080/api/store"
+          "https://dicedreams-backend-deploy-to-render.onrender.com/api/store"
         );
         setUsers(usersResponse.data);
         setStores(storesResponse.data);

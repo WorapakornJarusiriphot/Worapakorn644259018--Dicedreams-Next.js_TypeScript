@@ -36,7 +36,7 @@ export default function NotificationsPopover() {
       }
 
       try {
-        const response = await fetch("http://localhost:8080/api/notification", {
+        const response = await fetch("https://dicedreams-backend-deploy-to-render.onrender.com/api/notification", {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -94,7 +94,7 @@ export default function NotificationsPopover() {
         }
 
         const response = await fetch(
-          "http://localhost:8080/api/notification/mark-all-as-read",
+          "https://dicedreams-backend-deploy-to-render.onrender.com/api/notification/mark-all-as-read",
           {
             method: "PUT",
             headers: {
@@ -123,7 +123,7 @@ export default function NotificationsPopover() {
         return;
       }
 
-      const response = await fetch("http://localhost:8080/api/notification", {
+      const response = await fetch("https://dicedreams-backend-deploy-to-render.onrender.com/api/notification", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -420,7 +420,7 @@ function renderContent(notification, expanded, handleToggleExpand) {
     avatar: notification.data.user_image ? (
       <Avatar
         alt={notification.data.first_name}
-        src={`http://localhost:8080/images/${notification.data.user_image}`}
+        src={`https://dicedreams-backend-deploy-to-render.onrender.com/images/${notification.data.user_image}`}
       />
     ) : null,
     title,

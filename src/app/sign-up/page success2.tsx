@@ -185,7 +185,7 @@ const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
   console.log('User data being sent:', userData);
 
   try {
-    const response = await axios.post('http://localhost:8080/api/users', userData);
+    const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/users', userData);
     console.log('Response from server:', response.data);
 
     setAlertMessage('สมัครสมาชิกสำเร็จ!');

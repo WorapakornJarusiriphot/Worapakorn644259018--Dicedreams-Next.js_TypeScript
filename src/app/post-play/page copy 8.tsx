@@ -215,7 +215,7 @@ export default function PostPlay() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8080/api/postGame', {
+      const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame', {
         name_games: nameGames,
         detail_post: detailPost,
         num_people: numPeople,

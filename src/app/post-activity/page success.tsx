@@ -258,7 +258,7 @@ export default function PostActivity() {
   // React.useEffect(() => {
   //   const fetchUserData = async () => {
   //     try {
-  //       const response = await axios.get('http://localhost:8080/api/users/me', {
+  //       const response = await axios.get('https://dicedreams-backend-deploy-to-render.onrender.com/api/users/me', {
   //         headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
   //       });
   //       setUserInfo(response.data);
@@ -302,7 +302,7 @@ export default function PostActivity() {
   //   // ดึงข้อมูลผู้ใช้จากฐานข้อมูลหลังจากที่ผู้ใช้เข้าสู่ระบบ
   //   const fetchUserId = async () => {
   //     try {
-  //       const response = await axios.get('http://localhost:8080/api/auth/me', {
+  //       const response = await axios.get('https://dicedreams-backend-deploy-to-render.onrender.com/api/auth/me', {
   //         headers: {
   //           Authorization: `Bearer ${localStorage.getItem('access_token')}`
   //         }
@@ -361,7 +361,7 @@ export default function PostActivity() {
   // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
   //   event.preventDefault();
   //   try {
-  //     const response = await axios.post('http://localhost:8080/api/postActivity', {
+  //     const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity', {
   //       name_activity: nameActivity,
   //       detail_post: detailPost,
   //       num_people: numPeople,
@@ -392,7 +392,7 @@ export default function PostActivity() {
 
   //   // กำหนดค่า Authorization header ในคำขอ axios
   //   try {
-  //     const response = await axios.post('http://localhost:8080/api/postActivity', {
+  //     const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity', {
   //       name_activity: nameActivity,
   //       detail_post: detailPost,
   //       num_people: numPeople,
@@ -436,7 +436,7 @@ export default function PostActivity() {
 
   //     // กำหนดค่า Authorization header ในคำขอ axios
   //     try {
-  //         const response = await axios.post('http://localhost:8080/api/postActivity', {
+  //         const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity', {
   //             name_activity: nameActivity,
   //             detail_post: detailPost,
   //             num_people: numPeople,
@@ -480,7 +480,7 @@ export default function PostActivity() {
 
   //   try {
   //     // ส่งคำขอ HTTP POST ไปยังเซิร์ฟเวอร์ด้วย axios พร้อม token ใน Authorization header
-  //     await axios.post('http://localhost:8080/api/postActivity', {
+  //     await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity', {
   //       name_activity: nameActivity,
   //       detail_post: detailPost,
   //       num_people: numPeople,
@@ -523,7 +523,7 @@ export default function PostActivity() {
 
   //   try {
   //     // ส่งคำขอ HTTP POST ไปยังเซิร์ฟเวอร์ด้วย axios พร้อม token ใน Authorization header
-  //     await axios.post('http://localhost:8080/api/postActivity', {
+  //     await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity', {
   //       name_activity: nameActivity,
   //       detail_post: detailPost,
   //       num_people: numPeople,
@@ -566,7 +566,7 @@ export default function PostActivity() {
 
   //   try {
   //     // ส่งคำขอ HTTP POST ไปยังเซิร์ฟเวอร์ด้วย axios พร้อม token ใน Authorization header
-  //     await axios.post('http://localhost:8080/api/postActivity', {
+  //     await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity', {
   //       name_activity: nameActivity,
   //       detail_post: detailPost,
   //       num_people: numPeople,
@@ -624,7 +624,7 @@ export default function PostActivity() {
 
   //   try {
   //     // ส่งคำขอ HTTP POST ไปยังเซิร์ฟเวอร์ด้วย axios พร้อม token ใน Authorization header
-  //     const response = await axios.post('http://localhost:8080/api/postActivity', data, {
+  //     const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity', data, {
   //       headers: {
   //         'Authorization': `Bearer ${token}`,
   //         'Content-Type': 'application/json'
@@ -688,7 +688,7 @@ export default function PostActivity() {
 
   //   try {
   //     // ส่งคำขอ HTTP POST ไปยังเซิร์ฟเวอร์ด้วย axios พร้อม token ใน Authorization header
-  //     const response = await axios.post('http://localhost:8080/api/postActivity', data, {
+  //     const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity', data, {
   //       headers: {
   //         'Authorization': `Bearer ${token}`,
   //         'Content-Type': 'application/json'
@@ -764,7 +764,7 @@ export default function PostActivity() {
 
     try {
       // ส่งคำขอ HTTP POST ไปยังเซิร์ฟเวอร์ด้วย axios พร้อม token ใน Authorization header
-      const response = await axios.post('http://localhost:8080/api/postActivity', data, {
+      const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity', data, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -885,7 +885,7 @@ export default function PostActivity() {
   //     console.log('Firebase user created:', firebaseUser);
 
   //     // Save user data in MySQL
-  //     const response = await axios.post('http://localhost:8080/api/users', userData);
+  //     const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/users', userData);
   //     console.log('Response from server:', response.data);
 
   //     setAlertMessage('สร้างโพสต์สำเร็จ!');

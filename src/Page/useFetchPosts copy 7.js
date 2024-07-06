@@ -22,14 +22,14 @@ const useFetchPosts = (
       try {
         if (selectedCategory === "" || selectedCategory === "postGames") {
           const { data: postGames } = await axios.get(
-            "http://localhost:8080/api/postGame"
+            "https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame"
           );
           postData = postData.concat(postGames);
         }
 
         if (selectedCategory === "" || selectedCategory === "postActivity") {
           const { data: postActivities } = await axios.get(
-            "http://localhost:8080/api/postActivity"
+            "https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity"
           );
           postData = postData.concat(postActivities);
         }

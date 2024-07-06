@@ -55,7 +55,7 @@ export default function ProfileID() {
   React.useEffect(() => {
     const checkId = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/store/${id}`);
+        const response = await axios.get(`https://dicedreams-backend-deploy-to-render.onrender.com/api/store/${id}`);
         if (response.status === 200) {
           setIsStoreId(true);
         } else {

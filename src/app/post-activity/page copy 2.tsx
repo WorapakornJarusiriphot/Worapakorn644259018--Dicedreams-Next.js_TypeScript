@@ -382,7 +382,7 @@ export default function PostActivity() {
 
     try {
       // ส่งคำขอ HTTP POST ไปยังเซิร์ฟเวอร์ด้วย axios พร้อม token ใน Authorization header
-      const response = await axios.post('http://localhost:8080/api/postActivity', data, {
+      const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity', data, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

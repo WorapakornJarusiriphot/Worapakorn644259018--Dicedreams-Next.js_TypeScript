@@ -235,7 +235,7 @@ export default function PostPlay() {
   //   // ดึงข้อมูลผู้ใช้จากฐานข้อมูลหลังจากที่ผู้ใช้เข้าสู่ระบบ
   //   const fetchUserId = async () => {
   //     try {
-  //       const response = await axios.get('http://localhost:8080/api/auth/me', {
+  //       const response = await axios.get('https://dicedreams-backend-deploy-to-render.onrender.com/api/auth/me', {
   //         headers: {
   //           Authorization: `Bearer ${localStorage.getItem('access_token')}`
   //         }
@@ -314,7 +314,7 @@ export default function PostPlay() {
   // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
   //   event.preventDefault();
   //   try {
-  //     const response = await axios.post('http://localhost:8080/api/postGame', {
+  //     const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame', {
   //       name_games: nameGames,
   //       detail_post: detailPost,
   //       num_people: numPeople,
@@ -345,7 +345,7 @@ export default function PostPlay() {
 
   //   // กำหนดค่า Authorization header ในคำขอ axios
   //   try {
-  //     const response = await axios.post('http://localhost:8080/api/postGame', {
+  //     const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame', {
   //       name_games: nameGames,
   //       detail_post: detailPost,
   //       num_people: numPeople,
@@ -389,7 +389,7 @@ export default function PostPlay() {
 
   //     // กำหนดค่า Authorization header ในคำขอ axios
   //     try {
-  //         const response = await axios.post('http://localhost:8080/api/postGame', {
+  //         const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame', {
   //             name_games: nameGames,
   //             detail_post: detailPost,
   //             num_people: numPeople,
@@ -433,7 +433,7 @@ export default function PostPlay() {
 
   //   try {
   //     // ส่งคำขอ HTTP POST ไปยังเซิร์ฟเวอร์ด้วย axios พร้อม token ใน Authorization header
-  //     await axios.post('http://localhost:8080/api/postGame', {
+  //     await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame', {
   //       name_games: nameGames,
   //       detail_post: detailPost,
   //       num_people: numPeople,
@@ -476,7 +476,7 @@ export default function PostPlay() {
 
   //   try {
   //     // ส่งคำขอ HTTP POST ไปยังเซิร์ฟเวอร์ด้วย axios พร้อม token ใน Authorization header
-  //     await axios.post('http://localhost:8080/api/postGame', {
+  //     await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame', {
   //       name_games: nameGames,
   //       detail_post: detailPost,
   //       num_people: numPeople,
@@ -519,7 +519,7 @@ export default function PostPlay() {
 
   //   try {
   //     // ส่งคำขอ HTTP POST ไปยังเซิร์ฟเวอร์ด้วย axios พร้อม token ใน Authorization header
-  //     await axios.post('http://localhost:8080/api/postGame', {
+  //     await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame', {
   //       name_games: nameGames,
   //       detail_post: detailPost,
   //       num_people: numPeople,
@@ -577,7 +577,7 @@ export default function PostPlay() {
 
   //   try {
   //     // ส่งคำขอ HTTP POST ไปยังเซิร์ฟเวอร์ด้วย axios พร้อม token ใน Authorization header
-  //     const response = await axios.post('http://localhost:8080/api/postGame', data, {
+  //     const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame', data, {
   //       headers: {
   //         'Authorization': `Bearer ${token}`,
   //         'Content-Type': 'application/json'
@@ -641,7 +641,7 @@ export default function PostPlay() {
 
     try {
       // ส่งคำขอ HTTP POST ไปยังเซิร์ฟเวอร์ด้วย axios พร้อม token ใน Authorization header
-      const response = await axios.post('http://localhost:8080/api/postGame', data, {
+      const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame', data, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -761,7 +761,7 @@ export default function PostPlay() {
   //     console.log('Firebase user created:', firebaseUser);
 
   //     // Save user data in MySQL
-  //     const response = await axios.post('http://localhost:8080/api/users', userData);
+  //     const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/users', userData);
   //     console.log('Response from server:', response.data);
 
   //     setAlertMessage('สร้างโพสต์สำเร็จ!');

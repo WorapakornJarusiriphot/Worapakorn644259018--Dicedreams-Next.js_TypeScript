@@ -169,7 +169,7 @@ export default function SignUp() {
         }
 
         // Check for existing username or email
-        const usersResponse = await axios.get('http://localhost:8080/api/users');
+        const usersResponse = await axios.get('https://dicedreams-backend-deploy-to-render.onrender.com/api/users');
         const users = usersResponse.data;
         const usernameExists = users.some((user: { username: string; }) => user.username === values.username);
         const emailExists = users.some((user: { email: string; }) => user.email === values.email);
@@ -191,7 +191,7 @@ export default function SignUp() {
         console.log('Firebase user created:', firebaseUser);
 
         // Save user data in MySQL
-        const response = await axios.post('http://localhost:8080/api/users', values);
+        const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/users', values);
         console.log('Response from server:', response.data);
 
         setAlertMessage('สมัครสมาชิกสำเร็จ!');

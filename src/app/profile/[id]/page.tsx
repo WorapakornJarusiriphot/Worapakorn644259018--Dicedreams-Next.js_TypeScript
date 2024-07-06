@@ -62,7 +62,7 @@ export default function ProfileID() {
       }
 
       try {
-        const response = await fetch(`http://localhost:8080/api/store/${id}`, {
+        const response = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/store/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`, // เพิ่ม header สำหรับ token
           },

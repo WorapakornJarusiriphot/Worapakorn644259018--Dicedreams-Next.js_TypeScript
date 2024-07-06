@@ -54,7 +54,7 @@ export default function ProfileID() {
   React.useEffect(() => {
     const checkId = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/store/${id}`);
+        const response = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/store/${id}`);
         if (response.ok) {
           const data = await response.json();
           if (data.store_id) {

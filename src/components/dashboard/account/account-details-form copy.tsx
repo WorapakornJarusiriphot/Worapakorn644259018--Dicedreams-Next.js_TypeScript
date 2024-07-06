@@ -231,9 +231,9 @@ export function AccountDetailsForm(): React.JSX.Element {
   // ประกาศฟังก์ชัน fetchUserProfile ก่อนใช้งานใน useEffect
   const fetchUserProfile = async (userId: string, accessToken: string, decodedToken: { username?: string }) => {
     try {
-      console.log(`Requesting URL: http://localhost:8080/api/users/${userId}`);
+      console.log(`Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`);
       const response = await fetch(
-        `http://localhost:8080/api/users/${userId}`,
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -282,10 +282,10 @@ export function AccountDetailsForm(): React.JSX.Element {
           const decodedToken = JSON.parse(atob(accessToken.split(".")[1]));
           const userId = decodedToken.users_id;
 
-          console.log(`Requesting URL: http://localhost:8080/api/users/${userId}`);
+          console.log(`Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`);
 
           const response = await fetch(
-            `http://localhost:8080/api/users/${userId}`,
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,

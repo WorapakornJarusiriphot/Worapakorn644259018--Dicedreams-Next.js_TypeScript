@@ -99,7 +99,7 @@ function PostGames() {
         setLoading(true);
 
         const postsResponse = await fetch(
-          `http://localhost:8080/api/postGame`,
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -110,7 +110,7 @@ function PostGames() {
         if (!postsResponse.ok) throw new Error("Failed to fetch posts");
         const postsData = await postsResponse.json();
 
-        const usersResponse = await fetch(`http://localhost:8080/api/users`, {
+        const usersResponse = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users`, {
           headers: {
             "Content-Type": "application/json",
           },
@@ -120,7 +120,7 @@ function PostGames() {
         const usersData = await usersResponse.json();
 
         const participantsResponse = await fetch(
-          `http://localhost:8080/api/participate`,
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/participate`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -216,7 +216,7 @@ function PostGames() {
       try {
         const accessToken = localStorage.getItem("access_token");
         const response = await axios.post(
-          "http://localhost:8080/api/participate",
+          "https://dicedreams-backend-deploy-to-render.onrender.com/api/participate",
           {
             participant_status: "active",
             participant_apply_datetime: new Date().toLocaleString("th-TH"),

@@ -120,7 +120,7 @@ export default function AccountDetailsForm(): JSX.Element {
       }
 
       try {
-        const response = await fetch(`http://localhost:8080/api/users/${user.users_id}`);
+        const response = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${user.users_id}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -167,7 +167,7 @@ export default function AccountDetailsForm(): JSX.Element {
 
   async function fetchUserData(users_id: string) {
     try {
-      const response = await axios.get(`http://localhost:8080/api/users/${users_id}`);
+      const response = await axios.get(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${users_id}`);
       const data = response.data;
       console.log("Fetched user data:", response.data);
       setUser({

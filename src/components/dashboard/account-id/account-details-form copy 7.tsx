@@ -152,7 +152,7 @@ const AccountDetailsForm: React.FC = () => {
           return;
         }
         try {
-          const response = await axios.get(`http://localhost:8080/api/store/${user.users_id}`, {
+          const response = await axios.get(`https://dicedreams-backend-deploy-to-render.onrender.com/api/store/${user.users_id}`, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             }
@@ -232,7 +232,7 @@ const AccountDetailsForm: React.FC = () => {
         userImage: userImage || '',
       };
 
-      await axios.put(`http://localhost:8080/api/users/${userData.users_id}`, {
+      await axios.put(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userData.users_id}`, {
         first_name: updatedUser.firstName,
         last_name: updatedUser.lastName,
         username: updatedUser.username,
@@ -248,7 +248,7 @@ const AccountDetailsForm: React.FC = () => {
       });
 
       if (user.role === "store" && storeData) {
-        await axios.put(`http://localhost:8080/api/store/${storeData.store_id}`, {
+        await axios.put(`https://dicedreams-backend-deploy-to-render.onrender.com/api/store/${storeData.store_id}`, {
           name_store: storeData.name_store,
           phone_number: storeData.phone_number,
           house_number: storeData.house_number,
@@ -294,9 +294,9 @@ const AccountDetailsForm: React.FC = () => {
 
   const fetchUserProfile = async (users_id: any, accessToken: string, decodedToken: { username: any; }) => {
     try {
-      console.log(`Requesting URL: http://localhost:8080/api/users/${users_id}`);
+      console.log(`Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${users_id}`);
       const response = await fetch(
-        `http://localhost:8080/api/users/${users_id}`,
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${users_id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

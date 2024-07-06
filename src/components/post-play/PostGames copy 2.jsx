@@ -98,7 +98,7 @@ function PostGames() {
 
     const fetchItems = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/postGame", {
+        const response = await fetch("https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame", {
           headers: new Headers({
             Authorization: `Bearer ${accessToken}`, // ส่ง token ใน header
             "Content-Type": "application/json",

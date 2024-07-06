@@ -105,13 +105,13 @@ function PostGames() {
         const decoded = jwtDecode(accessToken);
         setUserId(decoded.users_id);
   
-        const userResponse = await fetch(`http://localhost:8080/api/users/${decoded.users_id}`, {
+        const userResponse = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${decoded.users_id}`, {
           headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" }
         });
         if (!userResponse.ok) throw new Error("Failed to fetch user details");
         const userData = await userResponse.json();
   
-        const postsResponse = await fetch(`http://localhost:8080/api/postGame/user/${decoded.users_id}`, {
+        const postsResponse = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/user/${decoded.users_id}`, {
           headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" }
         });
         if (!postsResponse.ok) throw new Error("Failed to fetch posts");
@@ -119,7 +119,7 @@ function PostGames() {
   
         // Fetch participants for each post
         const postsWithParticipants = await Promise.all(postsData.map(async post => {
-          const participantsResponse = await fetch(`http://localhost:8080/api/participate/${post.post_games_id}`, {
+          const participantsResponse = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/participate/${post.post_games_id}`, {
             headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" }
           });
           if (!participantsResponse.ok) throw new Error(`Failed to fetch participants for post ${post.post_games_id}`);

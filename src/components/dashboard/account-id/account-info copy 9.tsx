@@ -37,7 +37,7 @@ export default function AccountInfo({ id }: AccountInfoProps) {
 
   const fetchUserProfile = async (id: string, accessToken: string) => {
     try {
-      let url = `http://localhost:8080/api/users/${id}`;
+      let url = `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${id}`;
       let isStore = false;
 
       // Try fetching user data
@@ -47,7 +47,7 @@ export default function AccountInfo({ id }: AccountInfoProps) {
 
       if (!response.ok) {
         // If user data fetch fails, try fetching store data
-        url = `http://localhost:8080/api/store/${id}`;
+        url = `https://dicedreams-backend-deploy-to-render.onrender.com/api/store/${id}`;
         response = await fetch(url, {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
@@ -141,7 +141,7 @@ export default function AccountInfo({ id }: AccountInfoProps) {
             return;
           }
 
-          const response = await axios.put(`http://localhost:8080/api/users/${user.userId}`, updatedUser, {
+          const response = await axios.put(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${user.userId}`, updatedUser, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },

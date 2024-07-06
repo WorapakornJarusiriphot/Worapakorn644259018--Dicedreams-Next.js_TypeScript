@@ -191,7 +191,7 @@ export default function SignUp() {
 
   const checkUserExists = async (username: string, email: string) => {
     try {
-      const usersResponse = await axios.get('http://localhost:8080/api/users');
+      const usersResponse = await axios.get('https://dicedreams-backend-deploy-to-render.onrender.com/api/users');
       const users = usersResponse.data;
       return users.some((user: { username: any; email: any; }) => user.username === username || user.email === email);
     } catch (error) {
@@ -245,7 +245,7 @@ export default function SignUp() {
       console.log('Firebase user created:', firebaseUser);
 
       // Save user data in MySQL
-      const response = await axios.post('http://localhost:8080/api/users', userData);
+      const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/users', userData);
       console.log('Response from server:', response.data);
 
 

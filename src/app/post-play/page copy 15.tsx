@@ -260,7 +260,7 @@ export default function PostPlay() {
     };
 
     try {
-      const response = await axios.post('http://localhost:8080/api/postGame', data, {
+      const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame', data, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

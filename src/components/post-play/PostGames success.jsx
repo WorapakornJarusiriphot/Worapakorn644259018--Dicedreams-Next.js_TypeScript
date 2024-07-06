@@ -103,7 +103,7 @@ function PostGames() {
 
       try {
         const decoded = jwtDecode(accessToken);
-        const response = await fetch(`http://localhost:8080/api/postGame/user/${decoded.users_id}`, {
+        const response = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/user/${decoded.users_id}`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",

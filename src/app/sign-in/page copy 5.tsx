@@ -107,7 +107,7 @@ export default function SignIn() {
 
       try {
         console.log('Attempting login with:', credentials);
-        const response = await axios.post('http://localhost:8080/api/auth', credentials);
+        const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/auth', credentials);
 
         console.log('Access token:', response.data.access_token);
 

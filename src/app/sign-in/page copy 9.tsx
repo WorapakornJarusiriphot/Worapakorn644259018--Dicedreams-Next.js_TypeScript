@@ -111,7 +111,7 @@ export default function SignIn() {
       };
 
       try {
-        const response = await axios.post('http://localhost:8080/api/auth', credentials);
+        const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/auth', credentials);
         localStorage.setItem('access_token', response.data.access_token);
         router.push('/');
       } catch (error: any) {

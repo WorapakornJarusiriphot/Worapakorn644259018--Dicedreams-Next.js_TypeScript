@@ -55,7 +55,7 @@ export default function ProfileID() {
   React.useEffect(() => {
     const checkId = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/store/${id}`);
+        const response = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/store/${id}`);
         console.log("API response status:", response.status); // แสดงสถานะของการตอบกลับ API
         if (!response.ok) {
           throw new Error(`HTTP status ${response.status}`);

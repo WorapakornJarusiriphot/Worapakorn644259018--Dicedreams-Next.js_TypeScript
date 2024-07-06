@@ -81,7 +81,7 @@ const PostGames = ({ userId }) => {
 
       try {
         const userResponse = await fetch(
-          `http://localhost:8080/api/users/${userId}`,
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -93,7 +93,7 @@ const PostGames = ({ userId }) => {
         const userData = await userResponse.json();
 
         const postsResponse = await fetch(
-          `http://localhost:8080/api/postGame/user/${userId}`,
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/user/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -105,7 +105,7 @@ const PostGames = ({ userId }) => {
         const postsData = await postsResponse.json();
 
         const participantsResponse = await fetch(
-          `http://localhost:8080/api/participate`,
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/participate`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

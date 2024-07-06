@@ -82,7 +82,7 @@ function PostActivity() {
         setUserId(decoded.users_id);
 
         const postsResponse = await fetch(
-          `http://localhost:8080/api/postActivity`, // ดึงโพสต์ทั้งหมด
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity`, // ดึงโพสต์ทั้งหมด
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -95,7 +95,7 @@ function PostActivity() {
 
         // ดึงข้อมูลร้านค้าทั้งหมด
         const storesResponse = await fetch(
-          `http://localhost:8080/api/store`,
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/store`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

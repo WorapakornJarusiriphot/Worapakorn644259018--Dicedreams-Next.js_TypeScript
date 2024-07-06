@@ -55,8 +55,8 @@ const People = ({ sx }: PeopleProps): React.JSX.Element => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersResponse = await axios.get('http://localhost:8080/api/users');
-        const storesResponse = await axios.get('http://localhost:8080/api/store');
+        const usersResponse = await axios.get('https://dicedreams-backend-deploy-to-render.onrender.com/api/users');
+        const storesResponse = await axios.get('https://dicedreams-backend-deploy-to-render.onrender.com/api/store');
         
         setUsers(usersResponse.data);
         setStores(storesResponse.data);

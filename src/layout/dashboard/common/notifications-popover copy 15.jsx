@@ -36,7 +36,7 @@ export default function NotificationsPopover() {
       }
 
       try {
-        const response = await fetch("http://localhost:8080/api/notification", {
+        const response = await fetch("https://dicedreams-backend-deploy-to-render.onrender.com/api/notification", {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -319,7 +319,7 @@ function renderContent(notification, expanded, handleToggleExpand) {
 
   return {
     avatar: notification.data.user_image ? (
-      <Avatar alt={notification.data.first_name} src={`http://localhost:8080/images/${notification.data.user_image}`} />
+      <Avatar alt={notification.data.first_name} src={`https://dicedreams-backend-deploy-to-render.onrender.com/images/${notification.data.user_image}`} />
     ) : null,
     title,
   };
