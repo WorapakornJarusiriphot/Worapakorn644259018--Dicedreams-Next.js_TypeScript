@@ -85,8 +85,8 @@ function Search() {
       const fetchData = async () => {
         try {
           const [activitiesRes, gamesRes] = await Promise.all([
-            fetch(`http://localhost:8080/api/postActivity?search=${search}`),
-            fetch(`http://localhost:8080/api/postGame?search=${search}`),
+            fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity?search=${search}`),
+            fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame?search=${search}`),
           ]);
 
           if (!activitiesRes.ok || !gamesRes.ok) {

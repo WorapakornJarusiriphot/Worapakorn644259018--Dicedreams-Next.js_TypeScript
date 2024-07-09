@@ -59,8 +59,8 @@ export default function Search() {
         try {
           console.log("Fetching data for search:", search); // เพิ่ม log เพื่อตรวจสอบคำค้นหา
           const [activitiesRes, gamesRes] = await Promise.all([
-            fetch(`http://localhost:8080/api/postActivity?search=${search}`),
-            fetch(`http://localhost:8080/api/postGame?search=${search}`),
+            fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity?search=${search}`),
+            fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame?search=${search}`),
           ]);
 
           if (!activitiesRes.ok) {

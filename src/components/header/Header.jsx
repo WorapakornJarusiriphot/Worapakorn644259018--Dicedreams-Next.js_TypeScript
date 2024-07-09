@@ -5,10 +5,8 @@ import CircleNotificationsIcon from "@mui/icons-material/CircleNotifications";
 import MenuIcon from "@mui/icons-material/Menu";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar"; // ใช้สำหรับโปรไฟล์
-
 import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
-
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
@@ -20,19 +18,13 @@ import { List as ListIcon } from "@phosphor-icons/react/dist/ssr/List";
 import { MagnifyingGlass as MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { Users as UsersIcon } from "@phosphor-icons/react/dist/ssr/Users";
 import Link from "next/link";
-
-import { useRouter } from "next/navigation"; // แก้ไขจาก next/navigation
+import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import DrawerMobileNavigation from "../DrawerMobileNavigation";
-// import { MobileNav } from "@/layout/MobileNav";
 import { UserPopover } from "@/layout/user-popover";
-
-// import jwtDecode from 'jwt-decode';
 import { jwtDecode } from "jwt-decode";
-// import { JwtPayload } from 'jsonwebtoken';
 import { JwtPayload } from "jwt-decode";
-
 import NotificationsPopover from "@/layout/dashboard/common/notifications-popover";
 
 function Header() {
@@ -46,31 +38,8 @@ function Header() {
     firstName: "",
     lastName: "",
     profilePictureUrl: "",
-    userId: "", // เพิ่ม field userId
+    userId: "", 
   });
-
-  // const [user, setUser] = useState({
-  //   username: "",
-  //   userType: "",
-  //   firstName: "",
-  //   lastName: "",
-  //   profilePictureUrl: "",
-  // });
-
-  // useEffect(() => {
-  //   const accessToken = localStorage.getItem("access_token");
-  //   if (accessToken) {
-  //     const decodedToken = jwtDecode(accessToken);
-  //     // สมมุติว่า token ของคุณมีข้อมูล userId
-  //     setUser(prev => ({
-  //       ...prev,
-  //       firstName: decodedToken.firstName,
-  //       lastName: decodedToken.lastName,
-  //       email: decodedToken.email,
-  //       userId: decodedToken.userId  // ตั้งค่า userId
-  //     }));
-  //   }
-  // }, []);
 
   useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
@@ -82,21 +51,14 @@ function Header() {
           firstName: decoded.firstName,
           lastName: decoded.lastName,
           email: decoded.email,
-          userId: decoded.users_id, // สมมุติว่า token มี field users_id
+          userId: decoded.users_id,
         }));
       }
     }
   }, []);
 
   const [openNav, setOpenNav] = useState(false);
-
-  // const [openNav, setOpenNav] = React.useState<boolean>(false);
-
-  // const userPopover = usePopover<HTMLDivElement>();
-
   const [open, setOpen] = React.useState(false);
-  // const [userLoggedIn, setUserLoggedIn] = useState(false);
-  // const [user, setUser] = useState({ firstName: "", lastName: "", profilePictureUrl: "" });
   const router = useRouter();
 
   const handleLogout = () => {
@@ -105,10 +67,6 @@ function Header() {
     setUser({ firstName: "", lastName: "", profilePictureUrl: "" });
     router.push("/sign-in"); // เปลี่ยนเส้นทางไปยังหน้าล็อกอิน
   };
-
-  // const [open, setOpen] = React.useState(false);
-
-  // State เพื่อบ่งบอกว่าผู้ใช้ล็อกอินหรือไม่
   const [userLoggedIn, setUserLoggedIn] = React.useState(false);
 
   // ตัวอย่าง URL รูปโปรไฟล์ หากมีระบบที่ให้ผู้ใช้เปลี่ยนรูปโปรไฟล์เอง ควรดึงจากฐานข้อมูล
@@ -132,9 +90,9 @@ function Header() {
   // ประกาศฟังก์ชัน fetchUserProfile ก่อนใช้งานใน useEffect
   const fetchUserProfile = async (userId, accessToken, decodedToken) => {
     try {
-      console.log(`Requesting URL: http://localhost:8080/api/users/${userId}`);
+      console.log(`Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`);
       const response = await fetch(
-        `http://localhost:8080/api/users/${userId}`,
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -180,11 +138,11 @@ function Header() {
           const userId = decodedToken.users_id;
 
           console.log(
-            `Requesting URL: http://localhost:8080/api/users/${userId}`
+            `Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`
           );
 
           const response = await fetch(
-            `http://localhost:8080/api/users/${userId}`,
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -226,19 +184,8 @@ function Header() {
     <div className="font-bold w-full fixed top-0">
       <AppBar position="fixed" sx={{ zIndex: 1500, background: "#FFFFFF" }}>
         {" "}
-        {/* ปรับค่า z-index ให้สูง */}
-        {/* <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }} sx={{ background: "#FFFFFF" }}> */}
         <Toolbar>
-          {/* <IconButton
-            size="medium"
-            edge="start"
-            color="black"
-            aria-label="menu"
-            onClick={handleDrawerOpen}
-            sx={{ mr: 2 }}
-          > */}
           <DrawerMobileNavigation handleDrawerOpen={handleDrawerOpen} />
-          {/* </IconButton> */}
           <Typography
             variant="h6"
             component="div"
@@ -333,7 +280,6 @@ function Header() {
               </Button>
             </>
           )}
-          {/* <CircleNotificationsIcon sx={{ color: "black", size: "15" }} /> */}
         </Toolbar>
       </AppBar>
     </div>

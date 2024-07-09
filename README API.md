@@ -16,7 +16,7 @@ module.exports = {
 // create config file for auth
 module.exports = {
 
-    DOMAIN: "http://localhost:8080",
+    DOMAIN: "https://dicedreams-backend-deploy-to-render.onrender.com",
    
 }
 

@@ -111,7 +111,7 @@ export default function SignIn() {
       };
 
       try {
-        const response = await axios.post('http://localhost:8080/api/auth', credentials);
+        const response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/auth', credentials);
         localStorage.setItem('access_token', response.data.access_token);
         router.push('/');
       } catch (error: any) {
@@ -121,9 +121,9 @@ export default function SignIn() {
 
           if (responseMessage === 'User Not Exist') {
             if (isEmail) {
-              setErrorMessage('ไม่มีอีเมลนี้อยู่ในฐานข้อมูล');
+              setErrorMessage('คุณกรอก E-mail ไม่ถูกต้อง');
             } else {
-              setErrorMessage('ไม่มี username นี้อยู่ในฐานข้อมูล');
+              setErrorMessage('คุณกรอก Username ไม่ถูกต้อง');
             }
           } else if (responseMessage === 'Invalid Password') {
             setErrorMessage('คุณกรอก Password ผิด กรุณากรอก Password ให้ถูกต้อง');

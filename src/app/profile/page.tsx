@@ -79,11 +79,7 @@ export default function Profile() {
             <br />
             <br />
             <Stack spacing={3}>
-              {/* <div>
-            <Typography variant="h4" style={{ color: 'white', textAlign: 'center' }}>โปรไฟล์</Typography>
-          </div> */}
               <Grid container spacing={3}>
-                {/* <Grid lg={4} md={6} xs={12}> */}
                 <Grid xs={12}>
                   <AccountInfo />
                 </Grid>
@@ -91,11 +87,6 @@ export default function Profile() {
                 <Grid xs={12}>
                   <TabsProfile />
                 </Grid>
-
-                {/* <Grid lg={8} md={6} xs={12}> */}
-                {/* <Grid xs={12}>
-              <AccountDetailsForm />
-            </Grid> */}
               </Grid>
             </Stack>
           </ThemeProvider>

@@ -8,6 +8,7 @@ import Header from "@/components/header/Header";
 import Filter from "@/components/Filter";
 import { Container, Grid, Typography } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Suspense } from 'react';
 
 // กำหนดธีมสีเข้ม
 const darkTheme = createTheme({
@@ -45,6 +46,14 @@ const darkTheme = createTheme({
 });
 
 export default function SearchPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchComponent />
+    </Suspense>
+  );
+}
+
+function SearchComponent() {
   const searchParams = useSearchParams();
   const search = searchParams.get("search");
   const [activities, setActivities] = useState([]);
@@ -58,7 +67,7 @@ export default function SearchPage() {
         try {
           console.log("Fetching data for search:", search);
           const gamesRes = await fetch(
-            `http://localhost:8080/api/postGame?search=${search}`
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame?search=${search}`
           );
 
           if (!gamesRes.ok) {
@@ -101,7 +110,7 @@ export default function SearchPage() {
 
       try {
         const activitiesRes = await fetch(
-          `http://localhost:8080/api/postActivity?search=${search}`
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity?search=${search}`
         );
         if (!activitiesRes.ok) {
           throw new Error(
