@@ -3,8 +3,8 @@
     "builds": [
       {
         "src": "package.json",
-        "use": "@vercel/node"
+        "use": "@vercel/next"
       }
     ],
-    "buildCommand": "npm run vercel-build"
-}
+    "buildCommand": "npm install --legacy-peer-deps && npm run build"
+}  
