@@ -3,7 +3,6 @@ import dayjs, { Dayjs } from 'dayjs';
 
 interface User {
   role: string;
-  role: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -37,6 +36,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     birthday: dayjs(),
     users_id: '',
     userImage: '',
+    role: '',
   });
 
   return (

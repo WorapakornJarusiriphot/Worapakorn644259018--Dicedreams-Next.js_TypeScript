@@ -9,4 +9,4 @@ function ForgetPassword() {
   );
 }
 
-export default ForgetPassword; // เพิ่มการส่งออกคอมโพเนนต์
+export default ForgetPassword;

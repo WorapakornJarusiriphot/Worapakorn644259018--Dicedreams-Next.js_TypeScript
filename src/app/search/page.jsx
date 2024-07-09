@@ -8,6 +8,7 @@ import Header from "@/components/header/Header";
 import Filter from "@/components/Filter";
 import { Container, Grid, Typography } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Suspense } from 'react';
 
 // กำหนดธีมสีเข้ม
 const darkTheme = createTheme({
@@ -45,6 +46,14 @@ const darkTheme = createTheme({
 });
 
 export default function SearchPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchComponent />
+    </Suspense>
+  );
+}
+
+function SearchComponent() {
   const searchParams = useSearchParams();
   const search = searchParams.get("search");
   const [activities, setActivities] = useState([]);
