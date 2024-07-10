@@ -7,8 +7,7 @@
     "build": "npx next build",
     "start": "npx next start",
     "lint": "npx next lint",
-    "express": "nodemon src/app/api/server.js",
-    "postinstall": "npm install --legacy-peer-deps"
+    "express": "nodemon src/app/api/server.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",
