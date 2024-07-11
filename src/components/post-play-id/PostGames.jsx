@@ -43,25 +43,25 @@ import MuiAlert from "@mui/material/Alert";
 import axios from "axios";
 
 const formatDateTime = (dateString) => {
+  if (!dateString) return "Invalid date";
   const date = parseISO(dateString);
-  const formattedDate = format(
-    date,
-    "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'",
-    {
-      locale: th,
-    }
-  );
+  if (isNaN(date)) return "Invalid date";
+  const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'", { locale: th });
   return formattedDate;
 };
 
 const formatThaiDate = (dateString) => {
+  if (!dateString) return "Invalid date";
   const date = parseISO(dateString);
+  if (isNaN(date)) return "Invalid date";
   const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy", { locale: th });
   return formattedDate;
 };
 
 const formatThaiTime = (timeString) => {
+  if (!timeString) return "Invalid time";
   const [hours, minutes] = timeString.split(":");
+  if (!hours || !minutes) return "Invalid time";
   const formattedTime = `เวลา ${hours}.${minutes} น.`;
   return formattedTime;
 };

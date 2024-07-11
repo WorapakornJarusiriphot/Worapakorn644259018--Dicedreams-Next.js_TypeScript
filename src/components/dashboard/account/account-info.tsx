@@ -135,7 +135,7 @@ export function AccountInfo(): React.JSX.Element {
         reader.readAsDataURL(selectedFile);
         reader.onload = async () => {
           const base64Image = reader.result as string;
-          const formattedBirthday = user.birthday ? dayjs(user.birthday).format('YYYY-MM-DD') : ''; // แปลงเป็นรูปแบบที่ถูกต้อง
+          const formattedBirthday = user.birthday ? dayjs(user.birthday).format('MM-DD-YYYY') : '';
           const updatedUser = {
             first_name: user.firstName,
             last_name: user.lastName,
@@ -152,26 +152,38 @@ export function AccountInfo(): React.JSX.Element {
             return;
           }
 
-          const response = await axios.put(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${user.users_id}`, updatedUser, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          });
+          try {
+            const response = await axios.put(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${user.users_id}`, updatedUser, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            });
 
-          if (response.status === 200) {
-            setUser((prev) => ({
-              ...prev,
-              profilePictureUrl: base64Image,
-              birthday: dayjs(formattedBirthday), // อัพเดทค่า birthday ใน state ให้ถูกต้อง
-            }));
-            setPreviewUrl(null);
-            setSelectedFile(null);
-            setAlertMessage('อัพโหลดรูปภาพสำเร็จแล้ว');
-            setAlertSeverity('success');
-            setOpenSnackbar(true);
-          } else {
-            console.error(`API Error: ${response.status} ${response.statusText}`);
-            setAlertMessage('เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ');
+            if (response.status === 200) {
+              setUser((prev) => ({
+                ...prev,
+                profilePictureUrl: base64Image,
+                birthday: dayjs(formattedBirthday),
+              }));
+              setPreviewUrl(null);
+              setSelectedFile(null);
+              setAlertMessage('อัพโหลดรูปภาพสำเร็จแล้ว');
+              setAlertSeverity('success');
+              setOpenSnackbar(true);
+            } else {
+              console.error(`API Error: ${response.status} ${response.statusText}`);
+              setAlertMessage('เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ');
+              setAlertSeverity('error');
+              setOpenSnackbar(true);
+            }
+          } catch (error) {
+            if (axios.isAxiosError(error)) {
+              console.error('API Error:', error.response?.data);
+              setAlertMessage(`เกิดข้อผิดพลาด: ${error.response?.data.message || 'ไม่สามารถอัพเดตข้อมูลได้'}`);
+            } else {
+              console.error('Error:', error);
+              setAlertMessage('เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ');
+            }
             setAlertSeverity('error');
             setOpenSnackbar(true);
           }
