@@ -49,6 +49,7 @@ import Link from 'next/link';
 // สร้าง custom theme
 const theme = createTheme({
   palette: {
+    // mode: 'dark', // โหมด Dark Mode
     primary: {
       main: "#00C853", // สีเขียวสดใสสำหรับปุ่ม "เข้าร่วม"
     },
@@ -292,156 +293,155 @@ function PostGames() {
   return (
     <div>
       {items.map((item) => (
-        <Box
-          key={item.post_games_id}
-          sx={{
-            borderColor: "grey.800",
-            borderWidth: 1,
-            borderStyle: "solid",
-            borderRadius: 2,
-            marginTop: 3,
-            color: "white",
-            padding: "16px",
-            marginBottom: "16px",
-            backgroundColor: "#121212", // Added to match the Figma background
-            zIndex: 0, // กำหนดค่า z-index เพื่อให้การ์ดอยู่เหนือ navbar
-          }}
-        >
-          <Grid
-            container
-            spacing={2}
-            alignItems="center"
-            sx={{ marginBottom: "16px" }}
-          >
-            <Grid item>
-              <div onClick={() => handleProfileClick(item.users_id)}>
-                <img
-                  src={item.userProfileImage}
-                  alt={`${item.userFirstName} ${item.userLastName}`}
-                  width="50"
-                  height="50"
-                  style={{
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    objectPosition: "center",
-                    width: "50px",
-                    height: "50px",
-                    cursor: "pointer", // เพิ่ม cursor: pointer
-                  }}
-                />
-              </div>
-            </Grid>
-            <Grid item xs>
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-                sx={{ color: "white", cursor: "pointer" }} // เพิ่ม cursor: pointer
-                onClick={() => handleProfileClick(item.users_id)}
-              >
-                {item.userFirstName} {item.userLastName}
-              </Typography>
-              <Typography variant="body2" sx={{ color: "white" }}>
-                {item.creation_date}
-              </Typography>
-            </Grid>
-            <Grid item>
-              <IconButton
-                sx={{
-                  color: "white",
-                }}
-                aria-label="settings"
-              >
-                <MoreVertOutlinedIcon />
-              </IconButton>
-            </Grid>
-          </Grid>
-
+        <>
           <Link
             href={{
               pathname: "/PostGameDetail",
               query: { id: item?.post_games_id },
             }}
           >
-
-          <Image
-            src={item.games_image}
-            alt={item.name_games}
-            width={526} // ควรให้ค่าเป็นตัวเลขพิกเซล
-            height={296} // ควรให้ค่าเป็นตัวเลขพิกเซล
-            layout="responsive" // ใช้ layout แบบ responsive เพื่อให้ภาพปรับขนาดตามขนาดของ container
-            style={{ marginBottom: "16px" }} // กำหนด margin ด้านล่าง
-          />
-
-          <div className="text-left">
-            <Typography sx={{ color: "white", fontWeight: "bold" }}>
-              {item.name_games}
-            </Typography>
-            <Typography sx={{ color: "white" }}>
-              วันที่เจอกัน: {formatThaiDate(item.date_meet)}
-            </Typography>
-            <Typography sx={{ color: "white" }}>
-              เวลาที่เจอกัน: {formatThaiTime(item.time_meet)}
-            </Typography>
-
-            <br />
-            <Typography sx={{ color: "white" }}>
-              {item.detail_post}
-            </Typography>
-
-            <Typography sx={{ color: "white" }}>
-              สถานที่ : 43/5 ถนนราชดำเนิน (ถนนต้นสน)
-              ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง
-            </Typography>
-            <Typography sx={{ color: "white" }}>
-              จำนวนคนจะไป : {item.participants}/{item.num_people}
-            </Typography>
-
-            <br />
-          </div>
-
-          </Link>
-
-          <Grid container spacing={2} justifyContent="center">
-            {item.users_id !== userId && !item.isParticipated && (
-              <Grid item xs={12} sm={6}>
-                <Button
-                  variant="contained"
-                  fullWidth
-                  startIcon={<LoginIcon />}
-                  sx={{
-                    backgroundColor: "red",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "darkred",
-                    },
-                  }}
-                  onClick={() => handleJoinClick(item)}
-                >
-                  เข้าร่วม
-                </Button>
+          <Box
+            key={item.post_games_id}
+            sx={{
+              borderColor: "grey.800",
+              borderWidth: 1,
+              borderStyle: "solid",
+              borderRadius: 2,
+              marginTop: 3,
+              color: "white",
+              padding: "16px",
+              marginBottom: "16px",
+              backgroundColor: "#121212", // Added to match the Figma background
+              zIndex: 0, // กำหนดค่า z-index เพื่อให้การ์ดอยู่เหนือ navbar
+            }}
+          >
+            <Grid
+              container
+              spacing={2}
+              alignItems="center"
+              sx={{ marginBottom: "16px" }}
+            >
+              <Grid item>
+                <div onClick={() => handleProfileClick(item.users_id)}>
+                  <img
+                    src={item.userProfileImage}
+                    alt={`${item.userFirstName} ${item.userLastName}`}
+                    width="50"
+                    height="50"
+                    style={{
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      objectPosition: "center",
+                      width: "50px",
+                      height: "50px",
+                      cursor: "pointer", // เพิ่ม cursor: pointer
+                    }}
+                  />
+                </div>
               </Grid>
-            )}
-            <Grid item xs={12} sm={6}>
-              <Button
-                variant="contained"
-                fullWidth
-                startIcon={<CommentIcon />}
-                sx={{
-                  backgroundColor: "black",
-                  color: "white",
-                  border: "1px solid white",
-                  "&:hover": {
-                    backgroundColor: "#333333",
-                  },
-                  zIndex: 0,
-                }}
-                onClick={(event) => handleButtonClick(event, ``)}
-              >
-                พูดคุย
-              </Button>
+              <Grid item xs>
+                <Typography
+                  variant="subtitle1"
+                  gutterBottom
+                  sx={{ color: "white", cursor: "pointer" }} // เพิ่ม cursor: pointer
+                  onClick={() => handleProfileClick(item.users_id)}
+                >
+                  {item.userFirstName} {item.userLastName}
+                </Typography>
+                <Typography variant="body2" sx={{ color: "white" }}>
+                  {item.creation_date}
+                </Typography>
+              </Grid>
+              <Grid item>
+                <IconButton
+                  sx={{
+                    color: "white",
+                  }}
+                  aria-label="settings"
+                >
+                  <MoreVertOutlinedIcon />
+                </IconButton>
+              </Grid>
             </Grid>
-          </Grid>
-        </Box>
+
+            <Image
+              src={item.games_image}
+              alt={item.name_games}
+              width={526} // ควรให้ค่าเป็นตัวเลขพิกเซล
+              height={296} // ควรให้ค่าเป็นตัวเลขพิกเซล
+              layout="responsive" // ใช้ layout แบบ responsive เพื่อให้ภาพปรับขนาดตามขนาดของ container
+              style={{ marginBottom: "16px" }} // กำหนด margin ด้านล่าง
+            />
+            <div className="text-left">
+              <Typography sx={{ color: "white", fontWeight: "bold" }}>
+                {item.name_games}
+              </Typography>
+              <Typography sx={{ color: "white" }}>
+                วันที่เจอกัน: {formatThaiDate(item.date_meet)}
+              </Typography>
+              <Typography sx={{ color: "white" }}>
+                เวลาที่เจอกัน: {formatThaiTime(item.time_meet)}
+              </Typography>
+
+              <br />
+              <Typography sx={{ color: "white" }}>
+                {item.detail_post}
+              </Typography>
+
+              <Typography sx={{ color: "white" }}>
+                สถานที่ : 43/5 ถนนราชดำเนิน (ถนนต้นสน)
+                ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง
+              </Typography>
+              <Typography sx={{ color: "white" }}>
+                จำนวนคนจะไป : {item.participants}/{item.num_people}
+              </Typography>
+
+              <br />
+
+              <Grid container spacing={2} justifyContent="center">
+                {item.users_id !== userId && !item.isParticipated && (
+                  <Grid item xs={12} sm={6}>
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      startIcon={<LoginIcon />}
+                      sx={{
+                        backgroundColor: "red",
+                        color: "white",
+                        "&:hover": {
+                          backgroundColor: "darkred",
+                        },
+                      }}
+                      onClick={() => handleJoinClick(item)}
+                    >
+                      เข้าร่วม
+                    </Button>
+                  </Grid>
+                )}
+                <Grid item xs={12} sm={6}>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    startIcon={<CommentIcon />}
+                    sx={{
+                      backgroundColor: "black",
+                      color: "white",
+                      border: "1px solid white",
+                      "&:hover": {
+                        backgroundColor: "#333333",
+                      },
+                      zIndex: 0,
+                    }}
+                    onClick={(event) => handleButtonClick(event, ``)}
+                  >
+                    พูดคุย
+                  </Button>
+                </Grid>
+              </Grid>
+            </div>
+          </Box>
+          </Link>
+        </>
       ))}
       {items.length === 0 && (
         <Typography sx={{ color: "white" }}>
