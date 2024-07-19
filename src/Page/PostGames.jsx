@@ -43,11 +43,12 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import axios from "axios";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+// import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 // สร้าง custom theme
 const theme = createTheme({
   palette: {
-    // mode: 'dark', // โหมด Dark Mode
     primary: {
       main: "#00C853", // สีเขียวสดใสสำหรับปุ่ม "เข้าร่วม"
     },
@@ -110,11 +111,14 @@ function PostGames() {
         if (!postsResponse.ok) throw new Error("Failed to fetch posts");
         const postsData = await postsResponse.json();
 
-        const usersResponse = await fetch(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users`, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const usersResponse = await fetch(
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/users`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!usersResponse.ok) throw new Error("Failed to fetch users");
         const usersData = await usersResponse.json();
@@ -352,6 +356,13 @@ function PostGames() {
             </Grid>
           </Grid>
 
+          <Link
+            href={{
+              pathname: "/PostGameDetail",
+              query: { id: item?.post_games_id },
+            }}
+          >
+
           <Image
             src={item.games_image}
             alt={item.name_games}
@@ -360,6 +371,7 @@ function PostGames() {
             layout="responsive" // ใช้ layout แบบ responsive เพื่อให้ภาพปรับขนาดตามขนาดของ container
             style={{ marginBottom: "16px" }} // กำหนด margin ด้านล่าง
           />
+
           <div className="text-left">
             <Typography sx={{ color: "white", fontWeight: "bold" }}>
               {item.name_games}
@@ -372,7 +384,9 @@ function PostGames() {
             </Typography>
 
             <br />
-            <Typography sx={{ color: "white" }}>{item.detail_post}</Typography>
+            <Typography sx={{ color: "white" }}>
+              {item.detail_post}
+            </Typography>
 
             <Typography sx={{ color: "white" }}>
               สถานที่ : 43/5 ถนนราชดำเนิน (ถนนต้นสน)
@@ -383,48 +397,50 @@ function PostGames() {
             </Typography>
 
             <br />
+          </div>
 
-            <Grid container spacing={2} justifyContent="center">
-              {item.users_id !== userId && !item.isParticipated && (
-                <Grid item xs={12} sm={6}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    startIcon={<LoginIcon />}
-                    sx={{
-                      backgroundColor: "red",
-                      color: "white",
-                      "&:hover": {
-                        backgroundColor: "darkred",
-                      },
-                    }}
-                    onClick={() => handleJoinClick(item)}
-                  >
-                    เข้าร่วม
-                  </Button>
-                </Grid>
-              )}
+          </Link>
+
+          <Grid container spacing={2} justifyContent="center">
+            {item.users_id !== userId && !item.isParticipated && (
               <Grid item xs={12} sm={6}>
                 <Button
                   variant="contained"
                   fullWidth
-                  startIcon={<CommentIcon />}
+                  startIcon={<LoginIcon />}
                   sx={{
-                    backgroundColor: "black",
+                    backgroundColor: "red",
                     color: "white",
-                    border: "1px solid white",
                     "&:hover": {
-                      backgroundColor: "#333333",
+                      backgroundColor: "darkred",
                     },
-                    zIndex: 0,
                   }}
-                  onClick={(event) => handleButtonClick(event, ``)}
+                  onClick={() => handleJoinClick(item)}
                 >
-                  พูดคุย
+                  เข้าร่วม
                 </Button>
               </Grid>
+            )}
+            <Grid item xs={12} sm={6}>
+              <Button
+                variant="contained"
+                fullWidth
+                startIcon={<CommentIcon />}
+                sx={{
+                  backgroundColor: "black",
+                  color: "white",
+                  border: "1px solid white",
+                  "&:hover": {
+                    backgroundColor: "#333333",
+                  },
+                  zIndex: 0,
+                }}
+                onClick={(event) => handleButtonClick(event, ``)}
+              >
+                พูดคุย
+              </Button>
             </Grid>
-          </div>
+          </Grid>
         </Box>
       ))}
       {items.length === 0 && (

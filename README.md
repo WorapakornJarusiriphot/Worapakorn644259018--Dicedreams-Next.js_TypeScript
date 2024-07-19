@@ -1,5 +1,7 @@
 npm install --legacy-peer-deps
 
+npm install date-fns@latest
+
 set NODE_OPTIONS=--openssl-legacy-provider
 
 การใช้งาน npm audit และ npm outdated

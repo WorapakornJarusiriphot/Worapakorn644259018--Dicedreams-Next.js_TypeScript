@@ -346,6 +346,11 @@ const PostPlay = () => {
                               onBlur={handleBlur}
                               error={touched.timeMeet && Boolean(errors.timeMeet)}
                               renderInput={(params) => <TextField {...params} />}
+                              viewRenderers={{
+                                hours: renderTimeViewClock,
+                                minutes: renderTimeViewClock,
+                                seconds: renderTimeViewClock,
+                              }}
                             />
                             {touched.timeMeet && errors.timeMeet && (
                               <Alert severity="error">{errors.timeMeet}</Alert>

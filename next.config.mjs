@@ -7,15 +7,16 @@ const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  staticPageGenerationTimeout: 300, // เพิ่มเวลา timeout เป็น 300 วินาที (5 นาที)
   experimental: {
     forceSwcTransforms: true,
   },
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
+        protocol: 'http',
         hostname: 'localhost',
-        port: '',
+        port: '8080',
         pathname: '/**',
       },
       {
