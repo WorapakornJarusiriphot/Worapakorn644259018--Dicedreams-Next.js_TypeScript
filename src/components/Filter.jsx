@@ -2,38 +2,30 @@
 
 import {
   FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Button,
+  InputAdornment,
   FormControlLabel,
   Checkbox,
-  TextField,
   Typography,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import { ThemeProvider, createTheme } from "@mui/material";
 import * as React from "react";
-import Paper from "@mui/material/Paper";
-import InputBase from "@mui/material/InputBase";
-import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
-import SearchIcon from "@mui/icons-material/Search";
-import DirectionsIcon from "@mui/icons-material/Directions";
-import Button from "@mui/material/Button";
 import dayjs from "dayjs";
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { InputLabel, MenuItem, Select } from "@mui/material";
-import { useState } from "react";
-import InputAdornment from "@mui/material/InputAdornment";
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { styled } from "@mui/material/styles";
 import Tooltip from "@mui/material/Tooltip";
 import Stack from "@mui/material/Stack";
-import { DemoItem } from "@mui/x-date-pickers/internals/demo";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
+import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
+import { useRouter, useSearchParams } from "next/navigation";
 import { renderTimeViewClock } from "@mui/x-date-pickers/timeViewRenderers";
-import { useRouter } from "next/navigation"; // เพิ่มการใช้ useRouter
 
 const ProSpan = styled("span")({
   display: "inline-block",
@@ -81,7 +73,6 @@ const darkTheme = createTheme({
     },
   },
   components: {
-    // กำหนดค่าเริ่มต้นของ TextField ให้เข้ากับธีมสีเข้ม
     MuiTextField: {
       styleOverrides: {
         root: {
@@ -111,24 +102,59 @@ const darkTheme = createTheme({
 function Filter({
   selectedCategory,
   handleCategoryChange,
-  handleSearch,
   handleSearchChange,
   searchTerm,
   handleNumberChange,
   number,
-  handleCurrencyChange,
-  selectedCurrency,
-  handleDateChange, // เพิ่มฟังก์ชัน handleDateChange
-  selectedDate, // เพิ่ม prop selectedDate
-  handleTimeChange, // เพิ่ม handleTimeChange
-  selectedTime, // เพิ่ม selectedTime
+  handleDateChange,
+  selectedDate,
+  handleTimeChange,
+  selectedTime,
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [selectedGames, setSelectedGames] = React.useState({
+    Werewolf: false,
+    Coup: false,
+    Uno: false,
+    "Magic the gathering": false,
+    เกมเศรษฐี: false,
+    "Warhammer 40k": false,
+    Splendor: false,
+    "Kill Team": false,
+  });
+
+  const handleCheckboxChange = (event) => {
+    setSelectedGames({
+      ...selectedGames,
+      [event.target.value]: event.target.checked,
+    });
+  };
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
-      handleSearch();
+      executeSearch();
     }
+  };
+
+  const executeSearch = () => {
+    const query = new URLSearchParams(searchParams);
+    Object.keys(selectedGames).forEach((game) => {
+      if (selectedGames[game]) {
+        query.append("search", game);
+      }
+    });
+    if (selectedDate) {
+      query.set("search_date_meet", dayjs(selectedDate).format("YYYY-MM-DD"));
+    }
+    if (selectedTime) {
+      query.set("search_time_meet", dayjs(selectedTime).format("HH:mm"));
+    }
+    if (number) {
+      query.set("search_num_people", number);
+    }
+
+    router.push(`/search?${query.toString()}`);
   };
 
   return (
@@ -190,7 +216,6 @@ function Filter({
             label="จำนวนผู้เล่นที่ว่างตั้งแต่"
             onChange={handleNumberChange}
           >
-            {/* วนลูปเพื่อสร้าง MenuItem สำหรับตัวเลือกตั้งแต่ 1 ถึง 75 */}
             {Array.from({ length: 75 }, (_, index) => (
               <MenuItem key={index + 1} value={index + 1}>
                 {index + 1}
@@ -201,25 +226,6 @@ function Filter({
 
         <br />
         <br />
-        {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DemoContainer components={["DatePicker", "DatePicker"]}>
-            <DatePicker
-              label="เลือกวัน"
-              value={value}
-              onChange={(newValue) => setValue(newValue)}
-            />
-          </DemoContainer>
-        </LocalizationProvider>
-        <br />
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DemoContainer components={["TimePicker", "TimePicker"]}>
-            <TimePicker
-              label="เลือกเวลา"
-              value={value}
-              onChange={(newValue) => setValue(newValue)}
-            />
-          </DemoContainer>
-        </LocalizationProvider> */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <ThemeProvider theme={darkTheme}>
             <DemoContainer
@@ -253,13 +259,6 @@ function Filter({
                 }
               >
                 <TimePicker
-                  // slotProps={{
-                  //   textField: {
-                  //     variant: "outlined",
-                  //     InputLabelProps: { style: { color: "white" } },
-                  //     InputProps: { style: { color: "white" } },
-                  //   },
-                  // }}
                   value={selectedTime}
                   onChange={handleTimeChange}
                   viewRenderers={{
@@ -267,26 +266,15 @@ function Filter({
                     minutes: renderTimeViewClock,
                     seconds: renderTimeViewClock,
                   }}
+                  slotProps={{
+                    textField: {
+                      variant: "outlined",
+                      InputLabelProps: { style: { color: "white" } },
+                      InputProps: { style: { color: "white" } },
+                    },
+                  }}
                 />
               </DemoItem>
-              {/* <DemoItem
-                label={
-                  <Label componentName="ค้นหาวันและเวลาที่เล่น" valueType="date time" />
-                }
-              >
-<DatePicker
-  slots={{
-    textField: (params) => (
-      <TextField
-        {...params}
-        InputLabelProps={{ style: { color: "white" } }}
-        InputProps={{ style: { color: "white" } }}
-      />
-    ),
-  }}
-/>
-
-              </DemoItem> */}
             </DemoContainer>
           </ThemeProvider>
         </LocalizationProvider>
@@ -296,7 +284,7 @@ function Filter({
         <FormControl component="fieldset">
           <Button
             variant="contained"
-            onClick={handleSearch}
+            onClick={executeSearch}
             sx={{ background: "white", color: "black", marginTop: "10px" }}
           >
             ค้นหา
@@ -307,54 +295,21 @@ function Filter({
           <Typography variant="h6" gutterBottom style={{ color: "white" }}>
             เกมที่สนใจ
           </Typography>
-          <FormControlLabel
-            control={<Checkbox sx={{ color: "white" }} />}
-            label="Werewolf"
-            value="Werewolf"
-            sx={{ color: "white", borderColor: "white" }}
-          />
-          <FormControlLabel
-            control={<Checkbox sx={{ color: "white" }} />}
-            label="Coup"
-            value="Coup"
-            sx={{ color: "white", borderColor: "white" }}
-          />
-          <FormControlLabel
-            control={<Checkbox sx={{ color: "white" }} />}
-            label="Uno"
-            value="Uno"
-            sx={{ color: "white", borderColor: "white" }}
-          />
-          <FormControlLabel
-            control={<Checkbox sx={{ color: "white" }} />}
-            label="Magic the gethering"
-            value="Magic the gethering"
-            sx={{ color: "white", borderColor: "white" }}
-          />
-          <FormControlLabel
-            control={<Checkbox sx={{ color: "white" }} />}
-            label="เกมเศรษฐี"
-            value="เกมเศรษฐี"
-            sx={{ color: "white", borderColor: "white" }}
-          />
-          <FormControlLabel
-            control={<Checkbox sx={{ color: "white" }} />}
-            label="Warhummer 40k"
-            value="Warhummer 40k"
-            sx={{ color: "white", borderColor: "white" }}
-          />
-          <FormControlLabel
-            control={<Checkbox sx={{ color: "white" }} />}
-            label="Splendor"
-            value="Splendor"
-            sx={{ color: "white", borderColor: "white" }}
-          />
-          <FormControlLabel
-            control={<Checkbox sx={{ color: "white" }} />}
-            label="Kill Team"
-            value="Kill Team"
-            sx={{ color: "white", borderColor: "white" }}
-          />
+          {Object.keys(selectedGames).map((game) => (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  sx={{ color: "white" }}
+                  checked={selectedGames[game]}
+                  onChange={handleCheckboxChange}
+                />
+              }
+              label={game}
+              value={game}
+              sx={{ color: "white", borderColor: "white" }}
+              key={game}
+            />
+          ))}
         </FormControl>
       </ThemeProvider>
     </div>

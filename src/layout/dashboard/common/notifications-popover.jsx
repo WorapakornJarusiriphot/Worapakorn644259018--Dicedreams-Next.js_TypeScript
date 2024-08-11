@@ -26,40 +26,47 @@ export default function NotificationsPopover() {
   const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      const accessToken = localStorage.getItem("access_token");
-      if (!accessToken) {
-        console.error("Access token not found");
-        setError("Access token not found");
-        return;
-      }
+  const fetchNotifications = async () => {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      console.error("Access token not found");
+      setError("Access token not found");
+      return;
+    }
 
-      try {
-        const response = await fetch("https://dicedreams-backend-deploy-to-render.onrender.com/api/notification", {
+    try {
+      const response = await fetch(
+        "https://dicedreams-backend-deploy-to-render.onrender.com/api/notification",
+        {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        if (data.messages && Array.isArray(data.messages)) {
-          setNotifications(
-            data.messages.sort((a, b) => new Date(b.time) - new Date(a.time))
-          );
-        } else {
-          console.error("Invalid data format:", data);
-          setError("Invalid data format");
-        }
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-        setError("Error fetching notifications");
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
+      const data = await response.json();
+      if (data.messages && Array.isArray(data.messages)) {
+        setNotifications(
+          data.messages.sort((a, b) => new Date(b.time) - new Date(a.time))
+        );
+      } else {
+        console.error("Invalid data format:", data);
+        setError("Invalid data format");
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      setError("Error fetching notifications");
+    }
+  };
 
-    fetchNotifications();
+  useEffect(() => {
+    fetchNotifications(); // Initial fetch
+
+    const intervalId = setInterval(fetchNotifications, 5000); // Fetch every 5 seconds
+
+    return () => clearInterval(intervalId); // Cleanup on component unmount
   }, []);
 
   const totalUnRead = Array.isArray(notifications)
@@ -123,14 +130,17 @@ export default function NotificationsPopover() {
         return;
       }
 
-      const response = await fetch("https://dicedreams-backend-deploy-to-render.onrender.com/api/notification", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ notification_id: [id] }),
-      });
+      const response = await fetch(
+        "https://dicedreams-backend-deploy-to-render.onrender.com/api/notification",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ notification_id: [id] }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

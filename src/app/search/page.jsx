@@ -56,18 +56,42 @@ export default function SearchPage() {
 function SearchComponent() {
   const searchParams = useSearchParams();
   const search = searchParams.get("search");
+  const searchDateMeet = searchParams.get("search_date_meet");
+  const searchTimeMeet = searchParams.get("search_time_meet");
+  const searchNumPeople = searchParams.get("search_num_people");
   const [activities, setActivities] = useState([]);
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const buildQueryParams = () => {
+    let params = [];
+    if (search) {
+      search.split("&").forEach((term) => {
+        params.push(`search=${term}`);
+      });
+    }
+    if (searchDateMeet) {
+      params.push(`search_date_meet=${searchDateMeet}`);
+    }
+    if (searchTimeMeet) {
+      params.push(`search_time_meet=${searchTimeMeet}`);
+    }
+    if (searchNumPeople) {
+      params.push(`search_num_people=${searchNumPeople}`);
+    }
+    return params.join("&");
+  };
+
   useEffect(() => {
     if (search) {
       const fetchData = async () => {
         try {
-          console.log("Fetching data for search:", search);
+          const queryParams = buildQueryParams();
+          console.log("Fetching data with query:", queryParams);
+
           const gamesRes = await fetch(
-            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame?search=${search}`
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame?${queryParams}`
           );
 
           if (!gamesRes.ok) {
@@ -77,14 +101,7 @@ function SearchComponent() {
           const gamesData = await gamesRes.json();
           console.log("Fetched games data:", gamesData);
 
-          const filteredGames = gamesData.filter(
-            (game) =>
-              game.name_games.toLowerCase().includes(search.toLowerCase()) ||
-              game.detail_post.toLowerCase().includes(search.toLowerCase())
-          );
-
-          console.log("Filtered games:", filteredGames);
-          setGames(filteredGames);
+          setGames(gamesData);
         } catch (error) {
           console.error("Error fetching games data:", error);
           setError(error.message);
@@ -98,49 +115,40 @@ function SearchComponent() {
       console.log("No search query found");
       setLoading(false);
     }
-  }, [search]);
+  }, [search, searchDateMeet, searchTimeMeet, searchNumPeople]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!search) {
-        console.log("No search query found");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const activitiesRes = await fetch(
-          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity?search=${search}`
-        );
-        if (!activitiesRes.ok) {
-          throw new Error(
-            `Failed to fetch activities: ${activitiesRes.statusText}`
+    if (search) {
+      const fetchData = async () => {
+        try {
+          const queryParams = buildQueryParams();
+          const activitiesRes = await fetch(
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity?${queryParams}`
           );
+          if (!activitiesRes.ok) {
+            throw new Error(
+              `Failed to fetch activities: ${activitiesRes.statusText}`
+            );
+          }
+
+          const activitiesData = await activitiesRes.json();
+          console.log("Fetched activities:", activitiesData);
+
+          setActivities(activitiesData);
+        } catch (error) {
+          console.error("Error fetching activities data:", error);
+          setError(error.message);
+        } finally {
+          setLoading(false);
         }
+      };
 
-        const activitiesData = await activitiesRes.json();
-        console.log("Fetched activities:", activitiesData);
-
-        const filteredActivities = activitiesData.filter(
-          (activity) =>
-            activity.name_activity
-              .toLowerCase()
-              .includes(search.toLowerCase()) ||
-            activity.detail_post.toLowerCase().includes(search.toLowerCase())
-        );
-
-        console.log("Filtered activities:", filteredActivities);
-        setActivities(filteredActivities);
-      } catch (error) {
-        console.error("Error fetching activities data:", error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [search]);
+      fetchData();
+    } else {
+      console.log("No search query found");
+      setLoading(false);
+    }
+  }, [search, searchDateMeet, searchTimeMeet, searchNumPeople]);
 
   useEffect(() => {
     console.log("Activities state:", activities);

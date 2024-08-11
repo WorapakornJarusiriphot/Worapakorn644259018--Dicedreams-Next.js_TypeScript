@@ -1,12 +1,14 @@
 import * as React from 'react';
+import { useSearchParams } from 'next/navigation'; // ใช้ useSearchParams จาก next/navigation
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import AccountDetailsForm from '@/components/dashboard/account/account-details-form';
 import PostGames from '@/components/post-play/PostGames';
-import Participating from '@/components/participating/Participating'
-import PostActivity from '@/components/post-activity/PostActivity'
+import Participating from '@/components/participating/Participating';
+import PostActivity from '@/components/post-activity/PostActivity';
+import { useState, useEffect } from "react";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -42,10 +44,24 @@ function a11yProps(index: number) {
 }
 
 export default function TabsProfile() {
+  const searchParams = useSearchParams(); // ใช้ useSearchParams
   const [value, setValue] = React.useState(0);
+
+  useEffect(() => {
+    if (searchParams) { // ตรวจสอบว่า searchParams ไม่เป็น null
+      const tab = searchParams.get('tab'); // ดึงค่าจาก query string
+      if (tab !== null) {
+        const tabValue = parseInt(tab, 10);
+        if (!isNaN(tabValue) && tabValue !== value) {
+          setValue(tabValue);
+        }
+      }
+    }
+  }, [searchParams, value]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
+    window.history.pushState(null, '', `/profile?tab=${newValue}`); // อัปเดต URL query string
   };
 
   return (
@@ -65,7 +81,6 @@ export default function TabsProfile() {
         <Participating />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
-        {/* แทนที่ข้อความด้วยคอมโพเนนต์ AccountDetailsForm */}
         <AccountDetailsForm />
       </CustomTabPanel>
     </Box>

@@ -1,5 +1,7 @@
 'use client';
 
+import React, { Suspense } from 'react';
+import Home from "@/Page/Home";
 // import Image from "next/image";
 // import { useState } from "react";
 // import "./App.css";
@@ -7,9 +9,6 @@
 // import InputFileUpload from './components/FileUpload'
 // import RegistrationForm from './Page/SignUp'
 // import EbookFormMui from './Page/Add-book page'
-
-
-import Home from "@/Page/Home";
 // import Join from "@/Page/Join";
 // import Header from "@/components/header/Header";
 // import Footer from "@/components/Footer";
@@ -19,11 +18,10 @@ export default function HomePage() {
     <>
       <main>
         <div>
-          {/* <Header /> */}
-          {/* <Join /> */}
-          <Home />
+          <Suspense fallback={<div>Loading...</div>}>
+            <Home />
+          </Suspense>
         </div>
-        {/* <Footer /> */}
       </main>
     </>
   );
