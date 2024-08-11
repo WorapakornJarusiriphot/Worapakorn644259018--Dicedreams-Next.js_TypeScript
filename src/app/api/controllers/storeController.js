@@ -19,6 +19,16 @@ exports.create = async (req, res, next) => {
       return;
     }
 
+    // Handle store image
+    let storeImage;
+    if (req.body.store_image) {
+      if (req.body.store_image.startsWith("data:image")) {
+        storeImage = await saveImageToDisk(req.body.store_image);
+      } else {
+        storeImage = req.body.store_image;
+      }
+    }
+
     // Create a Store
     const store = {
       name_store: req.body.name_store,
@@ -29,17 +39,13 @@ exports.create = async (req, res, next) => {
       sub_district: req.body.sub_district,
       road: req.body.road,
       alley: req.body.alley,
-      store_image: req.body.store_image
-        ? await saveImageToDisk(req.body.store_image)
-        : req.body.store_image,
+      store_image: storeImage,
       users_id: req.body.users_id,
     };
 
     // Save Store in the database async
     const data = await Store.create(store);
-    res
-      .status(201)
-      .json({ message: "Store was created successfully.", data: data });
+    res.status(201).json({ message: "Store was created successfully.", data: data });
   } catch (error) {
     next(error);
   }
@@ -47,21 +53,20 @@ exports.create = async (req, res, next) => {
 
 // Retrieve all Stores from the database.
 exports.findAll = (req, res) => {
-  Store.findAll()
+  Store.findAll({
+    order: [['createdAt', 'DESC']]  // เรียงลำดับจากใหม่ไปเก่า
+  })
     .then((data) => {
       data.map((store) => {
         if (store.store_image) {
-          store.store_image = `${req.protocol}://${req.get("host")}/images/${
-            store.store_image
-          }`;
+          store.store_image = `${req.protocol}://${req.get("host")}/images/${store.store_image}`;
         }
       });
       res.status(200).json(data);
     })
     .catch((error) => {
       res.status(500).json({
-        message:
-          error.message || "Some error occurred while retrieving Stores.",
+        message: error.message || "Some error occurred while retrieving Stores.",
       });
     });
 };
@@ -96,14 +101,16 @@ exports.update = async (req, res, next) => {
   const id = req.params.id;
 
   if (req.body.store_image) {
-    //   check image is updated
-    if (req.body.store_image.search("data:image") != -1) {
+    // Check if image is updated
+    if (req.body.store_image.startsWith("data:image")) {
       const store = await Store.findByPk(id);
-      const uploadPath = path.resolve("./") + "/src/app/api/public/images/";
+      const uploadPath = path.resolve("./") + "/src/public/images/";
 
-      fs.unlink(uploadPath + store.store_image, function (err) {
-        console.log("File deleted!");
-      });
+      if (store.store_image) {
+        fs.unlink(uploadPath + store.store_image, function (err) {
+          if (err) console.log("File not found or already deleted.");
+        });
+      }
 
       req.body.store_image = await saveImageToDisk(req.body.store_image);
     }
@@ -171,18 +178,20 @@ exports.deleteAll = (req, res) => {
       });
     });
 };
+
 // Retrieve all Stores by user_id
 exports.findAllByUserId = (req, res) => {
   const id = req.params.id;
   Store.findAll({
     where: { user_id: id },
+    order: [['createdAt', 'DESC']]  // เรียงลำดับจากใหม่ไปเก่า
   })
     .then((data) => {
-      if (data.store_image) {
-        data.store_image = `${req.protocol}://${req.get("host")}/images/${
-          data.store_image
-        }`;
-      }
+      data.map((store) => {
+        if (store.store_image) {
+          store.store_image = `${req.protocol}://${req.get("host")}/images/${store.store_image}`;
+        }
+      });
       res.status(200).json(data);
     })
     .catch((error) => {
@@ -195,7 +204,7 @@ exports.findAllByUserId = (req, res) => {
 async function saveImageToDisk(baseImage) {
   const projectPath = path.resolve("./");
 
-  const uploadPath = `${projectPath}/src/app/api/public/images/`;
+  const uploadPath = `${projectPath}/src/public/images/`;
 
   const ext = baseImage.substring(
     baseImage.indexOf("/") + 1,

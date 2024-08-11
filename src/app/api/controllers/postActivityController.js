@@ -5,6 +5,7 @@ const { Op } = require("sequelize");
 const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
+const Fuse = require('fuse.js');
 const writeFileAsync = promisify(fs.writeFile);
 
 const PostActivity = db.post_activity;
@@ -22,6 +23,16 @@ exports.create = async (req, res, next) => {
       store_id,
     } = req.body;
 
+    // Handle post activity image
+    let postActivityImage;
+    if (post_activity_image) {
+      if (post_activity_image.startsWith("data:image")) {
+        postActivityImage = await saveImageToDisk(post_activity_image);
+      } else {
+        postActivityImage = post_activity_image;
+      }
+    }
+
     const data = {
       name_activity: name_activity,
       status_post: status_post,
@@ -30,9 +41,7 @@ exports.create = async (req, res, next) => {
       date_activity: moment(date_activity, "MM-DD-YYYY"),
       time_activity: time_activity,
       store_id: store_id,
-      post_activity_image: post_activity_image
-        ? await saveImageToDisk(post_activity_image)
-        : post_activity_image,
+      post_activity_image: postActivityImage,
     };
     const post_activity = await PostActivity.create(data);
     res.status(201).json(post_activity);
@@ -43,44 +52,88 @@ exports.create = async (req, res, next) => {
 
 exports.findAll = async (req, res, next) => {
   try {
-    const { search } = req.query;
-    console.log(`Received search query for activities: ${search}`); // เพิ่ม log เพื่อตรวจสอบคำค้นหา
+    const { search, search_date_activity, search_time_activity } = req.query;
+    console.log(`Received search query for activities: ${search}`);
 
-    const condition = search
-      ? {
-          [Op.or]: [
-            { name_activity: { [Op.like]: `%${search}%` } },
-            { detail_post: { [Op.like]: `%{search}%` } },
-          ],
-          status_post: { [Op.not]: "unActive" },
-        }
-      : {
-          status_post: { [Op.not]: "unActive" },
-        };
+    let condition = {
+      status_post: { [Op.not]: "unActive" },
+    };
 
-    const post_activity = await PostActivity.findAll({ where: condition });
-    post_activity.map((post_activity) => {
-      post_activity.post_activity_image = `${req.protocol}://${req.get(
-        "host"
-      )}/images/${post_activity.post_activity_image}`;
+    if (search_date_activity) {
+      const date = moment(search_date_activity, "MM/DD/YYYY").format("YYYY-MM-DD");
+      condition = {
+        ...condition,
+        date_activity: {
+          [Op.lte]: date,
+        },
+      };
+    }
+
+    const data = await PostActivity.findAll({
+      where: condition,
+      order: [
+        ['creation_date', 'DESC'],  // เรียงลำดับจากเก่าสุดไปใหม่สุด
+        ['date_activity', 'DESC'],
+        ['time_activity', 'DESC'],
+      ],
+      limit: 100,
     });
-    res.status(200).json(post_activity);
+
+    let filteredData = data;
+
+    if (search) {
+      const searchTerms = search.split('&search=').filter(term => term);
+      const fuse = new Fuse(filteredData, {
+        keys: ['name_activity', 'detail_post'],
+        threshold: 0.3
+      });
+
+      let finalResults = [];
+      searchTerms.forEach(term => {
+        const result = fuse.search(term);
+        finalResults = [...finalResults, ...result.map(({ item }) => item)];
+      });
+
+      filteredData = [...new Set(finalResults)];
+    }
+
+    if (search_time_activity) {
+      const targetTime = moment(search_time_activity, "HH:mm").toDate();
+      filteredData = filteredData.sort((a, b) => {
+        const timeA = moment(a.time_activity, "HH:mm").toDate();
+        const timeB = moment(b.time_activity, "HH:mm").toDate();
+        return Math.abs(targetTime - timeA) - Math.abs(targetTime - timeB);
+      }).slice(0, 100); // ค้นหาข้อมูลที่ใกล้เคียงที่สุดและจำกัดผลลัพธ์ไม่เกิน 100 รายการ
+    }
+
+    filteredData.forEach((post_activity) => {
+      if (post_activity.post_activity_image) {
+        post_activity.post_activity_image = `${req.protocol}://${req.get("host")}/images/${post_activity.post_activity_image}`;
+      }
+    });
+
+    res.send(filteredData);
   } catch (error) {
-    next(error);
+    res.status(500).send({
+      message: error.message || "Some error occurred while retrieving activities.",
+    });
   }
 };
 
-// ฟังก์ชันใหม่: ดึงโพสต์ทั้งหมดของร้านค้าตาม store_id
+// ดึงโพสต์ทั้งหมดของร้านค้าตาม store_id
 exports.findAllStorePosts = async (req, res, next) => {
   try {
-    const storeId = req.params.storeId; // รับ ID ร้านค้าจากพารามิเตอร์ URL
-    console.log(`Fetching posts for store ID: ${storeId}`); // เพิ่ม log เพื่อตรวจสอบการดึงโพสต์
+    const storeId = req.params.storeId;
+    console.log(`Fetching posts for store ID: ${storeId}`);
 
     const post_activity = await PostActivity.findAll({
-      where: { store_id: storeId }, // ค้นหาโพสต์ที่มี store_id ตรงกับ ID ที่ส่งมา
+      where: { store_id: storeId },
+      order: [
+        ['creation_date', 'DESC'],  // เรียงลำดับจากเก่าสุดไปใหม่สุด
+      ],
     });
 
-    console.log(`Found posts: ${post_activity.length}`); // เพิ่ม log เพื่อตรวจสอบจำนวนโพสต์ที่พบ
+    console.log(`Found posts: ${post_activity.length}`);
 
     post_activity.forEach((post) => {
       if (post.post_activity_image) {
@@ -92,7 +145,7 @@ exports.findAllStorePosts = async (req, res, next) => {
 
     res.status(200).json(post_activity);
   } catch (error) {
-    console.error("Failed to fetch store posts:", error.message); // เพิ่ม log ข้อผิดพลาด
+    console.error("Failed to fetch store posts:", error.message);
     next(error);
   }
 };
@@ -116,16 +169,18 @@ exports.update = async (req, res, next) => {
     const post_activity_id = req.params.id;
 
     if (req.body.post_activity_image) {
-      if (req.body.post_activity_image.search("data:image") != -1) {
+      if (req.body.post_activity_image.startsWith("data:image")) {
         const postactivity = await PostActivity.findByPk(post_activity_id);
-        const uploadPath = path.resolve("./") + "/src/app/api/public/images/";
+        const uploadPath = path.resolve("./") + "/src/public/images/";
 
-        fs.unlink(
-          uploadPath + postactivity.post_activity_image,
-          function (err) {
-            console.log("File deleted!");
-          }
-        );
+        if (postactivity.post_activity_image) {
+          fs.unlink(
+            uploadPath + postactivity.post_activity_image,
+            function (err) {
+              if (err) console.log("File not found or already deleted.");
+            }
+          );
+        }
 
         req.body.post_activity_image = await saveImageToDisk(
           req.body.post_activity_image
@@ -133,6 +188,7 @@ exports.update = async (req, res, next) => {
       }
     }
     req.body.date_activity = moment(req.body.date_activity, "MM-DD-YYYY");
+
     await PostActivity.update(req.body, {
       where: {
         post_activity_id,
@@ -147,12 +203,31 @@ exports.update = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
   try {
     const post_activity_id = req.params.id;
-    const post_activity = await PostActivity.destroy({
+    const post_activity = await PostActivity.findByPk(post_activity_id);
+
+    if (post_activity && post_activity.post_activity_image) {
+      const uploadPath = path.resolve("./") + "/src/public/images/";
+      fs.unlink(uploadPath + post_activity.post_activity_image, function (err) {
+        if (err) console.log("File not found or already deleted.");
+      });
+    }
+
+    const deleted = await PostActivity.destroy({
       where: {
         post_activity_id,
       },
     });
-    res.status(204).json({ message: "PostActivity was deleted successfully." });
+
+    if (deleted) {
+      res.status(200).json({
+        message: "PostActivity was deleted successfully.",
+        post_activity_id: post_activity_id,
+      });
+    } else {
+      res.status(404).json({
+        message: `PostActivity with id=${post_activity_id} not found.`,
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -160,11 +235,25 @@ exports.delete = async (req, res, next) => {
 
 exports.deleteAll = async (req, res, next) => {
   try {
-    const post_activity = await PostActivity.destroy({
+    const post_activities = await PostActivity.findAll();
+
+    for (const post_activity of post_activities) {
+      if (post_activity.post_activity_image) {
+        const uploadPath = path.resolve("./") + "/src/public/images/";
+        fs.unlink(uploadPath + post_activity.post_activity_image, function (err) {
+          if (err) console.log("File not found or already deleted.");
+        });
+      }
+    }
+
+    await PostActivity.destroy({
       where: {},
       truncate: false,
     });
-    res.status(204).json(post_activity);
+
+    res.status(200).json({
+      message: "All PostActivities were deleted successfully.",
+    });
   } catch (error) {
     next(error);
   }
@@ -173,7 +262,7 @@ exports.deleteAll = async (req, res, next) => {
 async function saveImageToDisk(baseImage) {
   const projectPath = path.resolve("./");
 
-  const uploadPath = `${projectPath}/src/app/api/public/images/`;
+  const uploadPath = `${projectPath}/src/public/images/`;
 
   const ext = baseImage.substring(
     baseImage.indexOf("/") + 1,

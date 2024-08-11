@@ -1,5 +1,3 @@
-// create router for participate
-
 const express = require("express");
 const router = express.Router();
 const participateController = require("../controllers/participateController");
@@ -31,7 +29,7 @@ const passportJWT = require('../middleware/passportJWT');
  *               participant_apply_datetime:
  *                 type: string
  *                 format: date-time
- *                 example: "2024-06-07T12:34:56Z"
+ *                 example: "07/13/2024 02:50:00"
  *               participant_status:
  *                 type: string
  *                 example: "pending"
@@ -46,6 +44,8 @@ const passportJWT = require('../middleware/passportJWT');
  *         description: The participation was successfully created
  *       400:
  *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
  */
 router.post("/", [passportJWT.isLogin, authentication.isUser], participateController.create);
 
@@ -108,6 +108,8 @@ router.get("/", participateController.findAll);
  *                 updatedAt:
  *                   type: string
  *                   format: date-time
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Participate not found
  */
@@ -156,8 +158,58 @@ router.get("/:id", [passportJWT.isLogin, authentication.isUser], participateCont
  *                   updatedAt:
  *                     type: string
  *                     format: date-time
+ *       401:
+ *         description: Unauthorized
  */
 router.get("/post/:id", [passportJWT.isLogin, authentication.isUser], participateController.findAllByPostGamesId);
+
+/**
+ * @swagger
+ * /participate/user/{userId}:
+ *   get:
+ *     summary: Retrieve all participates by user_id
+ *     tags: [Participates]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user ID
+ *         example: "217affca-a63a-429d-abed-c3c34498a1a8"
+ *     responses:
+ *       200:
+ *         description: A list of participates
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   participant_id:
+ *                     type: string
+ *                   participant_apply_datetime:
+ *                     type: string
+ *                     format: date-time
+ *                   participant_status:
+ *                     type: string
+ *                   user_id:
+ *                     type: string
+ *                   post_games_id:
+ *                     type: string
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *       401:
+ *         description: Unauthorized
+ */
+router.get("/user/:userId", [passportJWT.isLogin, authentication.isUser], participateController.findAllByUserId);
 
 /**
  * @swagger
@@ -185,7 +237,7 @@ router.get("/post/:id", [passportJWT.isLogin, authentication.isUser], participat
  *               participant_apply_datetime:
  *                 type: string
  *                 format: date-time
- *                 example: "2024-06-07T12:34:56Z"
+ *                 example: "07/13/2024 02:50:00"
  *               participant_status:
  *                 type: string
  *                 example: "approved"
@@ -198,10 +250,12 @@ router.get("/post/:id", [passportJWT.isLogin, authentication.isUser], participat
  *     responses:
  *       200:
  *         description: Participate was updated successfully.
- *       404:
- *         description: Participate not found
  *       400:
  *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Participate not found
  */
 router.put("/:id", [passportJWT.isLogin, authentication.isUser], participateController.update);
 
@@ -224,10 +278,12 @@ router.put("/:id", [passportJWT.isLogin, authentication.isUser], participateCont
  *     responses:
  *       200:
  *         description: Participate was deleted successfully.
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Participate not found
  */
-router.delete("/:id", [passportJWT.isLogin, authentication.isUser], participateController.delete);
+router.delete("/:id", [passportJWT.isLogin, authentication.isAdminOrUser], participateController.delete);
 
 /**
  * @swagger
@@ -240,7 +296,9 @@ router.delete("/:id", [passportJWT.isLogin, authentication.isUser], participateC
  *     responses:
  *       200:
  *         description: All participates were deleted successfully.
+ *       401:
+ *         description: Unauthorized
  */
-router.delete("/", [passportJWT.isLogin, authentication.isUser], participateController.deleteAll);
+router.delete("/", [passportJWT.isLogin, authentication.isAdminOrUser], participateController.deleteAll);
 
 module.exports = router;

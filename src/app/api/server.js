@@ -1,5 +1,3 @@
-'use server';
-
 const express = require("express");
 const http = require('http');
 const socketIo = require('socket.io');
@@ -23,10 +21,10 @@ const routerNotification = require("./routers/notification");
 // Import Swagger configuration
 const { swaggerUi, specs } = require('./configs/swaggerConfig');
 
-db.sequelize.sync();
-// db.sequelize.sync({ force: true }).then(() => {
-//     console.log("Drop and resync DB");
-//   });
+// ใช้การ sync แบบ alter เพื่ออัพเดต schema ของตารางที่มีอยู่แล้ว
+db.sequelize.sync({ alter: true })
+  .then(() => console.log("Tables have been updated successfully."))
+  .catch((error) => console.error("Error updating tables:", error));
 
 const app = express();
 
@@ -67,9 +65,6 @@ app.get("/", (req, res) => {
 });
 
 app.get('/testnotification', (req, res) => {
-  // req.user send users id to send notification to 
-
-
   res.sendFile(path.join(__dirname + '/index.html'))
 })
 
@@ -95,8 +90,13 @@ app.get('/swagger.json', (req, res) => {
 app.use(errorHandler);
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
+const DOMAIN = process.env.DOMAIN;
+
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
+  console.log(`Visit the application at: ${DOMAIN}`);
+  console.log(`API documentation is available at: ${DOMAIN}/api-docs`);
+  console.log(`Swagger JSON is available at: ${DOMAIN}/swagger.json`);
 });
 
 // console.log('Using mysql2 version:', require('mysql2').version);

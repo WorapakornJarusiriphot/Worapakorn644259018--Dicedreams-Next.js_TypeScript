@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"npx next dev\" \"nodemon src/app/api/server.js\"",
-    "build": "npx next build",
+    "build": "npm install --legacy-peer-deps && npx next build",
     "start": "npx next start",
     "lint": "npx next lint",
     "express": "nodemon src/app/api/server.js"
@@ -138,7 +138,8 @@
     "tailwind-merge": "^2.2.1",
     "uuid": "^9.0.1",
     "yup": "^1.4.0",
-    "zod": "3.22.4"
+    "zod": "3.22.4",
+    "fuse.js": "^7.0.0"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "4.1.1",

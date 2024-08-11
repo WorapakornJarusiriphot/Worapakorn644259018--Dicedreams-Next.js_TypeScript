@@ -1,5 +1,3 @@
-// create router for comment
-
 const express = require("express");
 const router = express.Router();
 const chatController = require("../controllers/chatController");
@@ -34,7 +32,7 @@ const passportJWT = require('../middleware/passportJWT');
  *               datetime_chat:
  *                 type: string
  *                 format: date-time
- *                 example: "2023-06-01T14:30:00Z"
+ *                 example: "07/13/2024 02:50:00"
  *               user_id:
  *                 type: string
  *                 example: "3cb8cba9-874c-482e-bb5e-c5d523d77b7a"
@@ -46,6 +44,8 @@ const passportJWT = require('../middleware/passportJWT');
  *         description: The chat was successfully created
  *       400:
  *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
  */
 router.post("/", [passportJWT.isLogin, authentication.isUser], chatController.create);
 
@@ -78,6 +78,8 @@ router.post("/", [passportJWT.isLogin, authentication.isUser], chatController.cr
  *                     type: string
  *                   post_games_id:
  *                     type: string
+ *       401:
+ *         description: Unauthorized
  */
 router.get("/", [passportJWT.isLogin, authentication.isUser], chatController.findAll);
 
@@ -115,6 +117,8 @@ router.get("/", [passportJWT.isLogin, authentication.isUser], chatController.fin
  *                   type: string
  *                 post_games_id:
  *                   type: string
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Chat not found
  */
@@ -148,14 +152,16 @@ router.get("/:id", [passportJWT.isLogin, authentication.isUser], chatController.
  *               datetime_chat:
  *                 type: string
  *                 format: date-time
- *                 example: "2023-06-01T15:00:00Z"
+ *                 example: "07/14/2567 02:50:00"
  *     responses:
  *       200:
  *         description: Chat was updated successfully.
- *       404:
- *         description: Chat not found
  *       400:
  *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Chat not found
  */
 router.put("/:id", [passportJWT.isLogin, authentication.isUser], chatController.update);
 
@@ -177,10 +183,12 @@ router.put("/:id", [passportJWT.isLogin, authentication.isUser], chatController.
  *     responses:
  *       200:
  *         description: Chat was deleted successfully.
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: Chat not found
  */
-router.delete("/:id", [passportJWT.isLogin, authentication.isUser], chatController.delete);
+router.delete("/:id", [passportJWT.isLogin, authentication.isAdminOrUser], chatController.delete);
 
 /**
  * @swagger
@@ -193,8 +201,10 @@ router.delete("/:id", [passportJWT.isLogin, authentication.isUser], chatControll
  *     responses:
  *       200:
  *         description: All chats were deleted successfully.
+ *       401:
+ *         description: Unauthorized
  */
-router.delete("/", [passportJWT.isLogin, authentication.isUser], chatController.deleteAll);
+router.delete("/", [passportJWT.isLogin, authentication.isAdminOrUser], chatController.deleteAll);
 
 /**
  * @swagger
@@ -232,7 +242,51 @@ router.delete("/", [passportJWT.isLogin, authentication.isUser], chatController.
  *                     type: string
  *                   post_games_id:
  *                     type: string
+ *       401:
+ *         description: Unauthorized
  */
 router.get("/post/:id", [passportJWT.isLogin, authentication.isUser], chatController.findAllByPostGamesId);
+
+/**
+ * @swagger
+ * /chat/user/{user_id}:
+ *   get:
+ *     summary: Retrieve all chats by user
+ *     tags: [Chat]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user ID
+ *     responses:
+ *       200:
+ *         description: A list of chats by user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     example: "217affca-a63a-429d-abed-c3c34498a1a8"
+ *                   message:
+ *                     type: string
+ *                   datetime_chat:
+ *                     type: string
+ *                     format: date-time
+ *                   user_id:
+ *                     type: string
+ *                   post_games_id:
+ *                     type: string
+ *       401:
+ *         description: Unauthorized
+ */
+router.get("/user/:user_id", [passportJWT.isLogin, authentication.isUser], chatController.findAllByUser);
 
 module.exports = router;
