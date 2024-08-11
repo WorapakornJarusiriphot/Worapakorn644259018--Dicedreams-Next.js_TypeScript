@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"npx next dev\" \"nodemon src/app/api/server.js\"",
-    "build": "npm install --legacy-peer-deps && npx next build",
+    "build": "npx next build",
     "start": "npx next start",
     "lint": "npx next lint",
     "express": "nodemon src/app/api/server.js"
