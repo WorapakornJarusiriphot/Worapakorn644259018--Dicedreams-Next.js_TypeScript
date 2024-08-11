@@ -157,6 +157,7 @@ function PostGameDetail() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isParticipated, setIsParticipated] = useState(false);
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false); // State for close confirmation dialog
 
   const [user, setUser] = useState({
     firstName: "",
@@ -473,7 +474,7 @@ function PostGameDetail() {
   const fetchParticipants = async (gameId, accessToken) => {
     try {
       setLoading(true);
-
+  
       const response = await fetch(
         `https://dicedreams-backend-deploy-to-render.onrender.com/api/participate/post/${gameId}`,
         {
@@ -483,15 +484,19 @@ function PostGameDetail() {
         }
       );
       if (!response.ok) throw new Error("Failed to fetch participants");
-
+  
       const participantsData = await response.json();
-      setParticipants(participantsData);
+      
+      // กรองเอาเฉพาะ participants ที่มี participant_status ไม่ใช่ 'unActive'
+      const activeParticipants = participantsData.filter(participant => participant.participant_status !== 'unActive');
+      
+      setParticipants(activeParticipants); // แสดงเฉพาะข้อมูลที่มีสถานะไม่ใช่ 'unActive'
     } catch (error) {
       setError("Failed to load data: " + error.message);
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
   const fetchChatMessages = async (postId) => {
     try {
@@ -534,6 +539,57 @@ function PostGameDetail() {
   }, [router.isReady]);
 
   console.log("Owner Profile State:", ownerProfile);
+
+  useEffect(() => {
+    if (router.asPath.includes("#chat")) {
+      document
+        .getElementById("chat-section")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [router.asPath]);
+
+  const handleCloseGame = async () => {
+    try {
+      setLoading(true);
+      const accessToken = localStorage.getItem("access_token");
+      const gameId = router.query.id;
+
+      const response = await axios.put(
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/${gameId}`,
+        {
+          status_post: "unActive", // อัพเดตสถานะเป็น unActive
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setSuccessMessage("ปิดระบบนัดเล่นเรียบร้อยแล้ว");
+        router.push('/'); // เปลี่ยนหน้าไปที่หน้าแรก
+      } else {
+        setErrorMessage(
+          "Failed to close the post with status: " + response.status
+        );
+      }
+    } catch (error) {
+      setErrorMessage("Error closing the post: " + error.message);
+    } finally {
+      setLoading(false);
+      setCloseDialogOpen(false); // ปิด dialog หลังจากปิดโพสต์เสร็จสิ้น
+    }
+  };
+
+  const handleOpenCloseDialog = () => {
+    setCloseDialogOpen(true);
+  };
+
+  const handleCloseCloseDialog = () => {
+    setCloseDialogOpen(false);
+  };
 
   return (
     <>
@@ -579,7 +635,15 @@ function PostGameDetail() {
                   marginBottom: "10px",
                 }}
               />
-              <Typography variant="body1" sx={{ color: "white" }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "white",
+                  fontWeight: "bold",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                }}
+              >
                 {postData?.detail_post}
               </Typography>
 
@@ -738,13 +802,16 @@ function PostGameDetail() {
                   variant="contained"
                   sx={{
                     marginTop: "10px",
-                    marginRight: "10px", // เพิ่ม marginRight
+                    marginRight: "10px",
                     backgroundColor: "white",
                     color: "red",
                     "&:hover": {
                       backgroundColor: "darkred",
                     },
                   }}
+                  onClick={() =>
+                    router.push(`/PostPlayEdit?id=${postData?.post_games_id}`)
+                  }
                 >
                   แก้ไขโพสต์
                 </Button>
@@ -754,9 +821,10 @@ function PostGameDetail() {
                     backgroundColor: "#4d4d4d",
                     color: "#ffffff",
                     "&:hover": {
-                      backgroundColor: "##121212",
+                      backgroundColor: "#121212",
                     },
                   }}
+                  onClick={handleOpenCloseDialog} // เปิด dialog เพื่อยืนยันการปิดระบบนัดเล่น
                 >
                   ปิดระบบนัดเล่น
                 </Button>
@@ -861,6 +929,7 @@ function PostGameDetail() {
             <form onSubmit={handleChatSubmit}>
               <TextField
                 fullWidth
+                id="chat-section"
                 multiline
                 rows={4}
                 variant="outlined"
@@ -963,6 +1032,22 @@ function PostGameDetail() {
             ยกเลิก
           </Button>
           <Button onClick={handleConfirmJoin} color="primary" autoFocus>
+            ตกลง
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={closeDialogOpen} onClose={handleCloseCloseDialog}>
+        <DialogTitle>ยืนยันการปิดระบบนัดเล่น</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            คุณแน่ใจหรือไม่ว่าต้องการปิดระบบนัดเล่นโพสต์นี้?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseCloseDialog} color="error">
+            ยกเลิก
+          </Button>
+          <Button onClick={handleCloseGame} color="primary" autoFocus>
             ตกลง
           </Button>
         </DialogActions>

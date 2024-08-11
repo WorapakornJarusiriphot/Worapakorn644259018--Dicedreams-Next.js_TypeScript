@@ -44,7 +44,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import axios from "axios";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 // import { Link } from 'react-router-dom';
-import Link from 'next/link';
+import Link from "next/link";
+import Avatar from "@mui/material/Avatar"; // เพิ่มการนำเข้า Avatar
 
 // สร้าง custom theme
 const theme = createTheme({
@@ -92,7 +93,12 @@ function PostGames() {
   const [selectedPost, setSelectedPost] = useState(null);
   const [errorMessage, setErrorMessage] = useState(""); // เพิ่มการประกาศ errorMessage
   const [successMessage, setSuccessMessage] = useState(""); // เพิ่มการประกาศ successMessage
+  const [isFullSize, setIsFullSize] = useState(false);
   const router = useRouter();
+
+  const handleImageClick = () => {
+    setIsFullSize(!isFullSize);
+  };
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -258,7 +264,7 @@ function PostGames() {
     setOpenDialog(false);
   };
 
-  const handleButtonClick = (event, redirectUrl) => {
+  const handleButtonClick = (event, id) => {
     event.preventDefault();
     const accessToken = localStorage.getItem("access_token");
 
@@ -266,11 +272,26 @@ function PostGames() {
       setOpenSnackbar(true);
       setTimeout(() => {
         router.push("/sign-in");
-      }, 2000); // รอ 2 วินาทีก่อนเปลี่ยนหน้า
+      }, 2000);
       return;
     }
 
-    router.push(redirectUrl);
+    router.push(`/PostGameDetail?id=${id}#chat`);
+  };
+
+  const handleLinkClick = (event, id) => {
+    event.preventDefault();
+    const accessToken = localStorage.getItem("access_token");
+
+    if (!accessToken) {
+      setOpenSnackbar(true);
+      setTimeout(() => {
+        router.push("/sign-in");
+      }, 2000);
+      return;
+    }
+
+    router.push(`/PostGameDetail?id=${id}`);
   };
 
   const handleCloseSnackbar = () => {
@@ -282,6 +303,17 @@ function PostGames() {
   };
 
   const handleProfileClick = (userId) => {
+    event.preventDefault();
+    const accessToken = localStorage.getItem("access_token");
+
+    if (!accessToken) {
+      setOpenSnackbar(true);
+      setTimeout(() => {
+        router.push("/sign-in");
+      }, 2000);
+      return;
+    }
+
     router.push(`/profile/${userId}`);
   };
 
@@ -315,20 +347,23 @@ function PostGames() {
           >
             <Grid item>
               <div onClick={() => handleProfileClick(item.users_id)}>
-                <img
-                  src={item.userProfileImage}
+                <Avatar
                   alt={`${item.userFirstName} ${item.userLastName}`}
-                  width="50"
-                  height="50"
-                  style={{
+                  src={item.userProfileImage}
+                  sx={{
                     borderRadius: "50%",
-                    objectFit: "cover",
-                    objectPosition: "center",
                     width: "50px",
                     height: "50px",
-                    cursor: "pointer", // เพิ่ม cursor: pointer
+                    cursor: "pointer",
+                    backgroundColor: item.userProfileImage
+                      ? "transparent"
+                      : "gray",
+                    border: "2px solid white", // เพิ่มกรอบสีขาว
                   }}
-                />
+                >
+                  {!item.userProfileImage &&
+                    `${item.userFirstName?.[0] ?? ""}${item.userLastName?.[0] ?? ""}`}
+                </Avatar>
               </div>
             </Grid>
             <Grid item xs>
@@ -356,50 +391,99 @@ function PostGames() {
             </Grid>
           </Grid>
 
-          <Link
+          <a
             href={{
               pathname: "/PostGameDetail",
               query: { id: item?.post_games_id },
             }}
+            onClick={(event) => handleLinkClick(event, item.post_games_id)}
           >
-
-          <Image
-            src={item.games_image}
-            alt={item.name_games}
-            width={526} // ควรให้ค่าเป็นตัวเลขพิกเซล
-            height={296} // ควรให้ค่าเป็นตัวเลขพิกเซล
-            layout="responsive" // ใช้ layout แบบ responsive เพื่อให้ภาพปรับขนาดตามขนาดของ container
-            style={{ marginBottom: "16px" }} // กำหนด margin ด้านล่าง
-          />
-
-          <div className="text-left">
-            <Typography sx={{ color: "white", fontWeight: "bold" }}>
-              {item.name_games}
-            </Typography>
-            <Typography sx={{ color: "white" }}>
-              วันที่เจอกัน: {formatThaiDate(item.date_meet)}
-            </Typography>
-            <Typography sx={{ color: "white" }}>
-              เวลาที่เจอกัน: {formatThaiTime(item.time_meet)}
-            </Typography>
-
-            <br />
-            <Typography sx={{ color: "white" }}>
-              {item.detail_post}
-            </Typography>
-
-            <Typography sx={{ color: "white" }}>
-              สถานที่ : 43/5 ถนนราชดำเนิน (ถนนต้นสน)
-              ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง
-            </Typography>
-            <Typography sx={{ color: "white" }}>
-              จำนวนคนจะไป : {item.participants}/{item.num_people}
-            </Typography>
+            <div
+              style={{
+                width: "100%",
+                paddingBottom: "56.25%", // 16:9 aspect ratio
+                position: "relative",
+                overflow: "hidden",
+                cursor: "pointer",
+              }}
+              onClick={handleImageClick}
+            >
+              <Image
+                src={item.games_image}
+                alt={item.name_games}
+                layout="fill"
+                objectFit="cover"
+                style={{
+                  transition: "transform 0.3s ease",
+                  transform: isFullSize ? "scale(1)" : "scale(1)",
+                }}
+              />
+            </div>
 
             <br />
-          </div>
 
-          </Link>
+            <div className="text-left">
+              <Typography
+                sx={{
+                  color: "white",
+                  fontWeight: "bold",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                }}
+              >
+                {item.name_games}
+              </Typography>
+              <Typography
+                sx={{
+                  color: "white",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                }}
+              >
+                วันที่เจอกัน: {formatThaiDate(item.date_meet)}
+              </Typography>
+              <Typography
+                sx={{
+                  color: "white",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                }}
+              >
+                เวลาที่เจอกัน: {formatThaiTime(item.time_meet)}
+              </Typography>
+              <br />
+              <Typography
+                sx={{
+                  color: "white",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                }}
+              >
+                {item.detail_post}
+              </Typography>
+
+              <Typography
+                sx={{
+                  color: "white",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                }}
+              >
+                สถานที่ : 43/5 ถนนราชดำเนิน (ถนนต้นสน)
+                ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง
+              </Typography>
+              <Typography
+                sx={{
+                  color: "white",
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                }}
+              >
+                จำนวนคนจะไป : {item.participants}/{item.num_people}
+              </Typography>
+              <br />
+            </div>
+          </a>
 
           <Grid container spacing={2} justifyContent="center">
             {item.users_id !== userId && !item.isParticipated && (
@@ -430,12 +514,12 @@ function PostGames() {
                   backgroundColor: "black",
                   color: "white",
                   border: "1px solid white",
-                  "&:hover": {
-                    backgroundColor: "#333333",
-                  },
+                  "&:hover": { backgroundColor: "#333333" },
                   zIndex: 0,
                 }}
-                onClick={(event) => handleButtonClick(event, ``)}
+                onClick={(event) =>
+                  handleButtonClick(event, item.post_games_id)
+                }
               >
                 พูดคุย
               </Button>

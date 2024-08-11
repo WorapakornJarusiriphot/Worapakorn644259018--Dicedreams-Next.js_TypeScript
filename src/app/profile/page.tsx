@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+// import Image from 'next/image';
 
 // import mealIcon from '@/assets/icons/meal.png';
 // import communityIcon from '@/assets/icons/community.png';
@@ -8,6 +8,7 @@ import Image from 'next/image';
 // import classes from './page.module.css';
 
 import * as React from 'react';
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -85,7 +86,9 @@ export default function Profile() {
                 </Grid>
 
                 <Grid xs={12}>
-                  <TabsProfile />
+                  <Suspense fallback={<div>Loading tabs...</div>}>
+                    <TabsProfile />
+                  </Suspense>
                 </Grid>
               </Grid>
             </Stack>

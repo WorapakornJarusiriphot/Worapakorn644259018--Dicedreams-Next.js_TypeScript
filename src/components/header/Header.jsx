@@ -4,7 +4,7 @@ import { usePopover } from "@/hook/use-popover";
 import CircleNotificationsIcon from "@mui/icons-material/CircleNotifications";
 import MenuIcon from "@mui/icons-material/Menu";
 import AppBar from "@mui/material/AppBar";
-import Avatar from "@mui/material/Avatar"; // ใช้สำหรับโปรไฟล์
+import Avatar from "@mui/material/Avatar";
 import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -24,6 +24,7 @@ import { useEffect, useState } from "react";
 import DrawerMobileNavigation from "../DrawerMobileNavigation";
 import { UserPopover } from "@/layout/user-popover";
 import { jwtDecode } from "jwt-decode";
+import Modal from "@mui/material/Modal";
 import { JwtPayload } from "jwt-decode";
 import NotificationsPopover from "@/layout/dashboard/common/notifications-popover";
 
@@ -61,12 +62,68 @@ function Header() {
   const [open, setOpen] = React.useState(false);
   const router = useRouter();
 
+  // ประกาศฟังก์ชัน fetchNotifications สำหรับการดึงข้อมูลการแจ้งเตือน
+  const fetchNotifications = async (userId, accessToken) => {
+    try {
+      console.log(`Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/notifications/${userId}`);
+      const response = await fetch(
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/notifications/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Notifications Data:", data);
+        setNotifications(data.notifications || []); // อัปเดตสถานะการแจ้งเตือน
+      } else {
+        console.error(`API Error: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access_token");
+    if (accessToken) {
+      const decoded = jwtDecode(accessToken);
+      const now = Math.floor(Date.now() / 1000);
+      if (decoded && decoded.exp > now) {
+        setUser((prev) => ({
+          ...prev,
+          firstName: decoded.firstName,
+          lastName: decoded.lastName,
+          email: decoded.email,
+          userId: decoded.users_id,
+        }));
+
+        fetchUserProfile(decoded.users_id, accessToken, decoded);
+
+        // Start polling notifications
+        const interval = setInterval(() => {
+          fetchNotifications(decoded.users_id, accessToken);
+        }, 5000); // Fetch every 5 seconds
+
+        // Clear interval on component unmount
+        return () => clearInterval(interval);
+      } else {
+        setModalOpen(true);
+      }
+    }
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("access_token"); // ล้าง token ที่เก็บไว้
     setUserLoggedIn(false); // อัปเดต state
     setUser({ firstName: "", lastName: "", profilePictureUrl: "" });
     router.push("/sign-in"); // เปลี่ยนเส้นทางไปยังหน้าล็อกอิน
   };
+
   const [userLoggedIn, setUserLoggedIn] = React.useState(false);
 
   // ตัวอย่าง URL รูปโปรไฟล์ หากมีระบบที่ให้ผู้ใช้เปลี่ยนรูปโปรไฟล์เอง ควรดึงจากฐานข้อมูล
@@ -180,10 +237,54 @@ function Header() {
 
   const altText = `${user.firstName || "User"} ${user.lastName || ""}`;
 
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    router.push("/sign-in");
+  };
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access_token");
+    if (accessToken) {
+      const decoded = jwtDecode(accessToken);
+      const now = Math.floor(Date.now() / 1000);
+      if (decoded && decoded.exp > now) {
+        setUser((prev) => ({
+          ...prev,
+          firstName: decoded.firstName,
+          lastName: decoded.lastName,
+          email: decoded.email,
+          userId: decoded.users_id,
+        }));
+      } else {
+        setModalOpen(true);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access_token");
+
+    if (accessToken) {
+      const decodedToken = JSON.parse(atob(accessToken.split(".")[1]));
+      setUsername(decodedToken.users_id);
+    }
+  }, []);
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access_token");
+    if (accessToken) {
+      const decodedToken = JSON.parse(atob(accessToken.split(".")[1]));
+      const userId = decodedToken.users_id;
+      fetchUserProfile(userId, accessToken, decodedToken);
+    }
+  }, []);
+
+
   return (
-    <div className="font-bold w-full fixed top-0">
-      <AppBar position="fixed" sx={{ zIndex: 1500, background: "#FFFFFF" }}>
-        {" "}
+    <div className="header-wrapper">
+      <AppBar position="fixed" sx={{ zIndex: 1300, background: "#FFFFFF" }}>
         <Toolbar>
           <DrawerMobileNavigation handleDrawerOpen={handleDrawerOpen} />
           <Typography
@@ -237,21 +338,25 @@ function Header() {
                 ออกจากระบบ
               </Button>
               <Tooltip title="การแจ้งเตือน">
-                <NotificationsPopover />
+                <Box sx={{ zIndex: 1400 }}>
+                  <NotificationsPopover />
+                </Box>
               </Tooltip>
               <Tooltip title="บัญชี">
-                <Avatar
-                  src={user.profilePictureUrl}
-                  alt={altText}
-                  onClick={userPopover.handleOpen}
-                  ref={userPopover.anchorRef}
-                  sx={{
-                    marginLeft: "10px", // เพิ่มระยะห่างทางด้านซ้าย
-                  }}
-                >
-                  {!user.profilePictureUrl &&
-                    `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`}
-                </Avatar>
+                <Box sx={{ zIndex: 1400 }}>
+                  <Avatar
+                    src={user.profilePictureUrl}
+                    alt={altText}
+                    onClick={userPopover.handleOpen}
+                    ref={userPopover.anchorRef}
+                    sx={{
+                      marginLeft: "10px",
+                    }}
+                  >
+                    {!user.profilePictureUrl &&
+                      `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`}
+                  </Avatar>
+                </Box>
               </Tooltip>
               <UserPopover
                 userId={user.userId}
@@ -282,6 +387,76 @@ function Header() {
           )}
         </Toolbar>
       </AppBar>
+
+      <Modal
+        open={modalOpen}
+        onClose={handleModalClose}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box
+          sx={{
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            borderRadius: 4,
+            width: "90%",
+            maxWidth: 500,
+            p: 4,
+            textAlign: "center",
+            position: "relative",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              mb: 2,
+              backgroundColor: "#f5f5f5",
+              borderRadius: "50%",
+              width: 80,
+              height: 80,
+              mx: "auto",
+            }}
+          >
+            <CircleNotificationsIcon sx={{ fontSize: 40, color: "#d32f2f" }} />
+          </Box>
+          <Typography
+            id="modal-title"
+            variant="h5"
+            component="h2"
+            sx={{ mb: 2, fontWeight: 600, color: "#333" }}
+          >
+            กรุณาเข้าสู่ระบบใหม่
+          </Typography>
+          <Typography id="modal-description" sx={{ mb: 3, color: "#555" }}>
+            เพื่อความปลอดภัย คุณต้องเข้าสู่ระบบใหม่เพื่อเข้าถึงการใช้งาน
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={handleModalClose}
+            sx={{
+              backgroundColor: "#4285f4",
+              color: "#fff",
+              px: 4,
+              py: 1,
+              fontWeight: "bold",
+              textTransform: "none",
+              borderRadius: 4,
+              "&:hover": {
+                backgroundColor: "#357ae8",
+              },
+            }}
+          >
+            ไปที่หน้าเข้าสู่ระบบ
+          </Button>
+        </Box>
+      </Modal>
     </div>
   );
 }
