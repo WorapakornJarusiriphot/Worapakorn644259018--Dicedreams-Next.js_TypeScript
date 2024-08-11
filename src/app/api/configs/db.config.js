@@ -1,23 +1,17 @@
-'use server';
-
 require("dotenv").config();
-const mysql2 = require('mysql2'); // นำเข้า mysql2
+const mysql2 = require("mysql2");
 
 module.exports = {
-  HOST: "localhost",
-  USER: "root",
-  PASSWORD: null,
-  DB: "dicedreams",
-  // dialect: "mysql",
-  dialect: "mysql",
-  // dialectModule: require('mysql2'),
-  dialectModule: mysql2, // ใช้ตัวแปร mysql2 ที่ import มา
+  HOST: process.env.DB_HOST,
+  USER: process.env.DB_USER,
+  PASSWORD: process.env.DB_PASSWORD,
+  DB: process.env.DB_NAME,
+  dialect: process.env.DB_DIALECT,
+  dialectModule: mysql2,
   pool: {
-    max: 5, // จำนวนสูงสุดของ connection ใน pool
-    min: 0, // จำนวนต่ำสุดของ connection ใน pool
-    acquire: 30000, // ระยะเวลาสูงสุดในการพยายามเชื่อมต่อก่อนจะขึ้นข้อผิดพลาด
-    idle: 10000 // ระยะเวลาสูงสุดที่ connection สามารถว่างได้ก่อนจะถูกปิด
+    max: parseInt(process.env.POOL_MAX, 10),
+    min: parseInt(process.env.POOL_MIN, 10),
+    acquire: parseInt(process.env.POOL_ACQUIRE, 10),
+    idle: parseInt(process.env.POOL_IDLE, 10),
   },
 };
-
-// console.log('Using mysql2 version:', require('mysql2').version);

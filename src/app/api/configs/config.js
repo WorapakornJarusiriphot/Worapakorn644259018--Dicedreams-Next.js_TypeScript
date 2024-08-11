@@ -1,6 +1,5 @@
-// create config file for auth
-module.exports = {
+require('dotenv').config();
 
-    DOMAIN: "https://dicedreams-backend-deploy-to-render.onrender.com",
-   
+module.exports = {
+    DOMAIN: process.env.DOMAIN,
 }

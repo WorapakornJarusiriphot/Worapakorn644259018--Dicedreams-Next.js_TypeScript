@@ -1,11 +1,10 @@
-// create controller for postActivity
 const db = require("../models");
-
-
 const Chat = db.chat;
+const User = db.user;
+
+// Create Chat
 exports.create = async (req, res, next) => {
   try {
-    // Validate request
     if (!req.body.message) {
       res.status(400).send({
         message: "Content can not be empty!",
@@ -13,22 +12,16 @@ exports.create = async (req, res, next) => {
       return;
     }
 
-
-    // Create a game
     const chat = {
       message: req.body.message,
       datetime_chat: req.body.datetime_chat,
-      user_id: req.body.user_id, // ส่งรูปเกมไปเก็บในระบบ
+      user_id: req.body.user_id,
       post_games_id: req.body.post_games_id,
     };
 
-    // Save game in the database async
     const data = await Chat.create(chat);
 
-    
-     //select postgame by post_game_id
      const postGame = await db.post_games.findByPk(req.body.post_games_id);
-         // insert table notification
          const notification = {
           type: "chat",
           read: false,
@@ -38,16 +31,13 @@ exports.create = async (req, res, next) => {
         };
         await db.notification.create(notification);
     
-        // ส่งข้อมูลกลับไปที่ client หลังจากทำการอัพเดท และสร้าง notification สำเร็จ socket.io จะทำการอัพเดทข้อมูลให้ทุกๆ client ที่เชื่อมต่อ แต่ละ client จะต้องเขียนโค้ดเพื่อรับข้อมูลที่ถูกส่งกลับมา
         const messages = [];
-    
-        // get table notification by user_id where read = false
+
         const notifications = await db.notification.findAll({
           where: { user_id: postGame.dataValues.users_id, read: false },
         });
         for (let i = 0; i < notifications.length; i++) {
           if (notifications[i].type === "participate") {
-            //  ดึงข้อมูลจาก table participate โดยใช้ entity_id ที่ได้จาก table notification
             const participate = await db.participate.findByPk(
               notifications[i].entity_id
             );
@@ -60,7 +50,6 @@ exports.create = async (req, res, next) => {
               time: notifications[i].time,
             });
           } else if (notifications[i].type === "chat") {
-            //  ดึงข้อมูลจาก table chat โดยใช้ entity_id ที่ได้จาก table notification
             const chat = await db.chat.findByPk(notifications[i].entity_id);
             messages.push({
               type: "chat",
@@ -72,8 +61,6 @@ exports.create = async (req, res, next) => {
             });
           }
         }
-    
-        // get socketio from app.js and emit to client
     
         req.app
           .get("socketio")
@@ -89,14 +76,16 @@ exports.create = async (req, res, next) => {
 
 // Retrieve all games from the database.
 exports.findAll = (req, res) => {
-  Chat.findAll()
+  Chat.findAll({
+    order: [['createdAt', 'ASC']], // เรียงลำดับจากอดีตไปใหม่ที่สุด
+  })
     .then((data) => {
       res.status(200).json(data);
     })
     .catch((error) => {
       res.status(500).json({
         message:
-          error.message || "Some error occurred while retrieving games.",
+          error.message || "Some error occurred while retrieving chats.",
       });
     });
 };
@@ -126,10 +115,8 @@ exports.update = async (req, res, next) => {
     });
     if (data == 1) {
 
-          // get in table chat by id
           const chat = await Chat.findByPk(id);
 
-          // insert table notification
           const notification = {
             type: "chat",
             read: false,
@@ -138,17 +125,14 @@ exports.update = async (req, res, next) => {
             entity_id: id,
           };
           await db.notification.create(notification);
-    
-          // ส่งข้อมูลกลับไปที่ client หลังจากทำการอัพเดท และสร้าง notification สำเร็จ socket.io จะทำการอัพเดทข้อมูลให้ทุกๆ client ที่เชื่อมต่อ แต่ละ client จะต้องเขียนโค้ดเพื่อรับข้อมูลที่ถูกส่งกลับมา
+
           const messages = [];
-    
-          // get table notification by user_id where read = false
+
           const notifications = await db.notification.findAll({
             where: { user_id: chat.dataValues.user_id, read: false },
           });
           for (let i = 0; i < notifications.length; i++) {
             if (notifications[i].type === "participate") {
-              //  ดึงข้อมูลจาก table participate โดยใช้ entity_id ที่ได้จาก table notification
               const participate = await db.participate.findByPk(
                 notifications[i].entity_id
               );
@@ -161,7 +145,6 @@ exports.update = async (req, res, next) => {
                 time: notifications[i].time,
               });
             } else if (notifications[i].type === "chat") {
-              //  ดึงข้อมูลจาก table chat โดยใช้ entity_id ที่ได้จาก table notification
               const chat = await db.chat.findByPk(notifications[i].entity_id);
               messages.push({
                 type: "chat",
@@ -173,9 +156,6 @@ exports.update = async (req, res, next) => {
               });
             }
           }
-    
-          // get socketio from app.js and emit to client
-    
           req.app
             .get("socketio")
             .emit("notifications_" + chat.dataValues.user_id, messages);
@@ -228,49 +208,45 @@ exports.deleteAll = async (req, res, next) => {
   }
 };
 
-// Find all published games
-exports.findAllPublished = (req, res) => {
-  Chat.findAll({ where: { published: true } })
-    .then((data) => {
-      res.status(200).json(data);
-    })
-    .catch((error) => {
-      res.status(500).json({
-        message:
-          error.message || "Some error occurred while retrieving games.",
-      });
-    });
-};
-
 // Find all games by user
 exports.findAllByUser = (req, res) => {
   const user_id = req.params.user_id;
-  Chat.findAll({ where: { user_id: user_id } })
+  Chat.findAll({
+    where: { user_id: user_id },
+    order: [['createdAt', 'ASC']], // เรียงลำดับจากอดีตไปใหม่ที่สุด
+  })
     .then((data) => {
       res.status(200).json(data);
     })
     .catch((error) => {
       res.status(500).json({
         message:
-          error.message || "Some error occurred while retrieving games.",
+          error.message || "Some error occurred while retrieving chats.",
       });
     });
 };
 
 // Find all games by post_games_id
 exports.findAllByPostGamesId = (req, res) => {
-  const post_games_id = req.params.post_games_id;
-  Chat.findAll({ where: { post_games_id: post_games_id } })
+  const post_games_id = req.params.id;
+
+  Chat.findAll({
+    where: { post_games_id: post_games_id },
+    include: [
+      {
+        model: User,
+        as: "user",
+        attributes: ["first_name", "last_name", "user_image"]
+      }
+    ],
+    order: [['createdAt', 'ASC']] // เรียงลำดับตาม createdAt จากเก่าที่สุดไปใหม่ที่สุด
+  })
     .then((data) => {
       res.status(200).json(data);
     })
     .catch((error) => {
       res.status(500).json({
-        message:
-          error.message || "Some error occurred while retrieving games.",
+        message: error.message || "Some error occurred while retrieving chats.",
       });
     });
 };
- 
-
-

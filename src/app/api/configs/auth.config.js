@@ -1,13 +1,7 @@
-// create config file for auth
-module.exports = {
-    secret : "worapakorn-secret-key",
-    
-    // jwtExpiration:3600, // 1 hour
-    // jwtRefreshExpiration:86400, //24 hours
-    
-    /* For test*/
-    jwtExpiration:60, // 1 minute
-    jwtRefreshExpiration:120, //2 minute
-   
-}
+require('dotenv').config();
 
+module.exports = {
+    secret : process.env.JWT_SECRET,
+    jwtExpiration: parseInt(process.env.JWT_EXPIRATION),
+    jwtRefreshExpiration: parseInt(process.env.JWT_REFRESH_EXPIRATION)
+}

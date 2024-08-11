@@ -1,5 +1,3 @@
-'use server';
-
 const express = require("express");
 const http = require('http');
 const socketIo = require('socket.io');
@@ -19,6 +17,9 @@ const routerChat = require("./routers/chat");
 const routParticipate = require("./routers/participate");
 const routerStore = require("./routers/store");
 const routerNotification = require("./routers/notification");
+
+// Import Swagger configuration
+const { swaggerUi, specs } = require('./configs/swaggerConfig');
 
 db.sequelize.sync();
 // db.sequelize.sync({ force: true }).then(() => {
@@ -64,11 +65,11 @@ app.get("/", (req, res) => {
 });
 
 app.get('/testnotification', (req, res) => {
-  // req.user send users id to send notification to 
-
-
   res.sendFile(path.join(__dirname + '/index.html'))
 })
+
+// Add Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use('/api/auth', routerAuth);
 app.use('/api/users', routerUser);
@@ -79,14 +80,23 @@ app.use('/api/participate', routParticipate);
 app.use('/api/store', routerStore);
 app.use('/api/notification', routerNotification);
 
-
+// Serve swagger.json
+app.get('/swagger.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(specs);
+});
 
 
 app.use(errorHandler);
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
+const DOMAIN = process.env.DOMAIN;
+
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
+  console.log(`Visit the application at: ${DOMAIN}`);
+  console.log(`API documentation is available at: ${DOMAIN}/api-docs`);
+  console.log(`Swagger JSON is available at: ${DOMAIN}/swagger.json`);
 });
 
 // console.log('Using mysql2 version:', require('mysql2').version);
