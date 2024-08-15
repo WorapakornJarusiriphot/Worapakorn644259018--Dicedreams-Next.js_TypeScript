@@ -53,62 +53,31 @@ function Home() {
   const [stores, setStores] = useState([]);
   const router = useRouter();
 
-  const fetchData = async () => {
-    try {
-      const [
-        usersResponse,
-        storesResponse,
-        postGamesResponse,
-        postActivitiesResponse,
-      ] = await Promise.all([
-        axios.get(
-          "https://dicedreams-backend-deploy-to-render.onrender.com/api/users"
-        ),
-        axios.get(
-          "https://dicedreams-backend-deploy-to-render.onrender.com/api/store"
-        ),
-        axios.get(
-          "https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame"
-        ),
-        axios.get(
-          "https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity"
-        ),
-      ]);
-
-      // Update state only if data has changed
-      setUsers((prev) =>
-        JSON.stringify(prev) !== JSON.stringify(usersResponse.data)
-          ? usersResponse.data
-          : prev
-      );
-      setStores((prev) =>
-        JSON.stringify(prev) !== JSON.stringify(storesResponse.data)
-          ? storesResponse.data
-          : prev
-      );
-      setPostGames((prev) =>
-        JSON.stringify(prev) !== JSON.stringify(postGamesResponse.data)
-          ? postGamesResponse.data
-          : prev
-      );
-      setPostActivities((prev) =>
-        JSON.stringify(prev) !== JSON.stringify(postActivitiesResponse.data)
-          ? postActivitiesResponse.data
-          : prev
-      );
-    } catch (error) {
-      console.error("Error fetching data", error);
-    }
-  };
-
   useEffect(() => {
-    fetchData(); // Fetch data initially
+    const fetchData = async () => {
+      try {
+        const usersResponse = await axios.get(
+          "https://dicedreams-backend-deploy-to-render.onrender.com/api/users"
+        );
+        const storesResponse = await axios.get(
+          "https://dicedreams-backend-deploy-to-render.onrender.com/api/store"
+        );
+        const postGamesResponse = await axios.get(
+          "https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame"
+        );
+        const postActivitiesResponse = await axios.get(
+          "https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity"
+        );
+        setUsers(usersResponse.data);
+        setStores(storesResponse.data);
+        setPostGames(postGamesResponse.data);
+        setPostActivities(postActivitiesResponse.data);
+      } catch (error) {
+        console.error("Error fetching data", error);
+      }
+    };
 
-    const intervalId = setInterval(() => {
-      fetchData(); // Fetch data every 5 seconds
-    }, 5000);
-
-    return () => clearInterval(intervalId); // Clear interval on component unmount
+    fetchData();
   }, []);
 
   const handleDateChange = (newDate) => {

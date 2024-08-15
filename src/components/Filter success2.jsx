@@ -139,41 +139,22 @@ function Filter({
 
   const executeSearch = () => {
     const query = new URLSearchParams(searchParams);
-
-    // Reset the search parameters before adding new ones
-    query.delete("search");
-    query.delete("search_date_meet");
-    query.delete("search_time_meet");
-    query.delete("search_num_people");
-
     Object.keys(selectedGames).forEach((game) => {
       if (selectedGames[game]) {
         query.append("search", game);
       }
     });
-
     if (selectedDate) {
       query.set("search_date_meet", dayjs(selectedDate).format("YYYY-MM-DD"));
     }
-
     if (selectedTime) {
       query.set("search_time_meet", dayjs(selectedTime).format("HH:mm"));
     }
-
     if (number) {
       query.set("search_num_people", number);
     }
 
-    // Check if any search parameters are set, if not redirect to homepage
-    if (!query.toString()) {
-      router.replace("/");
-    } else {
-      // Replace the current URL with the new search parameters
-      router.replace(`/search?${query.toString()}`);
-    }
-
-    // Optional: Reload the page to ensure the results are updated
-    router.reload();
+    router.push(`/search?${query.toString()}`);
   };
 
   return (

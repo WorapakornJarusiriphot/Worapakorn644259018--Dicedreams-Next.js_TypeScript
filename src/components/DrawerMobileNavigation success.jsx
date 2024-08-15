@@ -68,7 +68,7 @@ export default function DrawerMobileNavigation() {
           </Typography>
           <ModalClose id="close-icon" sx={{ position: 'initial' }} />
         </Box>
-        {/* <Input
+        <Input
           size="sm"
           placeholder="ค้นหาโพสต์"
           variant="plain"
@@ -100,7 +100,7 @@ export default function DrawerMobileNavigation() {
               transform: 'scaleX(1)',
             },
           }}
-        /> */}
+        />
         <List
           size="lg"
           component="nav"

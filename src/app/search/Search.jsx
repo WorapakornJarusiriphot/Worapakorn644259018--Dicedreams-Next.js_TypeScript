@@ -124,14 +124,14 @@ export default function Search() {
                   <PostActivity key={activity.post_activity_id} {...activity} />
                 ))
               ) : (
-                <p>ไม่พบกิจกรรมที่ตรงกับคำค้นหา</p>
+                <p>ไม่พบกิจกรรมที่ตรงกับที่ค้นหา</p>
               )}
               {games.length > 0 ? (
                 games.map((game) => (
                   <PostGames key={game.post_games_id} {...game} />
                 ))
               ) : (
-                <p>ไม่พบเกมที่ตรงกับคำค้นหา</p>
+                <p>ไม่พบเกมที่ตรงกับที่ค้นหา</p>
               )}
             </Grid>
           </Grid>

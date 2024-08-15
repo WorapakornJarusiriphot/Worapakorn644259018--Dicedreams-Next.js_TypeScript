@@ -42,7 +42,6 @@ import { useEffect, useState } from "react";
 import { format, parseISO, compareDesc, isValid } from "date-fns";
 import { th } from "date-fns/locale";
 import { Avatar } from "@mui/material";
-import { useRouter } from "next/navigation";
 
 // const items = [
 //   {
@@ -127,8 +126,6 @@ function Participating() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState("");
-  const [user_id, setUserid] = useState("");
-  const router = useRouter();
 
   useEffect(() => {
     async function fetchData() {
@@ -234,21 +231,6 @@ function Participating() {
     fetchData();
   }, []);
 
-  const handleProfileClick = (user_id) => {
-    event.preventDefault();
-    const accessToken = localStorage.getItem("access_token");
-
-    if (!accessToken) {
-      setOpenSnackbar(true);
-      setTimeout(() => {
-        router.push("/sign-in");
-      }, 2000);
-      return;
-    }
-
-    router.push(`/profile/${user_id}`);
-  };
-
   if (loading)
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
   if (error) return <Typography sx={{ color: "white" }}>{error}</Typography>;
@@ -278,33 +260,30 @@ function Participating() {
             sx={{ marginBottom: "16px" }}
           >
             <Grid item>
-              <div onClick={() => handleProfileClick(item.users_id)}>
-                <Avatar
-                  alt={`${item.userFirstName} ${item.userLastName}`}
-                  src={item.userProfileImage}
-                  sx={{
-                    borderRadius: "50%",
-                    width: "50px",
-                    height: "50px",
-                    cursor: "pointer",
-                    backgroundColor: item.userProfileImage
-                      ? "transparent"
-                      : "gray",
-                    border: "2px solid white", // เพิ่มกรอบสีขาว
-                    color: "white", // ตั้งค่าสีตัวอักษรเป็นสีขาว
-                  }}
-                >
-                  {!item.userProfileImage &&
-                    `${item.userFirstName?.[0] ?? ""}${item.userLastName?.[0] ?? ""}`}
-                </Avatar>
-              </div>
+              <Avatar
+                alt={`${item.userFirstName} ${item.userLastName}`}
+                src={item.userProfileImage}
+                sx={{
+                  borderRadius: "50%",
+                  width: "50px",
+                  height: "50px",
+                  cursor: "pointer",
+                  backgroundColor: item.userProfileImage
+                    ? "transparent"
+                    : "gray",
+                  border: "2px solid white", // เพิ่มกรอบสีขาว
+                  color: "white", // ตั้งค่าสีตัวอักษรเป็นสีขาว
+                }}
+              >
+                {!item.userProfileImage &&
+                  `${item.userFirstName?.[0] ?? ""}${item.userLastName?.[0] ?? ""}`}
+              </Avatar>
             </Grid>
             <Grid item xs>
               <Typography
                 variant="subtitle1"
                 gutterBottom
                 sx={{ color: "white" }}
-                onClick={() => handleProfileClick(item.users_id)}
               >
                 {`${item.userFirstName} ${item.userLastName}`}
               </Typography>
