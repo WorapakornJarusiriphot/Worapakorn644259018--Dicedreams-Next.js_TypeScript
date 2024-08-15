@@ -32,6 +32,8 @@ import TabsProfile from './TabsProfile';
 
 import { UserProvider } from '@/components/dashboard/account/UserContext'
 
+import { useEffect } from "react";
+
 // TODO remove, this demo shouldn't need to reset the theme.
 // กำหนดธีมสีเข้ม
 const darkTheme = createTheme({
@@ -69,6 +71,13 @@ const darkTheme = createTheme({
 });
 
 export default function Profile() {
+
+  useEffect(() => {
+    if (!window.location.hash) {
+      window.location.hash = 'loaded';
+      window.location.reload();
+    }
+  }, []);
 
   return (
     <>

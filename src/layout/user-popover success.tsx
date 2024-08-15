@@ -130,24 +130,24 @@ export function UserPopover({ anchorEl, onClose, open, userId }: UserPopoverProp
       </Box>
       <Divider />
       <MenuList disablePadding sx={{ p: '8px', '& .MuiMenuItem-root': { borderRadius: 1 } }}>
-        {/* <MenuItem component={RouterLink} href="/settings" onClick={onClose}>
+        <MenuItem component={RouterLink} href="/settings" onClick={onClose}>
           <ListItemIcon>
             <GearSixIcon fontSize="var(--icon-fontSize-md)" />
           </ListItemIcon>
           ตั้งค่า
-        </MenuItem> */}
+        </MenuItem>
         <MenuItem component={RouterLink} href="/profile" onClick={onClose}>
           <ListItemIcon>
             <UserIcon fontSize="var(--icon-fontSize-md)" />
           </ListItemIcon>
           โปรไฟล์
         </MenuItem>
-        {/* <MenuItem onClick={handleLogout}>
+        <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <SignOutIcon fontSize="var(--icon-fontSize-md)" />
           </ListItemIcon>
           ออกจากระบบ
-        </MenuItem> */}
+        </MenuItem>
       </MenuList>
     </Popover>
   );

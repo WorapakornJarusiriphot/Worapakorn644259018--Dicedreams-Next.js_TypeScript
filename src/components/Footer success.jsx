@@ -42,13 +42,13 @@ function Footer() {
             © {new Date().getFullYear()} สงวนลิขสิทธิ์
           </Typography>
           <Box mt={1}>
-            <a underline="hover" color="inherit">
+            <Link href="#" underline="hover" color="inherit">
               นโยบายความเป็นส่วนตัว
-            </a>
+            </Link>
             {" | "}
-            <a underline="hover" color="inherit">
+            <Link href="#" underline="hover" color="inherit">
               เงื่อนไขการให้บริการ
-            </a>
+            </Link>
           </Box>
         </Box>
       </Container>
