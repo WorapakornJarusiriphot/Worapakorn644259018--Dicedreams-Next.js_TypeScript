@@ -46,6 +46,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 // import { Link } from 'react-router-dom';
 import Link from "next/link";
 import Avatar from "@mui/material/Avatar";
+import { useSearchParams } from "next/navigation";
 
 // สร้าง custom theme
 const theme = createTheme({
@@ -83,30 +84,50 @@ const formatThaiTime = (timeString) => {
   return formattedTime;
 };
 
-function PostGames() {
+function PostGamesSearch() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState("");
+  const router = useRouter();
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isFullSize, setIsFullSize] = useState(false);
-  const router = useRouter();
 
-  const handleImageClick = () => {
-    setIsFullSize(!isFullSize);
+  const searchParams = useSearchParams();
+  const searchDateMeet = searchParams.get("search_date_meet");
+  const searchTimeMeet = searchParams.get("search_time_meet");
+  const searchNumPeople = searchParams.get("search_num_people");
+
+  const buildQueryParams = () => {
+    const params = new URLSearchParams();
+
+    if (searchDateMeet) {
+      params.append("search_date_meet", searchDateMeet);
+    }
+
+    if (searchTimeMeet) {
+      params.append("search_time_meet", searchTimeMeet);
+    }
+
+    if (searchNumPeople) {
+      params.append("search_num_people", searchNumPeople);
+    }
+
+    return params.toString();
   };
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
+        const queryParams = buildQueryParams(); // สร้าง queryParams จากค่าที่ผู้ใช้ป้อน
 
         const postsResponse = await fetch(
-          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame`,
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/search?${queryParams}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -185,12 +206,11 @@ function PostGames() {
           });
 
         const currentTime = new Date();
-        const filteredPosts = postsWithParticipants
-        .filter((post) => {
+        const filteredPosts = postsWithParticipants.filter((post) => {
           const postDateTime = new Date(`${post.date_meet}T${post.time_meet}`);
           const isPostFull = post.participants >= post.num_people; // ตรวจสอบว่าคนเต็มหรือไม่
           return postDateTime > currentTime && !isPostFull; // แสดงเฉพาะโพสต์ที่ยังไม่เต็มและยังไม่หมดเวลา
-        });      
+        });
 
         const sortedPosts = filteredPosts.sort(
           (a, b) => new Date(b.rawCreationDate) - new Date(a.rawCreationDate)
@@ -206,6 +226,10 @@ function PostGames() {
 
     fetchPosts();
   }, []);
+
+  const handleImageClick = () => {
+    setIsFullSize(!isFullSize);
+  };
 
   const handleJoinClick = (post) => {
     const accessToken = localStorage.getItem("access_token");
@@ -381,7 +405,7 @@ function PostGames() {
                 {item.creation_date}
               </Typography>
             </Grid>
-            <Grid item>
+            {/* <Grid item>
               <IconButton
                 sx={{
                   color: "white",
@@ -390,7 +414,7 @@ function PostGames() {
               >
                 <MoreVertOutlinedIcon />
               </IconButton>
-            </Grid>
+            </Grid> */}
           </Grid>
 
           <a
@@ -599,4 +623,4 @@ function PostGames() {
   );
 }
 
-export default PostGames;
+export default PostGamesSearch;

@@ -381,7 +381,7 @@ function PostGames() {
                 {item.creation_date}
               </Typography>
             </Grid>
-            <Grid item>
+            {/* <Grid item>
               <IconButton
                 sx={{
                   color: "white",
@@ -390,7 +390,7 @@ function PostGames() {
               >
                 <MoreVertOutlinedIcon />
               </IconButton>
-            </Grid>
+            </Grid> */}
           </Grid>
 
           <a

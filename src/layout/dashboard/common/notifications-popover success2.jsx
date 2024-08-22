@@ -200,14 +200,11 @@ export default function NotificationsPopover() {
         onClose={handleClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
-        slotProps={{
-          paper: {
-            sx: {
-              mt: 1.5,
-              ml: 0.75,
-              width: 360,
-              zIndex: 1500,
-            },
+        PaperProps={{
+          sx: {
+            mt: 1.5,
+            ml: 0.75,
+            width: 360,
           },
         }}
       >

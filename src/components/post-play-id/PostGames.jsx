@@ -463,7 +463,7 @@ const PostGames = ({ userId }) => {
       ))}
       {items.length === 0 && (
         <Typography sx={{ color: "white" }}>
-          ไม่พบโพสต์ที่คุณเคยโพสต์
+          ไม่พบโพสต์ที่เคยโพสต์
         </Typography>
       )}
       <Dialog open={openDialog} onClose={handleCloseDialog}>

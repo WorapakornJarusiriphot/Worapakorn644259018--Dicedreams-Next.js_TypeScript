@@ -35,7 +35,7 @@ import { jwtDecode } from "jwt-decode";
 // import { JwtPayload } from 'jsonwebtoken';
 import { JwtPayload } from "jwt-decode";
 
-// import { useRouter } from "next/navigator";
+import { useRouter } from "next/navigation";
 
 import { useEffect, useState } from "react";
 
@@ -93,6 +93,8 @@ function PostGames() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUserAndPosts = async () => {
@@ -187,6 +189,21 @@ function PostGames() {
 
     fetchUserAndPosts();
   }, []);
+
+  const handleButtonClick = (event, id) => {
+    event.preventDefault();
+    const accessToken = localStorage.getItem("access_token");
+
+    if (!accessToken) {
+      setOpenSnackbar(true);
+      setTimeout(() => {
+        router.push("/sign-in");
+      }, 2000);
+      return;
+    }
+
+    router.push(`/PostGameDetail?id=${id}#chat`);
+  };
 
   if (loading)
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
@@ -358,6 +375,9 @@ function PostGames() {
                       },
                       zIndex: 0,
                     }}
+                    onClick={(event) =>
+                      handleButtonClick(event, item.post_games_id)
+                    }
                   >
                     พูดคุย
                   </Button>

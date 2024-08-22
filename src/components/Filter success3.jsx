@@ -224,12 +224,14 @@ function Filter({
         <br />
 
         <FormControl fullWidth>
-          <InputLabel id="number-select-label">จำนวนคนจะไป</InputLabel>
+          <InputLabel id="number-select-label">
+            จำนวนผู้เล่นที่ว่างตั้งแต่
+          </InputLabel>
           <Select
             labelId="number-select-label"
             id="number-select"
             value={number}
-            label="จำนวนคนจะไป"
+            label="จำนวนผู้เล่นที่ว่างตั้งแต่"
             onChange={handleNumberChange}
           >
             {Array.from({ length: 75 }, (_, index) => (

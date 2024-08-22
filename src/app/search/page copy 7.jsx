@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import PostGamesSearch from "@/Page/PostGames-search";
-import PostActivitySearch from "@/Page/PostActivity-search";
+import PostGames from "@/Page/PostGames";
+import PostActivity from "@/Page/PostActivity";
 import Header from "@/components/header/Header";
 import Filter from "@/components/Filter";
 import { Container, Grid, Typography } from "@mui/material";
@@ -104,7 +104,6 @@ function SearchComponent() {
 
         const gamesData = await gamesRes.json();
         setGames(gamesData);
-        console.log("Fetched games data:", gamesData); // เพิ่ม log เพื่อตรวจสอบข้อมูลที่ดึงมา
       } catch (error) {
         console.error("Error fetching games data:", error);
         setError(error.message);
@@ -132,7 +131,6 @@ function SearchComponent() {
 
           const activitiesData = await activitiesRes.json();
           setActivities(activitiesData);
-          console.log("Fetched activities data:", activitiesData); // เพิ่ม log เพื่อตรวจสอบข้อมูลที่ดึงมา
         } catch (error) {
           console.error("Error fetching activities data:", error);
           setError(error.message);
@@ -183,7 +181,7 @@ function SearchComponent() {
             <Grid item xs={12} md={8}>
               {activities.length > 0 ? (
                 activities.map((activity) => (
-                  <PostActivitySearch key={activity.post_activity_id} {...activity} />
+                  <PostActivity key={activity.post_activity_id} {...activity} />
                 ))
               ) : (
                 <Typography color="white">
@@ -192,7 +190,7 @@ function SearchComponent() {
               )}
               {games.length > 0 ? (
                 games.map((game) => (
-                  <PostGamesSearch key={game.post_games_id} {...game} />
+                  <PostGames key={game.post_games_id} {...game} />
                 ))
               ) : (
                 <Typography color="white">

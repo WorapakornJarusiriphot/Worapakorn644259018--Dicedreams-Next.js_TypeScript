@@ -48,6 +48,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import CloseIcon from "@mui/icons-material/Close";
+import { useSearchParams } from "next/navigation";
 
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
@@ -73,38 +74,62 @@ const formatThaiTime = (timeString) => {
   return formattedTime;
 };
 
-function PostActivity() {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [userId, setUserId] = useState("");
-  const router = useRouter();
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [isFullSize, setIsFullSize] = useState(false);
-
-  useEffect(() => {
-    const fetchUserAndPosts = async () => {
-      setLoading(true);
-      const accessToken = localStorage.getItem("access_token");
-
-      try {
-        if (accessToken) {
-          const decoded = jwtDecode(accessToken);
-          setUserId(decoded.users_id);
-
-          const postsResponse = await fetch(
-            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
+function PostActivitySearch() {
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [userId, setUserId] = useState("");
+    const router = useRouter();
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [selectedPost, setSelectedPost] = useState(null);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+    const [isFullSize, setIsFullSize] = useState(false);
+  
+    const searchParams = useSearchParams();
+    const searchDateMeet = searchParams.get("search_date_meet");
+    const searchTimeMeet = searchParams.get("search_time_meet");
+    const searchNumPeople = searchParams.get("search_num_people");
+  
+    const buildQueryParams = () => {
+      const params = new URLSearchParams();
+  
+      if (searchDateMeet) {
+        params.append("search_date_meet", searchDateMeet);
+      }
+  
+      if (searchTimeMeet) {
+        params.append("search_time_meet", searchTimeMeet);
+      }
+  
+      if (searchNumPeople) {
+        params.append("search_num_people", searchNumPeople);
+      }
+  
+      return params.toString();
+    };
+  
+    useEffect(() => {
+      const fetchUserAndPosts = async () => {
+        setLoading(true);
+        const accessToken = localStorage.getItem("access_token");
+  
+        try {
+          const queryParams = buildQueryParams(); // สร้าง queryParams จากค่าที่ผู้ใช้ป้อน
+          if (accessToken) {
+            const decoded = jwtDecode(accessToken);
+            setUserId(decoded.users_id);
+  
+            const postsResponse = await fetch(
+              `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/search?${queryParams}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
           if (!postsResponse.ok) throw new Error("Failed to fetch posts");
           const postsData = await postsResponse.json();
 
@@ -317,7 +342,7 @@ function PostActivity() {
                 {item.creation_date}
               </Typography>
             </Grid>
-            <Grid item>
+            {/* <Grid item>
               <IconButton
                 sx={{
                   color: "white",
@@ -326,7 +351,7 @@ function PostActivity() {
               >
                 <MoreVertOutlinedIcon />
               </IconButton>
-            </Grid>
+            </Grid> */}
           </Grid>
 
           <Image
@@ -409,4 +434,4 @@ function PostActivity() {
   );
 }
 
-export default PostActivity;
+export default PostActivitySearch;
