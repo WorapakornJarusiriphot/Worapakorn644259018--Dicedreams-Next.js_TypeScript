@@ -133,13 +133,18 @@ function Filter({
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
-      event.preventDefault(); // ป้องกันการกระทำเริ่มต้น (เช่นการรีเฟรชหน้า)
-      executeSearch(); // เรียกฟังก์ชันการค้นหา
+      executeSearch();
     }
   };
 
   const executeSearch = () => {
-    const query = new URLSearchParams();
+    const query = new URLSearchParams(searchParams);
+
+    // รีเซ็ตพารามิเตอร์การค้นหาก่อนที่จะเพิ่มพารามิเตอร์ใหม่
+    query.delete("search");
+    query.delete("search_date_meet");
+    query.delete("search_time_meet");
+    query.delete("search_num_people");
 
     Object.keys(selectedGames).forEach((game) => {
       if (selectedGames[game]) {
@@ -147,15 +152,8 @@ function Filter({
       }
     });
 
-    if (searchTerm && searchTerm.trim()) {
-      const terms = searchTerm.trim().split(/\s+/); // แยกคำค้นหาด้วยเว้นวรรค
-      terms.forEach((term) => {
-        query.append("search", term); // เพิ่มคำค้นหาแต่ละคำใน query string
-      });
-    }
-
     if (selectedDate) {
-      query.set("search_date_meet", dayjs(selectedDate).format("MM/DD/YYYY"));
+      query.set("search_date_meet", dayjs(selectedDate).format("YYYY-MM-DD"));
     }
 
     if (selectedTime) {
@@ -166,13 +164,16 @@ function Filter({
       query.set("search_num_people", number);
     }
 
-    // ถ้ามีพารามิเตอร์การค้นหาใด ๆ ถูกตั้งค่า
-    if (query.toString()) {
-      router.push(`/search?${query.toString()}`); // ไปยังหน้าผลการค้นหาพร้อมกับ query string
+    // ตรวจสอบว่ามีการตั้งค่าพารามิเตอร์การค้นหาหรือไม่ ถ้าไม่มีให้นำทางไปที่หน้าแรก
+    if (!query.toString()) {
+      router.replace("/");
     } else {
-      // ถ้าไม่มีพารามิเตอร์การค้นหา ไปที่หน้าแรก (แสดงโพสต์ทั้งหมด)
-      router.push(`/`);
+      // แทนที่ URL ปัจจุบันด้วยพารามิเตอร์การค้นหาใหม่
+      router.replace(`/search?${query.toString()}`);
     }
+
+    // แทนที่การใช้ router.reload ด้วยการโหลดหน้าใหม่
+    window.location.reload(); // หรือ router.push(router.asPath) เพื่อให้หน้ารีโหลดใหม่
   };
 
   return (
@@ -224,12 +225,14 @@ function Filter({
         <br />
 
         <FormControl fullWidth>
-          <InputLabel id="number-select-label">จำนวนคนจะไป</InputLabel>
+          <InputLabel id="number-select-label">
+            จำนวนผู้เล่นที่ว่างตั้งแต่
+          </InputLabel>
           <Select
             labelId="number-select-label"
             id="number-select"
             value={number}
-            label="จำนวนคนจะไป"
+            label="จำนวนผู้เล่นที่ว่างตั้งแต่"
             onChange={handleNumberChange}
           >
             {Array.from({ length: 75 }, (_, index) => (

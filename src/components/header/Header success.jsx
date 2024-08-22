@@ -28,9 +28,6 @@ import Modal from "@mui/material/Modal";
 import { JwtPayload } from "jwt-decode";
 import NotificationsPopover from "@/layout/dashboard/common/notifications-popover";
 
-const DiceDreamsUrl =
-  "https://github.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/blob/main/src/app/icon.png?raw=true";
-
 function Header() {
   const userPopover = usePopover();
   const [user, setUser] = useState({
@@ -42,7 +39,7 @@ function Header() {
     firstName: "",
     lastName: "",
     profilePictureUrl: "",
-    userId: "",
+    userId: "", 
   });
 
   useEffect(() => {
@@ -68,9 +65,7 @@ function Header() {
   // ประกาศฟังก์ชัน fetchNotifications สำหรับการดึงข้อมูลการแจ้งเตือน
   const fetchNotifications = async (userId, accessToken) => {
     try {
-      console.log(
-        `Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/notifications/${userId}`
-      );
+      console.log(`Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/notifications/${userId}`);
       const response = await fetch(
         `https://dicedreams-backend-deploy-to-render.onrender.com/api/notifications/${userId}`,
         {
@@ -92,6 +87,7 @@ function Header() {
     }
   };
 
+  
   useEffect(() => {
     const accessToken = localStorage.getItem("access_token");
     if (accessToken) {
@@ -151,9 +147,7 @@ function Header() {
   // ประกาศฟังก์ชัน fetchUserProfile ก่อนใช้งานใน useEffect
   const fetchUserProfile = async (userId, accessToken, decodedToken) => {
     try {
-      console.log(
-        `Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`
-      );
+      console.log(`Requesting URL: https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`);
       const response = await fetch(
         `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`,
         {
@@ -287,6 +281,7 @@ function Header() {
     }
   }, []);
 
+
   return (
     <div className="header-wrapper">
       <AppBar position="fixed" sx={{ zIndex: 1300, background: "#FFFFFF" }}>
@@ -298,7 +293,7 @@ function Header() {
             sx={{ flexGrow: 1, textAlign: "left", color: "black" }}
           >
             <Link href="/" passHref>
-              <Avatar src={DiceDreamsUrl} alt="DiceDreams" />
+              DiceDreams
             </Link>
           </Typography>
 
@@ -342,16 +337,11 @@ function Header() {
               >
                 ออกจากระบบ
               </Button>
-              {/* <Tooltip
-                title="การแจ้งเตือน"
-                sx={{
-                  zIndex: 1300,
-                }}
-              > */}
-              <Box sx={{ zIndex: 1400 }}>
-                <NotificationsPopover />
-              </Box>
-              {/* </Tooltip> */}
+              <Tooltip title="การแจ้งเตือน">
+                <Box sx={{ zIndex: 1400 }}>
+                  <NotificationsPopover />
+                </Box>
+              </Tooltip>
               <Tooltip title="บัญชี">
                 <Box sx={{ zIndex: 1400 }}>
                   <Avatar

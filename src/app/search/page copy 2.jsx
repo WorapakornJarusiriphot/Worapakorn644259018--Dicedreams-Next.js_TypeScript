@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import PostGamesSearch from "@/Page/PostGames-search";
-import PostActivitySearch from "@/Page/PostActivity-search";
+import PostGames from "@/Page/PostGames";
+import PostActivity from "@/Page/PostActivity";
 import Header from "@/components/header/Header";
 import Filter from "@/components/Filter";
 import { Container, Grid, Typography } from "@mui/material";
@@ -64,6 +64,19 @@ function SearchComponent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const filterValidPosts = (posts) => {
+    const currentTime = new Date();
+    return posts.filter((post) => {
+      const postDateTime = new Date(`${post.date_meet}T${post.time_meet}`);
+      const isPostFull = post.participants >= post.num_people;
+      return (
+        post.status_post === "active" &&
+        postDateTime > currentTime &&
+        !isPostFull
+      );
+    });
+  };
+
   const buildQueryParams = () => {
     const params = new URLSearchParams();
 
@@ -95,7 +108,7 @@ function SearchComponent() {
         console.log("Fetching data with query:", queryParams);
 
         const gamesRes = await fetch(
-          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/search?${queryParams}`
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame?${queryParams}`
         );
 
         if (!gamesRes.ok) {
@@ -103,8 +116,11 @@ function SearchComponent() {
         }
 
         const gamesData = await gamesRes.json();
+        console.log("Fetched games data:", gamesData);
+
+        const validGames = filterValidPosts(gamesData); // กรองโพสต์ที่มีเวลาและสถานะที่ถูกต้อง
+
         setGames(gamesData);
-        console.log("Fetched games data:", gamesData); // เพิ่ม log เพื่อตรวจสอบข้อมูลที่ดึงมา
       } catch (error) {
         console.error("Error fetching games data:", error);
         setError(error.message);
@@ -122,7 +138,7 @@ function SearchComponent() {
         try {
           const queryParams = buildQueryParams();
           const activitiesRes = await fetch(
-            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/search?${queryParams}`
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity?${queryParams}`
           );
           if (!activitiesRes.ok) {
             throw new Error(
@@ -131,8 +147,11 @@ function SearchComponent() {
           }
 
           const activitiesData = await activitiesRes.json();
+          console.log("Fetched activities:", activitiesData);
+
+          const validGames = filterValidPosts(gamesData); // กรองโพสต์ที่มีเวลาและสถานะที่ถูกต้อง
+
           setActivities(activitiesData);
-          console.log("Fetched activities data:", activitiesData); // เพิ่ม log เพื่อตรวจสอบข้อมูลที่ดึงมา
         } catch (error) {
           console.error("Error fetching activities data:", error);
           setError(error.message);
@@ -183,7 +202,7 @@ function SearchComponent() {
             <Grid item xs={12} md={8}>
               {activities.length > 0 ? (
                 activities.map((activity) => (
-                  <PostActivitySearch key={activity.post_activity_id} {...activity} />
+                  <PostActivity key={activity.post_activity_id} {...activity} />
                 ))
               ) : (
                 <Typography color="white">
@@ -192,7 +211,7 @@ function SearchComponent() {
               )}
               {games.length > 0 ? (
                 games.map((game) => (
-                  <PostGamesSearch key={game.post_games_id} {...game} />
+                  <PostGames key={game.post_games_id} {...game} />
                 ))
               ) : (
                 <Typography color="white">

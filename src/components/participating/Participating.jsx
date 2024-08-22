@@ -249,6 +249,21 @@ function Participating() {
     router.push(`/profile/${user_id}`);
   };
 
+  const handleButtonClick = (event, id) => {
+    event.preventDefault();
+    const accessToken = localStorage.getItem("access_token");
+
+    if (!accessToken) {
+      setOpenSnackbar(true);
+      setTimeout(() => {
+        router.push("/sign-in");
+      }, 2000);
+      return;
+    }
+
+    router.push(`/PostGameDetail?id=${id}#chat`);
+  };
+
   if (loading)
     return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
   if (error) return <Typography sx={{ color: "white" }}>{error}</Typography>;
@@ -414,6 +429,9 @@ function Participating() {
                       },
                       zIndex: 0,
                     }}
+                    onClick={(event) =>
+                      handleButtonClick(event, item.post_games_id)
+                    }
                   >
                     พูดคุย
                   </Button>

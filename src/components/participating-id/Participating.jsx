@@ -445,7 +445,7 @@ function Participating({ userId }) {
       ))}
       {items.length === 0 && (
         <Typography sx={{ color: "white" }}>
-          ไม่พบโพสต์นัดเล่นที่คุณเคยเข้าร่วม
+          ไม่พบโพสต์นัดเล่นที่เคยเข้าร่วม
         </Typography>
       )}
       <Dialog open={openDialog} onClose={handleCloseDialog}>

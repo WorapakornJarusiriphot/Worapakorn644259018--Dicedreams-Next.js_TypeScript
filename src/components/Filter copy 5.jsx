@@ -133,8 +133,7 @@ function Filter({
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
-      event.preventDefault(); // ป้องกันการกระทำเริ่มต้น (เช่นการรีเฟรชหน้า)
-      executeSearch(); // เรียกฟังก์ชันการค้นหา
+      executeSearch();
     }
   };
 
@@ -147,15 +146,8 @@ function Filter({
       }
     });
 
-    if (searchTerm && searchTerm.trim()) {
-      const terms = searchTerm.trim().split(/\s+/); // แยกคำค้นหาด้วยเว้นวรรค
-      terms.forEach((term) => {
-        query.append("search", term); // เพิ่มคำค้นหาแต่ละคำใน query string
-      });
-    }
-
     if (selectedDate) {
-      query.set("search_date_meet", dayjs(selectedDate).format("MM/DD/YYYY"));
+      query.set("search_date_meet", dayjs(selectedDate).format("YYYY-MM-DD"));
     }
 
     if (selectedTime) {
@@ -166,12 +158,12 @@ function Filter({
       query.set("search_num_people", number);
     }
 
-    // ถ้ามีพารามิเตอร์การค้นหาใด ๆ ถูกตั้งค่า
-    if (query.toString()) {
-      router.push(`/search?${query.toString()}`); // ไปยังหน้าผลการค้นหาพร้อมกับ query string
+    // Check if any search parameters are set, if not redirect to homepage
+    if (!query.toString()) {
+      router.replace("/");
     } else {
-      // ถ้าไม่มีพารามิเตอร์การค้นหา ไปที่หน้าแรก (แสดงโพสต์ทั้งหมด)
-      router.push(`/`);
+      // Replace the current URL with the new search parameters
+      router.replace(`/search?${query.toString()}`);
     }
   };
 
@@ -224,12 +216,14 @@ function Filter({
         <br />
 
         <FormControl fullWidth>
-          <InputLabel id="number-select-label">จำนวนคนจะไป</InputLabel>
+          <InputLabel id="number-select-label">
+            จำนวนผู้เล่นที่ว่างตั้งแต่
+          </InputLabel>
           <Select
             labelId="number-select-label"
             id="number-select"
             value={number}
-            label="จำนวนคนจะไป"
+            label="จำนวนผู้เล่นที่ว่างตั้งแต่"
             onChange={handleNumberChange}
           >
             {Array.from({ length: 75 }, (_, index) => (

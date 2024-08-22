@@ -91,12 +91,12 @@ export default function SignIn() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    if (!window.location.hash) {
-      window.location.hash = 'loaded';
-      window.location.reload();
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (!window.location.hash) {
+  //     window.location.hash = 'loaded';
+  //     window.location.reload();
+  //   }
+  // }, []);
 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -224,7 +224,7 @@ export default function SignIn() {
               เข้าสู่ระบบ
             </Button>
 
-            {/* <Divider sx={{ my: 3 }}>
+            <Divider sx={{ my: 3 }}>
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 OR
               </Typography>
@@ -250,17 +250,17 @@ export default function SignIn() {
               >
                 <Iconify icon="eva:facebook-fill" color="#1877F2" />
               </Button>
-            </Stack> */}
+            </Stack>
 
             <br />
             <br />
 
             <Grid container>
-              {/* <Grid item xs>
+              <Grid item xs>
                 <Link href="/" variant="body2">
                   ลืมรหัสผ่านหรือไม่?
                 </Link>
-              </Grid> */}
+              </Grid>
               <Grid item>
                 <Link href="/sign-up" variant="body2">
                   {"ไม่มีบัญชีใช่ไหม? สมัครสมาชิก"}

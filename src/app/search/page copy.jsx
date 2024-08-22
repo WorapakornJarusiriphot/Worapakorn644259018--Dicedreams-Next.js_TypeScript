@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import PostGamesSearch from "@/Page/PostGames-search";
-import PostActivitySearch from "@/Page/PostActivity-search";
+import PostGames from "@/Page/PostGames";
+import PostActivity from "@/Page/PostActivity";
 import Header from "@/components/header/Header";
 import Filter from "@/components/Filter";
 import { Container, Grid, Typography } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Suspense } from "react";
+import { Suspense } from 'react';
 
 // กำหนดธีมสีเข้ม
 const darkTheme = createTheme({
@@ -65,55 +65,56 @@ function SearchComponent() {
   const [error, setError] = useState(null);
 
   const buildQueryParams = () => {
-    const params = new URLSearchParams();
-
+    let params = [];
     if (search) {
       search.split("&").forEach((term) => {
-        params.append("search", term);
+        params.push(`search=${term}`);
       });
     }
-
     if (searchDateMeet) {
-      params.append("search_date_meet", searchDateMeet);
+      params.push(`search_date_meet=${searchDateMeet}`);
     }
-
     if (searchTimeMeet) {
-      params.append("search_time_meet", searchTimeMeet);
+      params.push(`search_time_meet=${searchTimeMeet}`);
     }
-
     if (searchNumPeople) {
-      params.append("search_num_people", searchNumPeople);
+      params.push(`search_num_people=${searchNumPeople}`);
     }
-
-    return params.toString();
+    return params.join("&");
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const queryParams = buildQueryParams();
-        console.log("Fetching data with query:", queryParams);
+    if (search) {
+      const fetchData = async () => {
+        try {
+          const queryParams = buildQueryParams();
+          console.log("Fetching data with query:", queryParams);
 
-        const gamesRes = await fetch(
-          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/search?${queryParams}`
-        );
+          const gamesRes = await fetch(
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame?${queryParams}`
+          );
 
-        if (!gamesRes.ok) {
-          throw new Error(`Failed to fetch games: ${gamesRes.statusText}`);
+          if (!gamesRes.ok) {
+            throw new Error(`Failed to fetch games: ${gamesRes.statusText}`);
+          }
+
+          const gamesData = await gamesRes.json();
+          console.log("Fetched games data:", gamesData);
+
+          setGames(gamesData);
+        } catch (error) {
+          console.error("Error fetching games data:", error);
+          setError(error.message);
+        } finally {
+          setLoading(false);
         }
+      };
 
-        const gamesData = await gamesRes.json();
-        setGames(gamesData);
-        console.log("Fetched games data:", gamesData); // เพิ่ม log เพื่อตรวจสอบข้อมูลที่ดึงมา
-      } catch (error) {
-        console.error("Error fetching games data:", error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+      fetchData();
+    } else {
+      console.log("No search query found");
+      setLoading(false);
+    }
   }, [search, searchDateMeet, searchTimeMeet, searchNumPeople]);
 
   useEffect(() => {
@@ -122,7 +123,7 @@ function SearchComponent() {
         try {
           const queryParams = buildQueryParams();
           const activitiesRes = await fetch(
-            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/search?${queryParams}`
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity?${queryParams}`
           );
           if (!activitiesRes.ok) {
             throw new Error(
@@ -131,8 +132,9 @@ function SearchComponent() {
           }
 
           const activitiesData = await activitiesRes.json();
+          console.log("Fetched activities:", activitiesData);
+
           setActivities(activitiesData);
-          console.log("Fetched activities data:", activitiesData); // เพิ่ม log เพื่อตรวจสอบข้อมูลที่ดึงมา
         } catch (error) {
           console.error("Error fetching activities data:", error);
           setError(error.message);
@@ -183,7 +185,7 @@ function SearchComponent() {
             <Grid item xs={12} md={8}>
               {activities.length > 0 ? (
                 activities.map((activity) => (
-                  <PostActivitySearch key={activity.post_activity_id} {...activity} />
+                  <PostActivity key={activity.post_activity_id} {...activity} />
                 ))
               ) : (
                 <Typography color="white">
@@ -192,7 +194,7 @@ function SearchComponent() {
               )}
               {games.length > 0 ? (
                 games.map((game) => (
-                  <PostGamesSearch key={game.post_games_id} {...game} />
+                  <PostGames key={game.post_games_id} {...game} />
                 ))
               ) : (
                 <Typography color="white">
