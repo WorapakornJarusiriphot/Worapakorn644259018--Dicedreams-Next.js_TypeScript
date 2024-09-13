@@ -12,6 +12,9 @@ import {
   Box,
   RadioGroup,
   Radio,
+  Menu,
+  MenuItem,
+  Alert,
 } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import Header from "../components/header/Header";
@@ -48,6 +51,9 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import CloseIcon from "@mui/icons-material/Close";
+import { StorePopover } from "./store-popover";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
@@ -85,6 +91,61 @@ function PostActivity() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isFullSize, setIsFullSize] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [selectedPostId, setSelectedPostId] = useState(null);
+
+  // เปิดเมนู Pop Up ตัวเลือก
+  const handleMenuClick = (event, postId, post) => {
+    console.log("Selected post: ", post); // ตรวจสอบค่าของโพสต์ที่ถูกเลือก
+    if (!post) {
+      console.error("โพสต์ไม่มีข้อมูล หรือเป็น undefined");
+      setSnackbarMessage("ไม่พบข้อมูลของโพสต์นี้");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      return;
+    }
+    setAnchorEl(event.currentTarget); // เปิดเมนูป๊อปอัป
+    setSelectedPostId(postId); // บันทึก postId ของโพสต์ที่ถูกคลิก
+    setSelectedPost(post); // ตั้งค่า selectedPost ให้ตรงกับโพสต์ที่ถูกเลือก
+  };
+
+  // ปิดเมนู Pop Up ตัวเลือก
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  // เปิด/ปิด Dialog สำหรับแก้ไข
+  const handleEditOpen = () => {
+    setEditOpen(true);
+    setAnchorEl(null); // ปิดเมนูเมื่อเปิดการแก้ไข
+  };
+
+  const handleEditClose = () => {
+    setEditOpen(false);
+  };
+
+  // เปิด/ปิด Dialog สำหรับลบ
+  const handleDeleteOpen = () => {
+    setDeleteOpen(true);
+
+    setAnchorEl(null); // ปิดเมนูเมื่อเปิดการลบ
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteOpen(false);
+  };
+
+  // ฟังก์ชันสำหรับปิด Snackbar
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
 
   useEffect(() => {
     const fetchUserAndPosts = async () => {
@@ -94,10 +155,10 @@ function PostActivity() {
       try {
         if (accessToken) {
           const decoded = jwtDecode(accessToken);
-          setUserId(decoded.users_id);
+          setUserId(decoded.store_id);
 
           const postsResponse = await fetch(
-            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity`,
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/search`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -148,6 +209,7 @@ function PostActivity() {
                 creation_date: formatDateTime(post.creation_date),
                 date_activity: formatThaiDate(post.date_activity),
                 time_activity: formatThaiTime(post.time_activity),
+                store_id: post.store_id ? post.store_id : "Unknown",
               };
             });
 
@@ -158,7 +220,7 @@ function PostActivity() {
           setItems(sortedPosts);
         } else {
           const postsResponse = await fetch(
-            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity` // ดึงโพสต์ทั้งหมดโดยไม่ต้องใช้ accessToken
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/search` // ดึงโพสต์ทั้งหมดโดยไม่ต้องใช้ accessToken
           );
           if (!postsResponse.ok) throw new Error("Failed to fetch posts");
           const postsData = await postsResponse.json();
@@ -197,6 +259,7 @@ function PostActivity() {
                 creation_date: formatDateTime(post.creation_date),
                 date_activity: formatThaiDate(post.date_activity),
                 time_activity: formatThaiTime(post.time_activity),
+                store_id: post.store_id ? post.store_id : "Unknown",
               };
             });
 
@@ -235,11 +298,13 @@ function PostActivity() {
     router.push(`/profile/${userId}`);
   };
 
-  const handleLinkClick = (event, id) => {
+  const handleLinkClick = async (event, postId, postOwnerId) => {
     event.preventDefault();
-    const accessToken = localStorage.getItem("access_token");
 
+    const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
+      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
+      setSnackbarSeverity("error");
       setOpenSnackbar(true);
       setTimeout(() => {
         router.push("/sign-in");
@@ -247,7 +312,126 @@ function PostActivity() {
       return;
     }
 
-    router.push(`/PostGameDetail?id=${id}`);
+    try {
+      const decoded = jwtDecode(accessToken); // ถอดรหัส token เพื่อดึงข้อมูลผู้ใช้
+      const storeId = decoded.store_id; // ใช้ store_id แทน store_id
+      const userRole = decoded.role;
+
+      // ตรวจสอบว่า role ของผู้ใช้เป็น store หรือไม่
+      if (userRole !== "store") {
+        setSnackbarMessage("คุณไม่มีสิทธิ์ในการแก้ไขโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      // ตรวจสอบว่า storeId ตรงกับเจ้าของโพสต์หรือไม่
+      if (storeId !== postOwnerId) {
+        setSnackbarMessage("คุณไม่ใช่เจ้าของโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      // ตั้งค่า selectedPostId ก่อนที่จะนำทาง
+      setSelectedPostId(postId); // บันทึก postId ของโพสต์ที่ถูกคลิก
+
+      // นำทางไปที่หน้าแก้ไขโพสต์โดยใช้ `postId` ที่ถูกต้อง
+      router.push(`/PostActivityEdit?id=${postId}`);
+    } catch (error) {
+      setSnackbarMessage("Token ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      router.push("/sign-in");
+    }
+  };
+
+  // ยืนยันการลบโพสต์
+  // ฟังก์ชันสำหรับเปลี่ยนสถานะโพสต์เป็น unActive
+  const handleUpdateStatus = async () => {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(accessToken);
+      const storeId = decoded.store_id;
+      const userRole = decoded.role;
+
+      console.log("Selected post: ", selectedPost); // ตรวจสอบค่าของ selectedPost ก่อนดำเนินการ
+      if (!selectedPost) {
+        setSnackbarMessage("ไม่พบข้อมูลของโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      if (storeId !== selectedPost.store_id) {
+        setSnackbarMessage("คุณไม่ใช่เจ้าของโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      // เรียก API PUT เพื่ออัปเดตสถานะโพสต์
+      const response = await fetch(
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/${selectedPostId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status_post: "unActive", // อัปเดตสถานะโพสต์เป็น "unActive"
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("การอัปเดตสถานะโพสต์ล้มเหลว");
+      }
+
+      setSnackbarMessage("โพสต์กิจกรรมนี้ได้ถูกลบเป็นที่เรียบร้อยแล้ว");
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
+
+      // อัปเดตสถานะของโพสต์ใน UI
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item.post_activity_id === selectedPostId
+            ? { ...item, status_post: "unActive" }
+            : item
+        )
+      );
+
+      // รีเฟรชหน้าเว็บ
+      window.location.reload();
+    } catch (error) {
+      setSnackbarMessage(error.message);
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+    } finally {
+      setDeleteOpen(false); // ปิด Dialog
+    }
+  };
+
+  const checkToken = (token) => {
+    if (!token) return false;
+    try {
+      const decoded = jwtDecode(token);
+      const now = Date.now() / 1000;
+      if (decoded.exp && decoded.exp < now) {
+        return false; // token หมดอายุ
+      }
+      return decoded; // return decoded token หากยังไม่หมดอายุ
+    } catch (error) {
+      return false; // token ผิดพลาด
+    }
   };
 
   const handleCloseSnackbar = () => {
@@ -318,14 +502,84 @@ function PostActivity() {
               </Typography>
             </Grid>
             <Grid item>
-              <IconButton
-                sx={{
-                  color: "white",
-                }}
-                aria-label="settings"
-              >
-                <MoreVertOutlinedIcon />
-              </IconButton>
+              <div>
+                {/* ปุ่มเปิด Pop Up ตัวเลือก */}
+                <IconButton
+                  sx={{ color: "white" }}
+                  aria-label="settings"
+                  onClick={(event) =>
+                    handleMenuClick(event, item.post_activity_id, item)
+                  } // ส่ง item (ข้อมูลโพสต์) ไปด้วย
+                >
+                  <MoreVertOutlinedIcon />
+                </IconButton>
+
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                >
+                  <MenuItem
+                    onClick={(event) =>
+                      handleLinkClick(event, selectedPostId, item.store_id)
+                    }
+                  >
+                    <EditIcon sx={{ marginRight: 1 }} />
+                    แก้ไขโพสต์กิจกรรม
+                  </MenuItem>
+                  <MenuItem onClick={handleDeleteOpen}>
+                    <DeleteIcon sx={{ marginRight: 1 }} />
+                    ลบโพสต์กิจกรรม
+                  </MenuItem>
+                </Menu>
+
+                {/* Dialog สำหรับแก้ไขโพสต์ */}
+                {/* <Dialog open={editOpen} onClose={handleEditClose}>
+                  <DialogTitle>แก้ไขโพสต์กิจกรรม</DialogTitle>
+                  <DialogActions>
+                    <Button onClick={handleEditClose} color="primary">
+                      ยกเลิก
+                    </Button>
+                    <Button onClick={handleEditClose} color="primary">
+                      บันทึกการแก้ไข
+                    </Button>
+                  </DialogActions>
+                </Dialog> */}
+
+                {/* Dialog ยืนยันการลบโพสต์ */}
+                <Dialog open={deleteOpen} onClose={handleDeleteClose}>
+                  <DialogTitle>คุณต้องการลบโพสต์นี้ใช่ไหม?</DialogTitle>
+                  <DialogActions>
+                    <Button onClick={handleDeleteClose} color="primary">
+                      ยกเลิก
+                    </Button>
+                    <Button onClick={handleUpdateStatus} color="error">
+                      ลบโพสต์
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+
+                {/* Snackbar สำหรับแสดงข้อความ */}
+                <Snackbar
+                  open={openSnackbar}
+                  autoHideDuration={6000}
+                  onClose={handleSnackbarClose}
+                >
+                  <Alert
+                    onClose={handleSnackbarClose}
+                    severity={snackbarSeverity}
+                    sx={{ width: "100%" }}
+                  >
+                    {snackbarMessage}
+                  </Alert>
+                </Snackbar>
+              </div>
+              {/* <StorePopover
+                userId={user.userId}
+                anchorEl={userPopover.anchorRef.current}
+                onClose={userPopover.handleClose}
+                open={userPopover.open}
+              /> */}
             </Grid>
           </Grid>
 
@@ -362,7 +616,7 @@ function PostActivity() {
         </Box>
       ))}
       {items.length === 0 && <Typography sx={{ color: "white" }}></Typography>}
-      <Snackbar
+      {/* <Snackbar
         open={openSnackbar}
         autoHideDuration={2000}
         onClose={handleCloseSnackbar}
@@ -374,7 +628,7 @@ function PostActivity() {
         >
           กรุณาเข้าสู่ระบบก่อน
         </MuiAlert>
-      </Snackbar>
+      </Snackbar> */}
       {errorMessage && (
         <Snackbar
           open={true}

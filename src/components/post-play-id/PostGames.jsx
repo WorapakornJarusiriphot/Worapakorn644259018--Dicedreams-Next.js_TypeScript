@@ -317,14 +317,14 @@ const PostGames = ({ userId }) => {
               </Typography>
             </Grid>
             <Grid item>
-              <IconButton
+              {/* <IconButton
                 sx={{
                   color: "white",
                 }}
                 aria-label="settings"
               >
                 <MoreVertOutlinedIcon />
-              </IconButton>
+              </IconButton> */}
             </Grid>
           </Grid>
 

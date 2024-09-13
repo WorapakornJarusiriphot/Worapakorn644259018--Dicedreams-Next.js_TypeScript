@@ -100,12 +100,12 @@ const darkTheme = createTheme({
 });
 
 function Filter({
-  selectedCategory,
+  selectedCategory = "", // กำหนดค่าเริ่มต้นเป็น string ว่าง
   handleCategoryChange,
   handleSearchChange,
   searchTerm,
   handleNumberChange,
-  number,
+  number, // กำหนดค่าเริ่มต้นให้ number เป็น 1 เพื่อป้องกัน undefined
   handleDateChange,
   selectedDate,
   handleTimeChange,

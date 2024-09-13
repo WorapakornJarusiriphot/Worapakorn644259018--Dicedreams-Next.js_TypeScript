@@ -28,8 +28,8 @@ export default function NotificationsPopover() {
   const [error, setError] = useState(null);
   const router = useRouter();
 
-  // ฟังก์ชันที่สร้างขึ้นมาเพื่อใช้ในการนำทางไปยังหน้า PostGameDetail
-  const handleButtonClick = (event, id) => {
+  // ฟังก์ชันสำหรับนำทางไปยังหน้า PostGameDetail หรือ Chat
+  const handleButtonClick = (event, notification) => {
     event.preventDefault();
     const accessToken = localStorage.getItem("access_token");
 
@@ -41,7 +41,11 @@ export default function NotificationsPopover() {
       return;
     }
 
-    router.push(`/PostGameDetail?id=${id}`);
+    if (notification.type === "participate") {
+      router.push(`/PostGameDetail?id=${notification.data.post_games_id}`);
+    } else if (notification.type === "chat") {
+      router.push(`/PostGameDetail?id=${notification.data.post_games_id}#chat`);
+    }
   };
 
   const fetchNotifications = async () => {
@@ -54,7 +58,7 @@ export default function NotificationsPopover() {
 
     try {
       const response = await fetch(
-        "https://dicedreams-backend-deploy-to-render.onrender.com/api/notification",
+        "https://dicedreams-backend-deploy-to-render.onrender.com/api/notification/user",
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -119,7 +123,7 @@ export default function NotificationsPopover() {
         }
 
         const response = await fetch(
-          "https://dicedreams-backend-deploy-to-render.onrender.com/api/notification/mark-all-as-read",
+          "https://dicedreams-backend-deploy-to-render.onrender.com/api/notification/user/mark-all-as-read",
           {
             method: "PUT",
             headers: {
@@ -149,7 +153,7 @@ export default function NotificationsPopover() {
       }
 
       const response = await fetch(
-        "https://dicedreams-backend-deploy-to-render.onrender.com/api/notification",
+        "https://dicedreams-backend-deploy-to-render.onrender.com/api/notification/user",
         {
           method: "PUT",
           headers: {
@@ -251,9 +255,7 @@ export default function NotificationsPopover() {
                     key={notification.notification_id}
                     notification={notification}
                     onMarkAsRead={handleMarkAsRead}
-                    onClick={(event) =>
-                      handleButtonClick(event, notification.data.post_games_id)
-                    } // เพิ่ม onClick handler
+                    onClick={(event) => handleButtonClick(event, notification)} // ปรับปรุงการส่งพารามิเตอร์
                   />
                 ))}
             </List>
@@ -281,11 +283,8 @@ export default function NotificationsPopover() {
                       notification={notification}
                       onMarkAsRead={handleMarkAsRead}
                       onClick={(event) =>
-                        handleButtonClick(
-                          event,
-                          notification.data.post_games_id
-                        )
-                      } // เพิ่ม onClick handler
+                        handleButtonClick(event, notification)
+                      } // ปรับปรุงการส่งพารามิเตอร์
                     />
                   ))}
             </List>
@@ -313,10 +312,12 @@ NotificationItem.propTypes = {
       num_people: PropTypes.number,
       date_meet: PropTypes.string,
       time_meet: PropTypes.string,
+      message: PropTypes.string, // เพิ่มสำหรับ chat
     }),
     type: PropTypes.string,
   }),
   onMarkAsRead: PropTypes.func.isRequired,
+  onClick: PropTypes.func.isRequired, // เพิ่ม propTypes สำหรับ onClick
 };
 
 function NotificationItem({ notification, onMarkAsRead, onClick }) {
@@ -436,19 +437,31 @@ function renderContent(
             ""
           )}
         </Typography>
-        {notification.data.detail_post.length > 0 && (
-          <Button
-            size="small"
-            sx={{ color: "black" }}
-            onClick={handleToggleExpand}
-          >
-            {expanded ? "แสดงน้อยลง" : "...เพิ่มเติม"}
-          </Button>
-        )}
+        {notification.data.detail_post &&
+          notification.data.detail_post.length > 0 && (
+            <Button
+              size="small"
+              sx={{ color: "black" }}
+              onClick={handleToggleExpand}
+            >
+              {expanded ? "แสดงน้อยลง" : "...เพิ่มเติม"}
+            </Button>
+          )}
       </>
     );
   } else if (notification.type === "chat") {
-    message = "มีคนส่งข้อความถึงคุณ";
+    message = (
+      <>
+        มีคนส่งข้อความถึงคุณ:
+        <br />
+        <Typography
+          component="span"
+          sx={{ fontWeight: "bold", color: "black" }}
+        >
+          {notification.data.message}
+        </Typography>
+      </>
+    );
   }
 
   const title = (

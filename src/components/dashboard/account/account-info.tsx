@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import * as React from 'react'; // เพิ่มการ import SetStateAction
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -23,7 +23,7 @@ import dayjs, { Dayjs } from 'dayjs';
 
 export function AccountInfo(): React.JSX.Element {
   const { user, setUser } = useUser();
-
+  const { store, setStore } = useStore(); // ไม่ต้องใส่ <Store | null>
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [openNav, setOpenNav] = useState(false);
@@ -33,7 +33,6 @@ export function AccountInfo(): React.JSX.Element {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertSeverity, setAlertSeverity] = useState<'success' | 'error'>('success');
   const router = useRouter();
-  const { store, setStore } = useStore();
 
 
   const handleSnackbarClose = () => {
@@ -53,7 +52,7 @@ export function AccountInfo(): React.JSX.Element {
         if (decoded.store_id) {
           fetchStoreProfile(decoded.store_id, accessToken); // Fetch store data
         } else {
-          setStore(null); // If no store_id, set store to null
+          setStore(null as any); // แก้ไขโดยการ cast null เป็น any
         }
       } else {
         console.error('User ID is missing in the token');

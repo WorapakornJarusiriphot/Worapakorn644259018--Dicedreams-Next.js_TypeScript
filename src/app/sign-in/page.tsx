@@ -91,12 +91,12 @@ export default function SignIn() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  // useEffect(() => {
-  //   if (!window.location.hash) {
-  //     window.location.hash = 'loaded';
-  //     window.location.reload();
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (!window.location.hash) {
+      window.location.hash = 'loaded';
+      window.location.reload();
+    }
+  }, []);
 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
