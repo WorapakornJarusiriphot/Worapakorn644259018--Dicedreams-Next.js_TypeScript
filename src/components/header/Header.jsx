@@ -317,6 +317,19 @@ function Header() {
                 >
                   สร้างโพสต์กิจกรรม
                 </Button>
+              ) : user.userType === "admin" ? (
+                <Button
+                  variant="contained"
+                  sx={{
+                    background: "black",
+                    color: "white",
+                    marginRight: "10px",
+                  }}
+                  href="/Admin"
+                  replace="true"
+                >
+                  จัดการผู้ใช้
+                </Button>
               ) : (
                 <Button
                   variant="contained"

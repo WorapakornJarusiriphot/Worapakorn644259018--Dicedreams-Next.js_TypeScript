@@ -12,6 +12,9 @@ import {
   Box,
   RadioGroup,
   Radio,
+  Menu,
+  MenuItem,
+  Alert,
 } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import InputLabel from "@mui/material/InputLabel";
@@ -46,6 +49,8 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 // import { Link } from 'react-router-dom';
 import Link from "next/link";
 import Avatar from "@mui/material/Avatar";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 // สร้าง custom theme
 const theme = createTheme({
@@ -95,6 +100,61 @@ function PostGames() {
   const [successMessage, setSuccessMessage] = useState("");
   const [isFullSize, setIsFullSize] = useState(false);
   const router = useRouter();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [selectedPostId, setSelectedPostId] = useState(null);
+
+  // เปิดเมนู Pop Up ตัวเลือก
+  const handleMenuClick = (event, postId, post) => {
+    console.log("Selected post: ", post); // ตรวจสอบค่าของโพสต์ที่ถูกเลือก
+    if (!post) {
+      console.error("โพสต์ไม่มีข้อมูล หรือเป็น undefined");
+      setSnackbarMessage("ไม่พบข้อมูลของโพสต์นี้");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      return;
+    }
+    setAnchorEl(event.currentTarget); // เปิดเมนูป๊อปอัป
+    setSelectedPostId(postId); // บันทึก postId ของโพสต์ที่ถูกคลิก
+    setSelectedPost(post); // ตั้งค่า selectedPost ให้ตรงกับโพสต์ที่ถูกเลือก
+  };
+
+  // ปิดเมนู Pop Up ตัวเลือก
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  // เปิด/ปิด Dialog สำหรับแก้ไข
+  const handleEditOpen = () => {
+    setEditOpen(true);
+    setAnchorEl(null); // ปิดเมนูเมื่อเปิดการแก้ไข
+  };
+
+  const handleEditClose = () => {
+    setEditOpen(false);
+  };
+
+  // เปิด/ปิด Dialog สำหรับลบ
+  const handleDeleteOpen = () => {
+    setDeleteOpen(true);
+
+    setAnchorEl(null); // ปิดเมนูเมื่อเปิดการลบ
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteOpen(false);
+  };
+
+  // ฟังก์ชันสำหรับปิด Snackbar
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
 
   const handleImageClick = () => {
     setIsFullSize(!isFullSize);
@@ -153,44 +213,50 @@ function PostGames() {
           }
         }
 
-        const postsWithParticipants = postsData
-          .filter((post) => post.status_post === "active")
-          .map((post) => {
-            const postParticipants = participantsData.filter(
-              (participant) => participant.post_games_id === post.post_games_id
-            );
+        const postsWithParticipants = postsData.map((post) => {
+          const postParticipants = participantsData.filter(
+            (participant) =>
+              participant.post_games_id === post.post_games_id &&
+              ["active", "unActive", "pending"].includes(
+                participant.participant_status
+              ) // ตรวจสอบสถานะ active, unActive, หรือ pending
+          );
 
-            const postUser = usersData.find(
-              (user) => user.users_id === post.users_id
-            );
+          const postUser = usersData.find(
+            (user) => user.users_id === post.users_id
+          );
 
-            const isParticipated = postParticipants.some(
-              (participant) => participant.user_id === currentUserId
-            );
+          const isParticipated = participantsData.some(
+            (participant) =>
+              participant.user_id === currentUserId &&
+              participant.post_games_id === post.post_games_id &&
+              ["active", "unActive", "pending"].includes(
+                participant.participant_status
+              ) // ตรวจสอบสถานะ active, unActive, หรือ pending
+          );
 
-            return {
-              ...post,
-              participants: postParticipants.length + 1,
-              userFirstName: postUser ? postUser.first_name : "Unknown",
-              userLastName: postUser ? postUser.last_name : "Unknown",
-              userProfileImage: postUser
-                ? postUser.user_image
-                : "default-image-url",
-              rawCreationDate: post.creation_date,
-              creation_date: formatDateTime(post.creation_date),
-              date_meet: post.date_meet,
-              time_meet: post.time_meet,
-              isParticipated: isParticipated,
-            };
-          });
+          return {
+            ...post,
+            participants: postParticipants.length + 1,
+            userFirstName: postUser ? postUser.first_name : "Unknown",
+            userLastName: postUser ? postUser.last_name : "Unknown",
+            userProfileImage: postUser
+              ? postUser.user_image
+              : "default-image-url",
+            rawCreationDate: post.creation_date,
+            creation_date: formatDateTime(post.creation_date),
+            date_meet: post.date_meet,
+            time_meet: post.time_meet,
+            isParticipated: isParticipated, // กำหนดค่าการเข้าร่วมให้ถูกต้อง
+          };
+        });
 
         const currentTime = new Date();
-        const filteredPosts = postsWithParticipants
-        .filter((post) => {
+        const filteredPosts = postsWithParticipants.filter((post) => {
           const postDateTime = new Date(`${post.date_meet}T${post.time_meet}`);
           const isPostFull = post.participants >= post.num_people; // ตรวจสอบว่าคนเต็มหรือไม่
           return postDateTime > currentTime && !isPostFull; // แสดงเฉพาะโพสต์ที่ยังไม่เต็มและยังไม่หมดเวลา
-        });      
+        });
 
         const sortedPosts = filteredPosts.sort(
           (a, b) => new Date(b.rawCreationDate) - new Date(a.rawCreationDate)
@@ -251,13 +317,19 @@ function PostGames() {
                 : item
             )
           );
+        } else if (response.status === 400) {
+          setErrorMessage("คุณได้ถูกเตะออกจากการโพสต์นัดเล่นนี้แล้ว");
         } else {
           setErrorMessage(
             "Failed to join the post with status: " + response.status
           );
         }
       } catch (error) {
-        setErrorMessage("Error joining the post: " + error.message);
+        if (error.response && error.response.status === 400) {
+          setErrorMessage("คุณได้ถูกเตะออกจากการโพสต์นัดเล่นนี้แล้ว");
+        } else {
+          setErrorMessage("Error joining the post: " + error.message);
+        }
       }
     }
   };
@@ -281,7 +353,7 @@ function PostGames() {
     router.push(`/PostGameDetail?id=${id}#chat`);
   };
 
-  const handleLinkClick = (event, id) => {
+  const handleLinkClick2 = (event, id) => {
     event.preventDefault();
     const accessToken = localStorage.getItem("access_token");
 
@@ -317,6 +389,142 @@ function PostGames() {
     }
 
     router.push(`/profile/${userId}`);
+  };
+
+  const handleLinkClick = async (event, postId) => {
+    event.preventDefault();
+
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      setTimeout(() => {
+        router.push("/sign-in");
+      }, 2000);
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(accessToken); // ถอดรหัส token เพื่อดึงข้อมูลผู้ใช้
+      const userId = decoded.users_id; // ดึง users_id จาก token
+      const userRole = decoded.role;
+
+      // ตรวจสอบว่า role ของผู้ใช้เป็น "user" หรือไม่
+      if (userRole !== "user") {
+        setSnackbarMessage("คุณไม่มีสิทธิ์ในการแก้ไขโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      if (userId !== selectedPost.users_id) {
+        setSnackbarMessage("คุณไม่ใช่เจ้าของโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+      // ตรวจสอบว่า userId ตรงกับ users_id ของโพสต์ที่เลือกหรือไม่
+      console.log("Current userId: ", userId); // ตรวจสอบ userId ของคุณ
+      console.log("Selected post userId: ", selectedPost.users_id); // ตรวจสอบ users_id ของโพสต์
+
+      // ถ้า userId ตรงกับ users_id ของโพสต์ ให้ทำการนำทางไปที่หน้าแก้ไขโพสต์
+      setSelectedPostId(postId); // บันทึก postId ของโพสต์ที่ถูกคลิก
+      router.push(`/PostPlayEdit?id=${postId}`);
+    } catch (error) {
+      setSnackbarMessage("Token ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      router.push("/sign-in");
+    }
+  };
+
+  // ยืนยันการลบโพสต์
+  // ฟังก์ชันสำหรับเปลี่ยนสถานะโพสต์เป็น unActive
+  const handleUpdateStatus = async () => {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(accessToken);
+      const userId = decoded.users_id;
+      const userRole = decoded.role;
+
+      console.log("Selected post: ", selectedPost); // ตรวจสอบค่าของ selectedPost ก่อนดำเนินการ
+      if (!selectedPost) {
+        setSnackbarMessage("ไม่พบข้อมูลของโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      if (userId !== selectedPost.users_id) {
+        setSnackbarMessage("คุณไม่ใช่เจ้าของโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      // เรียก API PUT เพื่ออัปเดตสถานะโพสต์
+      const response = await fetch(
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/${selectedPostId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status_post: "unActive", // อัปเดตสถานะโพสต์เป็น "unActive"
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("การอัปเดตสถานะโพสต์ล้มเหลว");
+      }
+
+      setSnackbarMessage("โพสต์กิจกรรมนี้ได้ถูกลบเป็นที่เรียบร้อยแล้ว");
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
+
+      // อัปเดตสถานะของโพสต์ใน UI
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item.post_games_id === selectedPostId
+            ? { ...item, status_post: "unActive" }
+            : item
+        )
+      );
+
+      // รีเฟรชหน้าเว็บ
+      window.location.reload();
+    } catch (error) {
+      setSnackbarMessage(error.message);
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+    } finally {
+      setDeleteOpen(false); // ปิด Dialog
+    }
+  };
+
+  const checkToken = (token) => {
+    if (!token) return false;
+    try {
+      const decoded = jwtDecode(token);
+      const now = Date.now() / 1000;
+      if (decoded.exp && decoded.exp < now) {
+        return false; // token หมดอายุ
+      }
+      return decoded; // return decoded token หากยังไม่หมดอายุ
+    } catch (error) {
+      return false; // token ผิดพลาด
+    }
   };
 
   if (loading)
@@ -382,14 +590,84 @@ function PostGames() {
               </Typography>
             </Grid>
             <Grid item>
-              <IconButton
-                sx={{
-                  color: "white",
-                }}
-                aria-label="settings"
-              >
-                <MoreVertOutlinedIcon />
-              </IconButton>
+              <div>
+                {/* ปุ่มเปิด Pop Up ตัวเลือก */}
+                <IconButton
+                  sx={{ color: "white" }}
+                  aria-label="settings"
+                  onClick={(event) =>
+                    handleMenuClick(event, item.post_games_id, item)
+                  } // ส่ง item (ข้อมูลโพสต์) ไปด้วย
+                >
+                  <MoreVertOutlinedIcon />
+                </IconButton>
+
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                >
+                  <MenuItem
+                    onClick={(event) =>
+                      handleLinkClick(event, selectedPostId, item.users_id)
+                    }
+                  >
+                    <EditIcon sx={{ marginRight: 1 }} />
+                    แก้ไขโพสต์กิจกรรม
+                  </MenuItem>
+                  <MenuItem onClick={handleDeleteOpen}>
+                    <DeleteIcon sx={{ marginRight: 1 }} />
+                    ลบโพสต์กิจกรรม
+                  </MenuItem>
+                </Menu>
+
+                {/* Dialog สำหรับแก้ไขโพสต์ */}
+                {/* <Dialog open={editOpen} onClose={handleEditClose}>
+                  <DialogTitle>แก้ไขโพสต์กิจกรรม</DialogTitle>
+                  <DialogActions>
+                    <Button onClick={handleEditClose} color="primary">
+                      ยกเลิก
+                    </Button>
+                    <Button onClick={handleEditClose} color="primary">
+                      บันทึกการแก้ไข
+                    </Button>
+                  </DialogActions>
+                </Dialog> */}
+
+                {/* Dialog ยืนยันการลบโพสต์ */}
+                <Dialog open={deleteOpen} onClose={handleDeleteClose}>
+                  <DialogTitle>คุณต้องการลบโพสต์นี้ใช่ไหม?</DialogTitle>
+                  <DialogActions>
+                    <Button onClick={handleDeleteClose} color="primary">
+                      ยกเลิก
+                    </Button>
+                    <Button onClick={handleUpdateStatus} color="error">
+                      ลบโพสต์
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+
+                {/* Snackbar สำหรับแสดงข้อความ */}
+                <Snackbar
+                  open={openSnackbar}
+                  autoHideDuration={6000}
+                  onClose={handleSnackbarClose}
+                >
+                  <Alert
+                    onClose={handleSnackbarClose}
+                    severity={snackbarSeverity}
+                    sx={{ width: "100%" }}
+                  >
+                    {snackbarMessage}
+                  </Alert>
+                </Snackbar>
+              </div>
+              {/* <StorePopover
+                userId={user.userId}
+                anchorEl={userPopover.anchorRef.current}
+                onClose={userPopover.handleClose}
+                open={userPopover.open}
+              /> */}
             </Grid>
           </Grid>
 
@@ -398,7 +676,7 @@ function PostGames() {
               pathname: "/PostGameDetail",
               query: { id: item?.post_games_id },
             }}
-            onClick={(event) => handleLinkClick(event, item.post_games_id)}
+            onClick={(event) => handleLinkClick2(event, item.post_games_id)}
           >
             <div
               style={{
@@ -488,25 +766,28 @@ function PostGames() {
           </a>
 
           <Grid container spacing={2} justifyContent="center">
-            {item.users_id !== userId && !item.isParticipated && (
-              <Grid item xs={12} sm={6}>
-                <Button
-                  variant="contained"
-                  fullWidth
-                  startIcon={<LoginIcon />}
-                  sx={{
-                    backgroundColor: "red",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "darkred",
-                    },
-                  }}
-                  onClick={() => handleJoinClick(item)}
-                >
-                  เข้าร่วม
-                </Button>
-              </Grid>
-            )}
+            {item.users_id !== userId &&
+              !item.isParticipated &&
+              !["unActive", "pending"].includes(item.participant_status) && (
+                <Grid item xs={12} sm={6}>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    startIcon={<LoginIcon />}
+                    sx={{
+                      backgroundColor: "red",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "darkred",
+                      },
+                    }}
+                    onClick={() => handleJoinClick(item)}
+                  >
+                    เข้าร่วม
+                  </Button>
+                </Grid>
+              )}
+
             <Grid item xs={12} sm={6}>
               <Button
                 variant="contained"
@@ -534,7 +815,7 @@ function PostGames() {
           ไม่พบโพสต์นัดเล่นเลยตอนนี้
         </Typography>
       )}
-      <Snackbar
+      {/* <Snackbar
         open={openSnackbar}
         autoHideDuration={2000}
         onClose={handleCloseSnackbar}
@@ -546,7 +827,7 @@ function PostGames() {
         >
           กรุณาเข้าสู่ระบบก่อน
         </MuiAlert>
-      </Snackbar>
+      </Snackbar> */}
       {errorMessage && (
         <Snackbar
           open={true}
@@ -558,7 +839,9 @@ function PostGames() {
             severity="error"
             sx={{ width: "100%" }}
           >
-            {errorMessage}
+            {errorMessage === "Request failed with status code 400"
+              ? "คุณได้ถูกเตะออกจากการโพสต์นัดเล่นนี้แล้ว"
+              : errorMessage}
           </MuiAlert>
         </Snackbar>
       )}
