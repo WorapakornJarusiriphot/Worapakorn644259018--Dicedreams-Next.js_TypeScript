@@ -912,8 +912,7 @@ function PostGameDetail() {
       }
 
       // ตรวจสอบว่าเจ้าของโพสต์ตรงกับ userId หรือไม่
-      if (userId !== selectedPost.user.users_id) {
-        // แก้ไขตรงนี้
+      if (userId !== selectedPost.users_id) {
         setSnackbarMessage("คุณไม่มีสิทธิ์ในการลบพูดคุยนี้");
         setSnackbarSeverity("error");
         setOpenSnackbar(true);

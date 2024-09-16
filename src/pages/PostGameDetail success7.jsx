@@ -876,11 +876,10 @@ function PostGameDetail() {
     }
   };
 
-  // ยืนยันการลบพูดคุย
-  // ฟังก์ชันสำหรับเปลี่ยนสถานะพูดคุยเป็น unActive
+  // ยืนยันการลบโพสต์
+  // ฟังก์ชันสำหรับเปลี่ยนสถานะโพสต์เป็น unActive
   const handleUpdateStatus = async () => {
     const accessToken = localStorage.getItem("access_token");
-
     if (!accessToken) {
       setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
       setSnackbarSeverity("error");
@@ -888,83 +887,61 @@ function PostGameDetail() {
       return;
     }
 
-    if (accessToken) {
-      console.log("accessToken: ", accessToken);
-    }
-
     try {
-      // ถอดรหัส token
       const decoded = jwtDecode(accessToken);
       const userId = decoded.users_id;
-      console.log("userId จาก token:", userId); // ตรวจสอบ userId
+      const userRole = decoded.role;
 
-      // ตรวจสอบว่ามีการเลือกพูดคุยหรือไม่
-      console.log("selectedPost:", selectedPost); // ตรวจสอบ selectedPost
+      console.log("Selected post: ", selectedPost); // ตรวจสอบค่าของ selectedPost ก่อนดำเนินการ
       if (!selectedPost) {
-        setSnackbarMessage("ไม่พบข้อมูลของพูดคุยนี้");
+        setSnackbarMessage("ไม่พบข้อมูลของโพสต์นี้");
         setSnackbarSeverity("error");
         setOpenSnackbar(true);
         return;
       }
 
-      if (selectedPost) {
-        console.log("selectedPost: ", selectedPost);
-      }
-
-      // ตรวจสอบว่าเจ้าของโพสต์ตรงกับ userId หรือไม่
-      if (userId !== selectedPost.user.users_id) {
-        // แก้ไขตรงนี้
-        setSnackbarMessage("คุณไม่มีสิทธิ์ในการลบพูดคุยนี้");
+      if (userId !== selectedPost.users_id) {
+        setSnackbarMessage("คุณไม่ใช่เจ้าของโพสต์นี้");
         setSnackbarSeverity("error");
         setOpenSnackbar(true);
         return;
       }
 
-      // ตรวจสอบว่า selectedChatId ถูกต้องหรือไม่
-      console.log("selectedChatId:", selectedChatId); // ตรวจสอบ selectedChatId
-      if (!selectedChatId) {
-        setSnackbarMessage("ไม่พบข้อมูลของแชทนี้");
-        setSnackbarSeverity("error");
-        setOpenSnackbar(true);
-        return;
-      }
-
-      if (selectedChatId) {
-        console.log("selectedChatId: ", selectedChatId);
-      }
-
-      // เรียก API DELETE เพื่อลบแชท
+      // เรียก API PUT เพื่ออัปเดตสถานะโพสต์
       const response = await fetch(
-        `https://dicedreams-backend-deploy-to-render.onrender.com/api/chat/${selectedChatId}`, // ใช้ selectedChatId
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/${selectedChatId}`,
         {
-          method: "DELETE",
+          method: "PUT",
           headers: {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({
+            status_post: "unActive", // อัปเดตสถานะโพสต์เป็น "unActive"
+          }),
         }
       );
 
-      console.log("API Response:", response); // ตรวจสอบ response จาก API
-
       if (!response.ok) {
-        const errorMessage = await response.text();
-        console.error("Error message from API:", errorMessage);
-        throw new Error("การลบพูดคุยล้มเหลว");
+        throw new Error("การอัปเดตสถานะโพสต์ล้มเหลว");
       }
 
-      if (response.ok) {
-        console.log("response.ok: ", response.ok);
-      }
-
-      setSnackbarMessage("พูดคุยนัดเล่นนี้ได้ถูกลบเป็นที่เรียบร้อยแล้ว");
+      setSnackbarMessage("โพสต์นัดเล่นนี้ได้ถูกลบเป็นที่เรียบร้อยแล้ว");
       setSnackbarSeverity("success");
       setOpenSnackbar(true);
 
-      // รีเฟรชหน้าเว็บหลังจากลบแชท
+      // อัปเดตสถานะของโพสต์ใน UI
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item.post_games_id === selectedChatId
+            ? { ...item, status_post: "unActive" }
+            : item
+        )
+      );
+
+      // รีเฟรชหน้าเว็บ
       window.location.reload();
     } catch (error) {
-      console.error("Error in handleUpdateStatus:", error.message);
       setSnackbarMessage(error.message);
       setSnackbarSeverity("error");
       setOpenSnackbar(true);
@@ -994,24 +971,24 @@ function PostGameDetail() {
 
       // ตรวจสอบว่า role ของผู้ใช้เป็น "user" หรือไม่
       if (userRole !== "user") {
-        setSnackbarMessage("คุณไม่มีสิทธิ์ในการแก้ไขพูดคุยนี้");
+        setSnackbarMessage("คุณไม่มีสิทธิ์ในการแก้ไขโพสต์นี้");
         setSnackbarSeverity("error");
         setOpenSnackbar(true);
         return;
       }
 
       if (userId !== selectedPost.users_id) {
-        setSnackbarMessage("คุณไม่ใช่เจ้าของพูดคุยนี้");
+        setSnackbarMessage("คุณไม่ใช่เจ้าของโพสต์นี้");
         setSnackbarSeverity("error");
         setOpenSnackbar(true);
         return;
       }
-      // ตรวจสอบว่า userId ตรงกับ users_id ของพูดคุยที่เลือกหรือไม่
+      // ตรวจสอบว่า userId ตรงกับ users_id ของโพสต์ที่เลือกหรือไม่
       console.log("Current userId: ", userId); // ตรวจสอบ userId ของคุณ
-      console.log("Selected post userId: ", selectedPost.users_id); // ตรวจสอบ users_id ของพูดคุย
+      console.log("Selected post userId: ", selectedPost.users_id); // ตรวจสอบ users_id ของโพสต์
 
-      // ถ้า userId ตรงกับ users_id ของพูดคุย ให้ทำการนำทางไปที่หน้าแก้ไขพูดคุย
-      setSelectedChatId(chat_id); // บันทึก chat_id ของพูดคุยที่ถูกคลิก
+      // ถ้า userId ตรงกับ users_id ของโพสต์ ให้ทำการนำทางไปที่หน้าแก้ไขโพสต์
+      setSelectedChatId(chat_id); // บันทึก chat_id ของโพสต์ที่ถูกคลิก
       router.push(`/PostPlayEdit?id=${chat_id}`);
     } catch (error) {
       setSnackbarMessage("Token ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่");
@@ -1413,19 +1390,6 @@ function PostGameDetail() {
                   {chat.message}
                 </Typography>
               )}
-
-              {/* Dialog ยืนยันการลบพูดคุย */}
-              <Dialog open={deleteOpen} onClose={handleDeleteClose}>
-                <DialogTitle>คุณต้องการลบพูดคุยนี้ใช่ไหม?</DialogTitle>
-                <DialogActions>
-                  <Button onClick={handleDeleteClose} color="primary">
-                    ยกเลิก
-                  </Button>
-                  <Button onClick={handleUpdateStatus} color="error">
-                    ลบพูดคุย
-                  </Button>
-                </DialogActions>
-              </Dialog>
             </Paper>
           ))}
 
@@ -1532,20 +1496,6 @@ function PostGameDetail() {
           กรุณาเข้าสู่ระบบก่อน
         </MuiAlert>
       </Snackbar> */}
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar} // ฟังก์ชันปิด Snackbar
-      >
-        <MuiAlert
-          onClose={handleCloseSnackbar}
-          severity={snackbarSeverity} // ใช้ `severity` เพื่อควบคุมประเภทของการแจ้งเตือน (error, success)
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage} {/* แสดงข้อความที่ถูกตั้งค่า */}
-        </MuiAlert>
-      </Snackbar>
-
       {errorMessage && (
         <Snackbar
           open={true}

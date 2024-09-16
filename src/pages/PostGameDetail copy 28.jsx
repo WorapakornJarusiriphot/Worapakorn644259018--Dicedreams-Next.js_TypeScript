@@ -880,7 +880,6 @@ function PostGameDetail() {
   // ฟังก์ชันสำหรับเปลี่ยนสถานะพูดคุยเป็น unActive
   const handleUpdateStatus = async () => {
     const accessToken = localStorage.getItem("access_token");
-
     if (!accessToken) {
       setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
       setSnackbarSeverity("error");
@@ -888,18 +887,12 @@ function PostGameDetail() {
       return;
     }
 
-    if (accessToken) {
-      console.log("accessToken: ", accessToken);
-    }
-
     try {
-      // ถอดรหัส token
       const decoded = jwtDecode(accessToken);
       const userId = decoded.users_id;
-      console.log("userId จาก token:", userId); // ตรวจสอบ userId
+      const userRole = decoded.role;
 
-      // ตรวจสอบว่ามีการเลือกพูดคุยหรือไม่
-      console.log("selectedPost:", selectedPost); // ตรวจสอบ selectedPost
+      console.log("Selected post: ", selectedPost); // ตรวจสอบค่าของ selectedPost ก่อนดำเนินการ
       if (!selectedPost) {
         setSnackbarMessage("ไม่พบข้อมูลของพูดคุยนี้");
         setSnackbarSeverity("error");
@@ -907,64 +900,48 @@ function PostGameDetail() {
         return;
       }
 
-      if (selectedPost) {
-        console.log("selectedPost: ", selectedPost);
-      }
-
-      // ตรวจสอบว่าเจ้าของโพสต์ตรงกับ userId หรือไม่
-      if (userId !== selectedPost.user.users_id) {
-        // แก้ไขตรงนี้
-        setSnackbarMessage("คุณไม่มีสิทธิ์ในการลบพูดคุยนี้");
+      if (userId !== selectedPost.users_id) {
+        setSnackbarMessage("คุณไม่ใช่เจ้าของพูดคุยนี้");
         setSnackbarSeverity("error");
         setOpenSnackbar(true);
         return;
       }
 
-      // ตรวจสอบว่า selectedChatId ถูกต้องหรือไม่
-      console.log("selectedChatId:", selectedChatId); // ตรวจสอบ selectedChatId
-      if (!selectedChatId) {
-        setSnackbarMessage("ไม่พบข้อมูลของแชทนี้");
-        setSnackbarSeverity("error");
-        setOpenSnackbar(true);
-        return;
-      }
-
-      if (selectedChatId) {
-        console.log("selectedChatId: ", selectedChatId);
-      }
-
-      // เรียก API DELETE เพื่อลบแชท
+      // เรียก API DELETE เพื่ออัปเดตสถานะพูดคุย
       const response = await fetch(
-        `https://dicedreams-backend-deploy-to-render.onrender.com/api/chat/${selectedChatId}`, // ใช้ selectedChatId
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/chat/${selectedPostId}`,
         {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
+          // body: JSON.stringify({
+          //   status_post: "unActive", // อัปเดตสถานะพูดคุยเป็น "unActive"
+          // }),
         }
       );
 
-      console.log("API Response:", response); // ตรวจสอบ response จาก API
-
       if (!response.ok) {
-        const errorMessage = await response.text();
-        console.error("Error message from API:", errorMessage);
-        throw new Error("การลบพูดคุยล้มเหลว");
-      }
-
-      if (response.ok) {
-        console.log("response.ok: ", response.ok);
+        throw new Error("การอัปเดตสถานะพูดคุยล้มเหลว");
       }
 
       setSnackbarMessage("พูดคุยนัดเล่นนี้ได้ถูกลบเป็นที่เรียบร้อยแล้ว");
       setSnackbarSeverity("success");
       setOpenSnackbar(true);
 
-      // รีเฟรชหน้าเว็บหลังจากลบแชท
+      // // อัปเดตสถานะของพูดคุยใน UI
+      // setItems((prevItems) =>
+      //   prevItems.map((item) =>
+      //     item.post_games_id === selectedChatId
+      //       ? { ...item, status_post: "unActive" }
+      //       : item
+      //   )
+      // );
+
+      // รีเฟรชหน้าเว็บ
       window.location.reload();
     } catch (error) {
-      console.error("Error in handleUpdateStatus:", error.message);
       setSnackbarMessage(error.message);
       setSnackbarSeverity("error");
       setOpenSnackbar(true);
