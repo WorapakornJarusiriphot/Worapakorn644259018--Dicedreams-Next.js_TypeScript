@@ -70,6 +70,7 @@ export default function StoreInfo({ storeId }: StoreInfoProps) {
           gender: data.gender,
           phoneNumber: data.phone_number,
           birthday: dayjs(data.birthday),
+          bio: data.bio,
           userId: data.users_id,
           profilePictureUrl: data.user_image || '',
         }));
@@ -147,6 +148,7 @@ export default function StoreInfo({ storeId }: StoreInfoProps) {
             birthday: formattedBirthday,
             phone_number: user.phoneNumber,
             gender: user.gender,
+            bio: user.bio,
             user_image: base64Image,
           };
 
@@ -233,6 +235,10 @@ export default function StoreInfo({ storeId }: StoreInfoProps) {
             <Typography color="text.secondary" variant="body2">
               เพศ : {user.gender}
             </Typography>
+            <Typography color="text.secondary" variant="body2">
+              ประวัติ : {user.bio ? user.bio : 'คุณไม่ได้กรอกประวัติลงไป'}
+            </Typography>
+
           </Stack>
         </Stack>
         {previewUrl && (

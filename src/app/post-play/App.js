@@ -41,8 +41,10 @@ export default function App({ onImageUpload }) {
           backgroundColor: "#333",
           color: "#fff",
           borderColor: "#444",
-          minWidth: "550px",
+          width: "100%", // ทำให้ responsive
+          maxWidth: "100%", // จำกัดความกว้างสูงสุดให้ไม่เกิน 100%
         }}
+        id="games_image"
         onChange={updateFiles}
         minHeight="195px"
         onClean={handleClean}

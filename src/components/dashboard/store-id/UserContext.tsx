@@ -11,6 +11,7 @@ interface User {
   phoneNumber: string;
   gender: string;
   birthday: Dayjs;
+  bio: string;
   users_id: string;
   userImage: string;
 }
@@ -33,6 +34,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     phoneNumber: '',
     gender: '',
     birthday: dayjs(),
+    bio: '',
     users_id: '',
     userImage: '',
   });

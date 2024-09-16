@@ -10,6 +10,8 @@ import TabsProfileStore from './TabsProfileStore';
 import { UserProvider } from '@/components/dashboard/account-id/UserContext';
 import AccountInfo from '@/components/dashboard/account-id/account-info';
 import StoreInfo from '@/components/dashboard/account-id/store-info';
+import { useEffect } from 'react';
+import { useState } from 'react';
 
 const darkTheme = createTheme({
   palette: {
@@ -48,11 +50,18 @@ const darkTheme = createTheme({
 export default function ProfileID() {
   const params = useParams();
   const id = params?.id as string;
-  const [isStoreId, setIsStoreId] = React.useState<boolean | null>(null);
+  const [isStoreId, setIsStoreId] = useState<boolean | null>(null);
 
   console.log("ID received from URL:", id); // แสดงค่า id ที่ได้รับจาก URL
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (!window.location.hash) {
+      window.location.hash = 'loaded';
+      window.location.reload();
+    }
+  }, []);
+
+  useEffect(() => {
     const checkId = async () => {
       const token = localStorage.getItem('access_token'); // เพิ่มการดึง token จาก localStorage
       if (!token) {

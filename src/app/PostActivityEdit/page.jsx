@@ -318,7 +318,9 @@ const PostActivityEditContent = () => {
   return (
     <>
       <ThemeProvider theme={darkTheme}>
-        <Container component="main" maxWidth="xs">
+        <Container component="main" maxWidth="md">
+          {" "}
+          {/* ใช้ความกว้างระดับ 'md' */}
           <CssBaseline />
           <Box
             sx={{
@@ -326,11 +328,30 @@ const PostActivityEditContent = () => {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              position: "relative",
+              zIndex: 2,
             }}
           >
             <br />
             <br />
-            <Typography component="h1" variant="h5">
+            <Typography
+              variant="h4"
+              color={"white"}
+              sx={{
+                textAlign: "left",
+                fontSize: {
+                  xs: "1.5rem", // ขนาดสำหรับหน้าจอที่มีความกว้างน้อยกว่า 360px
+                  sm: "1.7rem", // ขนาดสำหรับหน้าจอที่กว้าง 360px - 390px
+                  md: "2rem", // ขนาดสำหรับหน้าจอปานกลาง 390px - 430px
+                  lg: "2.5rem", // ขนาดสำหรับหน้าจอใหญ่ขึ้น
+                },
+                fontWeight: 600,
+                whiteSpace: "normal", // อนุญาตให้ข้อความแบ่งบรรทัดได้
+                wordBreak: "break-word", // ทำให้การตัดคำเกิดขึ้นที่ขอบคำ
+                maxWidth: "100%", // ควบคุมความกว้างไม่ให้เกินคอนเทนเนอร์
+                lineHeight: 1.2, // ปรับระยะห่างบรรทัดให้พอดี
+              }}
+            >
               แก้ไขโพสต์กิจกรรม
             </Typography>
             <Suspense fallback={<div>Loading...</div>}>
