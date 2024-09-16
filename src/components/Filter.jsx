@@ -26,6 +26,7 @@ import Stack from "@mui/material/Stack";
 import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { useRouter, useSearchParams } from "next/navigation";
 import { renderTimeViewClock } from "@mui/x-date-pickers/timeViewRenderers";
+import { useState } from "react";
 
 const ProSpan = styled("span")({
   display: "inline-block",
@@ -113,15 +114,15 @@ function Filter({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [selectedGames, setSelectedGames] = React.useState({
+  const [selectedGames, setSelectedGames] = useState({
+    "Magic the gathering": false,
+    "Warhammer 40k": false,
+    "Kill Team": false,
     Werewolf: false,
     Coup: false,
     Uno: false,
-    "Magic the gathering": false,
     เกมเศรษฐี: false,
-    "Warhammer 40k": false,
     Splendor: false,
-    "Kill Team": false,
   });
 
   const handleCheckboxChange = (event) => {

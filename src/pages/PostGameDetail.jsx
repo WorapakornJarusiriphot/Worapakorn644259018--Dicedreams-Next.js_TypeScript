@@ -8,6 +8,14 @@ import {
   Button,
   Avatar,
   IconButton,
+  Checkbox,
+  FormControlLabel,
+  RadioGroup,
+  Radio,
+  Menu,
+  MenuItem,
+  Alert,
+  Grid,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -28,13 +36,6 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import axios from "axios";
 import Link from "next/link";
-import {
-  Grid,
-  Checkbox,
-  FormControlLabel,
-  RadioGroup,
-  Radio,
-} from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import InputLabel from "@mui/material/InputLabel";
 import FormHelperText from "@mui/material/FormHelperText";
@@ -58,6 +59,11 @@ import { List as ListIcon } from "@phosphor-icons/react/dist/ssr/List";
 import { MagnifyingGlass as MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { Users as UsersIcon } from "@phosphor-icons/react/dist/ssr/Users";
 import { UserPopover } from "@/layout/user-popover";
+import * as React from "react";
+import { JwtPayload } from "jwt-decode";
+// import { Link } from 'react-router-dom';
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const BASE_URL =
   "https://dicedreams-backend-deploy-to-render.onrender.com/images/";
@@ -158,6 +164,139 @@ function PostGameDetail() {
   const [successMessage, setSuccessMessage] = useState("");
   const [isParticipated, setIsParticipated] = useState(false);
   const [closeDialogOpen, setCloseDialogOpen] = useState(false); // State for close confirmation dialog
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [items, setItems] = useState([]);
+  const [isFullSize, setIsFullSize] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [selectedChatId, setSelectedChatId] = useState(null);
+  const [posts, setPosts] = useState([]); // ประกาศตัวแปร posts
+  // สร้าง state สำหรับเก็บ chat ที่กำลังถูกแก้ไข
+  const [editingChatId, setEditingChatId] = useState(null); // แชทที่กำลังแก้ไข
+  const [editedMessage, setEditedMessage] = useState(""); // ข้อความที่กำลังแก้ไข
+
+  // ฟังก์ชันสำหรับเริ่มการแก้ไข
+  const handleEditChat = async (event, chat_id, message, chat) => {
+    event.preventDefault();
+
+    // if (!selectedPost) {
+    //   console.error("ไม่มีพูดคุยที่เลือก");
+    //   return;
+    // }
+
+    // const accessToken = localStorage.getItem("access_token");
+    // if (!accessToken) {
+    //   setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
+    //   setSnackbarSeverity("error");
+    //   setOpenSnackbar(true);
+    //   setTimeout(() => {
+    //     router.push("/sign-in");
+    //   }, 2000);
+    //   return;
+    // }
+
+    // try {
+    //   const decoded = jwtDecode(accessToken); // ถอดรหัส token เพื่อดึงข้อมูลผู้ใช้
+    //   const userId = decoded.users_id; // ดึง users_id จาก token
+    //   const userRole = decoded.role;
+
+    //   // ตรวจสอบว่า role ของผู้ใช้เป็น "user" หรือไม่
+    //   if (userRole !== "user") {
+    //     setSnackbarMessage("คุณไม่มีสิทธิ์ในการแก้ไขโพสต์นี้");
+    //     setSnackbarSeverity("error");
+    //     setOpenSnackbar(true);
+    //     return;
+    //   }
+
+    //   if (userId !== editingChatId.users_id) {
+    //     setSnackbarMessage("คุณไม่ใช่เจ้าของโพสต์นี้");
+    //     setSnackbarSeverity("error");
+    //     setOpenSnackbar(true);
+    //     return;
+    //   }
+      // ตรวจสอบว่า userId ตรงกับ users_id ของโพสต์ที่เลือกหรือไม่
+      console.log("Current userId: ", userId); // ตรวจสอบ userId ของคุณ
+      console.log("Selected post userId: ", editingChatId.users_id); // ตรวจสอบ users_id ของโพสต์
+
+    // setEditingChatId(editingChatId.chat_id); // กำหนดค่า chat_id ที่ถูกเลือก
+    // setEditedMessage(editingChatId.message); // กำหนดข้อความที่จะถูกแก้ไข
+    // } catch (error) {
+    //   setSnackbarMessage("Token ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่");
+    //   setSnackbarSeverity("error");
+    //   setOpenSnackbar(true);
+    //   router.push("/sign-in");
+    // }
+  };
+
+  // ฟังก์ชันสำหรับบันทึกการแก้ไข
+  const handleSaveEditChat = async (chat) => {
+    const accessToken = localStorage.getItem("access_token");
+
+    try {
+      const response = await fetch(
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/chat/${chat.chat_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ message: editedMessage }), // ข้อความที่ถูกแก้ไข
+        }
+      );
+
+      if (response.ok) {
+        // ถ้าบันทึกสำเร็จ รีเฟรชข้อมูล
+        setEditingChatId(null); // ยกเลิกโหมดแก้ไข
+        window.location.reload(); // โหลดข้อมูลใหม่
+      } else {
+        console.error("Failed to save edited chat:", await response.text());
+      }
+    } catch (error) {
+      console.error("Error saving edited chat:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const accessToken = localStorage.getItem("access_token");
+
+        if (!accessToken) {
+          throw new Error("No access token found. Please login again.");
+        }
+
+        // ตรวจสอบว่ามีการส่ง post_games_id เข้ามาหรือไม่
+        const postId = router.query.id;
+        if (!postId) {
+          throw new Error("post_games_id is not defined.");
+        }
+
+        const response = await fetch(
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/chat/post/${postId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error fetching posts: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setPosts(data); // กำหนดค่า posts จากข้อมูล API
+      } catch (error) {
+        console.error("Error fetching posts:", error.message);
+        setError(error.message); // เก็บ error message ไว้ใน state เพื่อแสดงใน UI
+      }
+    };
+
+    fetchPosts(); // เรียกใช้ฟังก์ชันดึงข้อมูล
+  }, [router.query.id]); // ใช้ router.query.id เป็น dependency
 
   const [user, setUser] = useState({
     firstName: "",
@@ -619,6 +758,229 @@ function PostGameDetail() {
     setCloseDialogOpen(false);
   };
 
+  // เปิดเมนู Pop Up ตัวเลือก
+  const handleMenuClick = (event, chat_id, chat) => {
+    console.log("Selected chat: ", chat); // ตรวจสอบค่าของโพสต์ที่ถูกเลือก
+    if (!chat) {
+      console.error("โพสต์ไม่มีข้อมูล หรือเป็น undefined");
+      setSnackbarMessage("ไม่พบข้อมูลของโพสต์นี้");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      return;
+    }
+    setAnchorEl(event.currentTarget); // เปิดเมนูป๊อปอัป
+    setSelectedChatId(chat_id); // บันทึก chat_id ของโพสต์ที่ถูกคลิก
+    setSelectedPost(chat); // ตั้งค่า selectedPost ให้ตรงกับโพสต์ที่ถูกเลือก
+  };
+
+  // ปิดเมนู Pop Up ตัวเลือก
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  // เปิด/ปิด Dialog สำหรับแก้ไข
+  const handleEditOpen = () => {
+    setEditOpen(true);
+    setAnchorEl(null); // ปิดเมนูเมื่อเปิดการแก้ไข
+  };
+
+  const handleEditClose = () => {
+    setEditOpen(false);
+  };
+
+  // เปิด/ปิด Dialog สำหรับลบ
+  const handleDeleteOpen = () => {
+    setDeleteOpen(true);
+
+    setAnchorEl(null); // ปิดเมนูเมื่อเปิดการลบ
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteOpen(false);
+  };
+
+  // ฟังก์ชันสำหรับปิด Snackbar
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+  const handleImageClick = () => {
+    setIsFullSize(!isFullSize);
+  };
+
+  const handleLinkClick = async (event, postId) => {
+    event.preventDefault();
+
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      setTimeout(() => {
+        router.push("/sign-in");
+      }, 2000);
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(accessToken); // ถอดรหัส token เพื่อดึงข้อมูลผู้ใช้
+      const userId = decoded.users_id; // ดึง users_id จาก token
+      const userRole = decoded.role;
+
+      // ตรวจสอบว่า role ของผู้ใช้เป็น "user" หรือไม่
+      if (userRole !== "user") {
+        setSnackbarMessage("คุณไม่มีสิทธิ์ในการแก้ไขโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      if (userId !== selectedPost.users_id) {
+        setSnackbarMessage("คุณไม่ใช่เจ้าของโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+      // ตรวจสอบว่า userId ตรงกับ users_id ของโพสต์ที่เลือกหรือไม่
+      console.log("Current userId: ", userId); // ตรวจสอบ userId ของคุณ
+      console.log("Selected post userId: ", selectedPost.users_id); // ตรวจสอบ users_id ของโพสต์
+
+      // ถ้า userId ตรงกับ users_id ของโพสต์ ให้ทำการนำทางไปที่หน้าแก้ไขโพสต์
+      setSelectedChatId(postId); // บันทึก postId ของโพสต์ที่ถูกคลิก
+      router.push(`/PostPlayEdit?id=${postId}`);
+    } catch (error) {
+      setSnackbarMessage("Token ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      router.push("/sign-in");
+    }
+  };
+
+  // ยืนยันการลบโพสต์
+  // ฟังก์ชันสำหรับเปลี่ยนสถานะโพสต์เป็น unActive
+  const handleUpdateStatus = async () => {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(accessToken);
+      const userId = decoded.users_id;
+      const userRole = decoded.role;
+
+      console.log("Selected post: ", selectedPost); // ตรวจสอบค่าของ selectedPost ก่อนดำเนินการ
+      if (!selectedPost) {
+        setSnackbarMessage("ไม่พบข้อมูลของโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      if (userId !== selectedPost.users_id) {
+        setSnackbarMessage("คุณไม่ใช่เจ้าของโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      // เรียก API PUT เพื่ออัปเดตสถานะโพสต์
+      const response = await fetch(
+        `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/${selectedChatId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status_post: "unActive", // อัปเดตสถานะโพสต์เป็น "unActive"
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("การอัปเดตสถานะโพสต์ล้มเหลว");
+      }
+
+      setSnackbarMessage("โพสต์นัดเล่นนี้ได้ถูกลบเป็นที่เรียบร้อยแล้ว");
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
+
+      // อัปเดตสถานะของโพสต์ใน UI
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item.post_games_id === selectedChatId
+            ? { ...item, status_post: "unActive" }
+            : item
+        )
+      );
+
+      // รีเฟรชหน้าเว็บ
+      window.location.reload();
+    } catch (error) {
+      setSnackbarMessage(error.message);
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+    } finally {
+      setDeleteOpen(false); // ปิด Dialog
+    }
+  };
+
+  const handleEditChat2 = async (event, chat_id) => {
+    event.preventDefault();
+
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      setTimeout(() => {
+        router.push("/sign-in");
+      }, 2000);
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(accessToken); // ถอดรหัส token เพื่อดึงข้อมูลผู้ใช้
+      const userId = decoded.users_id; // ดึง users_id จาก token
+      const userRole = decoded.role;
+
+      // ตรวจสอบว่า role ของผู้ใช้เป็น "user" หรือไม่
+      if (userRole !== "user") {
+        setSnackbarMessage("คุณไม่มีสิทธิ์ในการแก้ไขโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+
+      if (userId !== selectedPost.users_id) {
+        setSnackbarMessage("คุณไม่ใช่เจ้าของโพสต์นี้");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+      // ตรวจสอบว่า userId ตรงกับ users_id ของโพสต์ที่เลือกหรือไม่
+      console.log("Current userId: ", userId); // ตรวจสอบ userId ของคุณ
+      console.log("Selected post userId: ", selectedPost.users_id); // ตรวจสอบ users_id ของโพสต์
+
+      // ถ้า userId ตรงกับ users_id ของโพสต์ ให้ทำการนำทางไปที่หน้าแก้ไขโพสต์
+      setSelectedChatId(chat_id); // บันทึก chat_id ของโพสต์ที่ถูกคลิก
+      router.push(`/PostPlayEdit?id=${chat_id}`);
+    } catch (error) {
+      setSnackbarMessage("Token ไม่ถูกต้องหรือหมดอายุ กรุณาเข้าสู่ระบบใหม่");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      router.push("/sign-in");
+    }
+  };
+
   return (
     <>
       <Header />
@@ -902,15 +1264,14 @@ function PostGameDetail() {
                   display: "flex",
                   flexDirection: "row",
                   alignItems: "center",
-                  textAlign: "left",
+                  justifyContent: "space-between", // จัดข้อความอยู่ซ้ายและไอคอนอยู่ขวา
                 }}
               >
                 <div
-                  onClick={
-                    (event) =>
-                      chat.user?.users_id
-                        ? handleProfileClick(event, chat.user.users_id)
-                        : console.error("User ID is undefined") // เพิ่มการตรวจสอบและแสดงข้อความ error ถ้า users_id เป็น undefined
+                  onClick={(event) =>
+                    chat.user?.users_id
+                      ? handleProfileClick(event, chat.user.users_id)
+                      : console.error("User ID is undefined")
                   }
                 >
                   <Avatar
@@ -923,13 +1284,12 @@ function PostGameDetail() {
                     sx={{ width: "50px", height: "50px", marginRight: "20px" }}
                   />
                 </div>
-                <Box>
+                <Grid item xs>
                   <div
-                    onClick={
-                      (event) =>
-                        chat.user?.users_id
-                          ? handleProfileClick(event, chat.user.users_id)
-                          : console.error("User ID is undefined") // เพิ่มการตรวจสอบและแสดงข้อความ error ถ้า users_id เป็น undefined
+                    onClick={(event) =>
+                      chat.user?.users_id
+                        ? handleProfileClick(event, chat.user.users_id)
+                        : console.error("User ID is undefined")
                     }
                   >
                     <Typography variant="body1">
@@ -939,14 +1299,80 @@ function PostGameDetail() {
                   <Typography variant="body2" sx={{ color: "gray" }}>
                     {formatDateTime(chat.datetime_chat)}
                   </Typography>
-                </Box>
+                </Grid>
+                <Grid item>
+                  <div>
+                    <IconButton
+                      sx={{ color: "white", ml: "auto" }}
+                      aria-label="settings"
+                      onClick={(event) =>
+                        handleMenuClick(event, chat.chat_id, chat)
+                      }
+                    >
+                      <MoreVertOutlinedIcon />
+                    </IconButton>
+
+                    <Menu
+                      anchorEl={anchorEl}
+                      open={Boolean(anchorEl)}
+                      onClose={handleMenuClose}
+                    >
+                      <MenuItem
+                        onClick={(event) =>
+                          handleEditChat(event, selectedChatId, chat.users_id)
+                        }
+                      >
+                        <EditIcon sx={{ marginRight: 1 }} />
+                        แก้ไขพูดคุย
+                      </MenuItem>
+                      <MenuItem onClick={handleDeleteOpen}>
+                        <DeleteIcon sx={{ marginRight: 1 }} />
+                        ลบพูดคุย
+                      </MenuItem>
+                    </Menu>
+                  </div>
+                </Grid>
               </Box>
-              <Typography
-                variant="body1"
-                sx={{ marginTop: "10px", textAlign: "left", color: "gray" }}
-              >
-                {chat.message}
-              </Typography>
+
+              {/* ถ้ากำลังอยู่ในโหมดแก้ไขของแชทนี้ แสดง TextField */}
+              {editingChatId === chat.chat_id ? (
+                <>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={4}
+                    variant="outlined"
+                    value={editedMessage}
+                    onChange={(e) => setEditedMessage(e.target.value)}
+                    sx={{
+                      marginTop: "10px",
+                      backgroundColor: "#1c1c1c",
+                      "& .MuiInputBase-root": { color: "#ffffff" },
+                      "& fieldset": { borderColor: "#ffffff" },
+                    }}
+                  />
+                  <Button
+                    onClick={() => handleSaveEditChat(chat)}
+                    variant="contained"
+                    sx={{ marginTop: "10px" }}
+                  >
+                    บันทึก
+                  </Button>
+                  <Button
+                    onClick={() => setEditingChatId(null)} // ยกเลิกโหมดแก้ไข
+                    sx={{ marginTop: "10px", marginLeft: "10px" }}
+                  >
+                    ยกเลิก
+                  </Button>
+                </>
+              ) : (
+                <Typography
+                  variant="body1"
+                  sx={{ marginTop: "10px", textAlign: "left", color: "gray" }}
+                >
+                  {chat.message}
+                </Typography>
+              )}
             </Paper>
           ))}
 
@@ -1045,13 +1471,13 @@ function PostGameDetail() {
         autoHideDuration={2000}
         onClose={handleCloseSnackbar}
       >
-        <MuiAlert
+        {/* <MuiAlert
           onClose={handleCloseSnackbar}
           severity="warning"
           sx={{ width: "100%" }}
         >
           กรุณาเข้าสู่ระบบก่อน
-        </MuiAlert>
+        </MuiAlert> */}
       </Snackbar>
       {errorMessage && (
         <Snackbar

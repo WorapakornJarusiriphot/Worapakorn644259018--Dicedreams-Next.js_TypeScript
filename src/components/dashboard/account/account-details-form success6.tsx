@@ -27,7 +27,8 @@ import { Dayjs } from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { useUser } from './UserContext';
 import { useStore } from './UserContext';
-
+import { Formik, Field, Form, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
 
 import Avatar from '@mui/material/Avatar';
@@ -96,6 +97,7 @@ interface User {
   phoneNumber: string;
   gender: string;
   birthday: Dayjs;
+  bio: string;
   users_id: string;
   userImage: string; // Add the 'userImage' property
 }
@@ -111,6 +113,7 @@ interface Store {
   sub_district: string;
   province: string;
   store_image: string;
+  bio: string;
   users_id: string;
   createdAt: string;
   updatedAt: string;
@@ -165,6 +168,11 @@ const AccountDetailsForm: React.FC = () => {
 
     fetchStoreData();
   }, [user]);
+
+  const handleDetailChange = (event: any) => {
+    const newText = event.target.value.slice(0, 500);
+    setUserData(newText);
+  };
 
   // const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
   //   const { name, value } = event.target;
@@ -233,7 +241,7 @@ const AccountDetailsForm: React.FC = () => {
     }
   }, [user]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
     setUserData((prevUser) => ({
       ...prevUser,
@@ -250,61 +258,42 @@ const AccountDetailsForm: React.FC = () => {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    const accessToken = localStorage.getItem("access_token");
-    if (!accessToken) {
-      setAlertMessage('ไม่พบ JWT token กรุณาเข้าสู่ระบบอีกครั้ง');
-      setAlertSeverity('error');
-      setOpenSnackbar(true);
-      return;
-    }
-
     try {
-      const decodedToken: { role: string, store_id: string } = jwtDecode(accessToken);
-
-      if (!decodedToken.role) {
-        setAlertMessage('ไม่พบสิทธิ์ของผู้ใช้ กรุณาตรวจสอบสิทธิ์ของท่าน');
-        setAlertSeverity('error');
-        setOpenSnackbar(true);
-        return;
+      const accessToken = localStorage.getItem("access_token");
+      if (!accessToken) {
+        throw new Error('Access token is missing');
       }
 
-      // แปลงวันที่ให้อยู่ในรูปแบบ MM-DD-YYYY
-      const formattedBirthday = dayjs(userData.birthday).format('MM-DD-YYYY');
+      const userImage = userData.userImage.startsWith('http://') || userData.userImage.startsWith('https://')
+        ? userData.userImage.split('/').pop()!
+        : userData.userImage;
 
       const updatedUser = {
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        phoneNumber: userData.phoneNumber,
-        userImage: userData.userImage,
-        username: userData.username,
-        role: userData.role,
-        gender: userData.gender,
-        birthday: formattedBirthday, // ส่งวันที่ที่แปลงแล้วในรูปแบบ string
-        users_id: userData.users_id,
-        profilePictureUrl: userData.profilePictureUrl,
+        ...userData,
+        userImage: userImage || '',
       };
 
-      // อัปเดตโปรไฟล์ผู้ใช้
-      await axios.put(
-        `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userData.users_id}`,
-        updatedUser,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          }
+      await axios.put(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userData.users_id}`, {
+        first_name: updatedUser.firstName,
+        last_name: updatedUser.lastName,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        birthday: updatedUser.birthday.format('MM/DD/YYYY'),
+        phone_number: updatedUser.phoneNumber,
+        gender: updatedUser.gender,
+        bio: updatedUser.bio,
+        user_image: updatedUser.userImage,
+      }, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
         }
-      );
-
-      // อัปเดต context แต่แปลง birthday กลับมาเป็น Dayjs
-      setUser({
-        ...updatedUser,
-        birthday: dayjs(formattedBirthday), // แปลง string กลับเป็น Dayjs
       });
 
+      setUser(updatedUser); // อัปเดต context ทันทีหลังจากอัปเดตข้อมูลสำเร็จ
       setAlertMessage('ข้อมูลผู้ใช้ถูกอัพเดทเรียบร้อยแล้ว');
       setAlertSeverity('success');
+
+      const decodedToken: { role: string, store_id: string } = jwtDecode(accessToken);
 
       // ตรวจสอบว่ามี store_id ใน token ก่อนอัปเดตร้านค้า
       if (decodedToken.store_id && storeData) {
@@ -319,6 +308,7 @@ const AccountDetailsForm: React.FC = () => {
           sub_district: storeData.sub_district,
           province: storeData.province,
           store_image: storeData.store_image,
+          bio: storeData.bio,
           users_id: storeData.users_id,
           createdAt: storeData.createdAt,
           updatedAt: storeData.updatedAt,
@@ -347,6 +337,8 @@ const AccountDetailsForm: React.FC = () => {
       setOpenSnackbar(true);
     }
   };
+
+
 
   // const [user, setUserData] = useState({
   //   username: "",
@@ -463,6 +455,7 @@ const AccountDetailsForm: React.FC = () => {
           gender: data.gender,
           phoneNumber: data.phone_number,
           birthday: data.birthday,
+          bio: data.bio,
           users_id: data.users_id, // Add the missing 'users_id' property
           profilePictureUrl: data.user_image || "",
         }));
@@ -520,6 +513,7 @@ const AccountDetailsForm: React.FC = () => {
               gender: data.gender,
               phoneNumber: data.phone_number,
               birthday: dayjs(data.birthday),
+              bio: data.bio,
               users_id: data.users_id,
               profilePictureUrl: data.user_image || "",
               userImage: data.user_image || "", // กำหนดค่าให้กับ userImage
@@ -613,6 +607,20 @@ const AccountDetailsForm: React.FC = () => {
                     onChange={handleChange}
                   />
                 </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="ประวัติ"
+                  name="bio"
+                  value={userData.bio}
+                  onChange={handleChange}
+                  // onBlur={handleBlur}
+                  // helperText={`${userData.bio.length} / 500 ${touched.bio && errors.bio ? ` - ${errors.bio}` : ""}`}
+                  // error={touched.bio && Boolean(errors.bio)}
+                  multiline
+                  rows={6}
+                />
               </Grid>
               {storeData && (
                 <>

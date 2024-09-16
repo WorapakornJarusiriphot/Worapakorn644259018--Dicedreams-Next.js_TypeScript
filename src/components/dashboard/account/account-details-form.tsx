@@ -27,7 +27,8 @@ import { Dayjs } from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { useUser } from './UserContext';
 import { useStore } from './UserContext';
-
+import { Formik, Field, Form, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
 
 import Avatar from '@mui/material/Avatar';
@@ -96,6 +97,7 @@ interface User {
   phoneNumber: string;
   gender: string;
   birthday: Dayjs;
+  bio: string;
   users_id: string;
   userImage: string; // Add the 'userImage' property
 }
@@ -111,6 +113,7 @@ interface Store {
   sub_district: string;
   province: string;
   store_image: string;
+  bio: string;
   users_id: string;
   createdAt: string;
   updatedAt: string;
@@ -165,6 +168,11 @@ const AccountDetailsForm: React.FC = () => {
 
     fetchStoreData();
   }, [user]);
+
+  const handleDetailChange = (event: any) => {
+    const newText = event.target.value.slice(0, 500);
+    setUserData(newText);
+  };
 
   // const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
   //   const { name, value } = event.target;
@@ -233,7 +241,7 @@ const AccountDetailsForm: React.FC = () => {
     }
   }, [user]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
     setUserData((prevUser) => ({
       ...prevUser,
@@ -273,6 +281,7 @@ const AccountDetailsForm: React.FC = () => {
         birthday: updatedUser.birthday.format('MM/DD/YYYY'),
         phone_number: updatedUser.phoneNumber,
         gender: updatedUser.gender,
+        bio: updatedUser.bio,
         user_image: updatedUser.userImage,
       }, {
         headers: {
@@ -299,6 +308,7 @@ const AccountDetailsForm: React.FC = () => {
           sub_district: storeData.sub_district,
           province: storeData.province,
           store_image: storeData.store_image,
+          bio: storeData.bio,
           users_id: storeData.users_id,
           createdAt: storeData.createdAt,
           updatedAt: storeData.updatedAt,
@@ -445,6 +455,7 @@ const AccountDetailsForm: React.FC = () => {
           gender: data.gender,
           phoneNumber: data.phone_number,
           birthday: data.birthday,
+          bio: data.bio,
           users_id: data.users_id, // Add the missing 'users_id' property
           profilePictureUrl: data.user_image || "",
         }));
@@ -502,6 +513,7 @@ const AccountDetailsForm: React.FC = () => {
               gender: data.gender,
               phoneNumber: data.phone_number,
               birthday: dayjs(data.birthday),
+              bio: data.bio,
               users_id: data.users_id,
               profilePictureUrl: data.user_image || "",
               userImage: data.user_image || "", // กำหนดค่าให้กับ userImage
@@ -595,6 +607,20 @@ const AccountDetailsForm: React.FC = () => {
                     onChange={handleChange}
                   />
                 </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="ประวัติ"
+                  name="bio"
+                  value={userData.bio}
+                  onChange={handleChange}
+                  // onBlur={handleBlur}
+                  // helperText={`${userData.bio.length} / 500 ${touched.bio && errors.bio ? ` - ${errors.bio}` : ""}`}
+                  // error={touched.bio && Boolean(errors.bio)}
+                  multiline
+                  rows={6}
+                />
               </Grid>
               {storeData && (
                 <>

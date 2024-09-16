@@ -11,6 +11,7 @@ interface User {
   phoneNumber: string;
   gender: string;
   birthday: Dayjs;
+  bio: string;
   users_id: string;
   userImage: string;
 }
@@ -26,6 +27,7 @@ interface Store {
   sub_district: string;
   province: string;
   store_image: string;
+  bio: string;
   users_id: string;
   createdAt: string;
   updatedAt: string;
@@ -50,6 +52,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     gender: '',
     birthday: dayjs(),
     users_id: '',
+    bio: '',
     userImage: '',
   });
 
@@ -88,6 +91,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     sub_district: '',
     province: '',
     store_image: '',
+    bio: '',
     users_id: '',
     createdAt: '',
     updatedAt: '',
