@@ -407,14 +407,6 @@ function renderContent(
   handleMarkAsRead
 ) {
   let message = "";
-  const truncateText = (text, maxLength) => {
-    if (text.length > maxLength) {
-      return text.slice(0, maxLength) + "…";
-    }
-    return text;
-  };
-  const maxNameLength = 25; // กำหนดความยาวสูงสุดสำหรับ name_games
-  const maxMessageLength = 25; // กำหนดความยาวสูงสุดสำหรับ message
   if (notification.type === "participate") {
     message = (
       <>
@@ -425,7 +417,7 @@ function renderContent(
           component="span"
           sx={{ fontWeight: "bold", color: "black" }}
         >
-          {truncateText(notification.data.name_games, maxNameLength)}
+          {notification.data.name_games}
         </Typography>
         <Typography component="span">
           {expanded ? (
@@ -484,7 +476,7 @@ function renderContent(
           component="span"
           sx={{ fontWeight: "bold", color: "black" }}
         >
-          {truncateText(notification.data.message, maxMessageLength)}
+          {notification.data.message}
         </Typography>
       </>
     );
