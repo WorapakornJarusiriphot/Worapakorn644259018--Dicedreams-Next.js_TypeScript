@@ -1028,22 +1028,8 @@ function PostGameDetail() {
         <Container maxWidth="lg" sx={{ marginTop: 10 }}>
           <Typography
             variant="h2"
-            color={"white"}
-            sx={{
-              textAlign: "left",
-              fontSize: {
-                xs: "1.5rem", // สำหรับหน้าจอที่มีความกว้างน้อยกว่า 360px
-                sm: "1.7rem", // สำหรับหน้าจอที่กว้าง 360px - 390px
-                md: "2rem", // สำหรับหน้าจอขนาดกลาง 390px - 430px
-                lg: "2.5rem", // สำหรับหน้าจอที่กว้างขึ้น
-                xl: "6rem", // เพิ่มสำหรับหน้าจอใหญ่ขึ้นอีก เช่นหน้าจอคอมพิวเตอร์ขนาดใหญ่
-              },
-              fontWeight: 600,
-              whiteSpace: "normal", // อนุญาตให้ข้อความแบ่งบรรทัดได้
-              wordBreak: "break-word", // ทำให้การตัดคำเกิดขึ้นที่ขอบคำ
-              maxWidth: "100%", // ควบคุมความกว้างไม่ให้เกินคอนเทนเนอร์
-              lineHeight: 1.2, // ปรับระยะห่างบรรทัดให้พอดี
-            }}
+            gutterBottom
+            style={{ color: "white", textAlign: "left", marginBottom: "30px" }}
           >
             {postData?.name_games}
           </Typography>
@@ -1148,25 +1134,7 @@ function PostGameDetail() {
                 textAlign: "left",
               }}
             >
-              <Typography
-                variant="h5"
-                color={"white"}
-                sx={{
-                  textAlign: "left",
-                  fontSize: {
-                    xs: "1.5rem", // สำหรับหน้าจอที่มีความกว้างน้อยกว่า 360px
-                    sm: "1.7rem", // สำหรับหน้าจอที่กว้าง 360px - 390px
-                    md: "2rem", // สำหรับหน้าจอขนาดกลาง 390px - 430px
-                    lg: "2rem", // สำหรับหน้าจอที่กว้างขึ้น
-                    xl: "2rem", // เพิ่มสำหรับหน้าจอใหญ่ขึ้นอีก เช่นหน้าจอคอมพิวเตอร์ขนาดใหญ่
-                  },
-                  fontWeight: 600,
-                  whiteSpace: "normal", // อนุญาตให้ข้อความแบ่งบรรทัดได้
-                  wordBreak: "break-word", // ทำให้การตัดคำเกิดขึ้นที่ขอบคำ
-                  maxWidth: "100%", // ควบคุมความกว้างไม่ให้เกินคอนเทนเนอร์
-                  lineHeight: 1.2, // ปรับระยะห่างบรรทัดให้พอดี
-                }}
-              >
+              <Typography variant="h5" sx={{ color: "white" }}>
                 จำนวนคนจะไป : {postData?.participants}/{postData?.num_people}
               </Typography>
               <br />
@@ -1313,22 +1281,7 @@ function PostGameDetail() {
 
           <Typography
             variant="h4"
-            color={"white"}
-            sx={{
-              textAlign: "center",
-              fontSize: {
-                xs: "1.5rem", // สำหรับหน้าจอที่มีความกว้างน้อยกว่า 360px
-                sm: "1.7rem", // สำหรับหน้าจอที่กว้าง 360px - 390px
-                md: "2rem", // สำหรับหน้าจอขนาดกลาง 390px - 430px
-                lg: "2.5rem", // สำหรับหน้าจอที่กว้างขึ้น
-                xl: "2.5rem", // เพิ่มสำหรับหน้าจอใหญ่ขึ้นอีก เช่นหน้าจอคอมพิวเตอร์ขนาดใหญ่
-              },
-              fontWeight: 600,
-              whiteSpace: "normal", // อนุญาตให้ข้อความแบ่งบรรทัดได้
-              wordBreak: "break-word", // ทำให้การตัดคำเกิดขึ้นที่ขอบคำ
-              maxWidth: "100%", // ควบคุมความกว้างไม่ให้เกินคอนเทนเนอร์
-              lineHeight: 1.2, // ปรับระยะห่างบรรทัดให้พอดี
-            }}
+            sx={{ color: "white", textAlign: "center", marginTop: "20px" }}
           >
             มาพูดคุยกัน
           </Typography>

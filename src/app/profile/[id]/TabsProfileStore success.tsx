@@ -59,9 +59,7 @@ export default function TabsProfileStore({ storeId }: TabsProfileStoreProps) {
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-        <Box sx={{ maxWidth: '900px', margin: '0 auto' }}> {/* ลดขนาดและทำให้เป็นศูนย์กลาง */}
-          <PostActivity storeId={storeId} />
-        </Box>
+        <PostActivity storeId={storeId} />
       </CustomTabPanel>
     </Box>
   );

@@ -19,7 +19,7 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import dayjs, { Dayjs } from 'dayjs';
 import { JwtPayload } from 'jwt-decode';
-
+import BioComponent from './BioComponent';
 
 
 interface StoreInfoProps {
@@ -145,7 +145,7 @@ export default function StoreInfo({ storeId }: StoreInfoProps) {
               เพศ : {user.gender}
             </Typography>
             <Typography color="text.secondary" variant="body2">
-              ประวัติ : {user.bio ? user.bio : 'คุณไม่ได้กรอกประวัติลงไป'}
+              ประวัติ : {user.bio ? <BioComponent bio={user.bio} /> : 'ยังไม่ได้กรอกประวัติลงไป'}
             </Typography>
           </Stack>
         </Stack>

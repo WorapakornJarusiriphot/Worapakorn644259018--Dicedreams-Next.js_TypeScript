@@ -60,10 +60,14 @@ export default function TabsProfile({ userId }: TabsProfileProps) {
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-        <PostGames userId={userId} />
+        <Box sx={{ maxWidth: '900px', margin: '0 auto' }}> {/* ลดขนาดและทำให้เป็นศูนย์กลาง */}
+          <PostGames userId={userId} />
+        </Box>
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
-        <Participating userId={userId} />
+        <Box sx={{ maxWidth: '900px', margin: '0 auto' }}> {/* ลดขนาดและทำให้เป็นศูนย์กลาง */}
+          <Participating userId={userId} />
+        </Box>
       </CustomTabPanel>
     </Box>
   );

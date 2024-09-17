@@ -19,7 +19,7 @@ import axios from 'axios';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import dayjs, { Dayjs } from 'dayjs';
-
+import BioComponent from './BioComponent';
 
 interface AccountInfoProps {
   userId: string;
@@ -215,7 +215,7 @@ export default function AccountInfo({ userId }: AccountInfoProps) {
               เพศ : {user.gender}
             </Typography>
             <Typography color="text.secondary" variant="body2">
-              ประวัติ : {user.bio ? user.bio : 'คุณไม่ได้กรอกประวัติลงไป'}
+              ประวัติ : {user.bio ? <BioComponent bio={user.bio} /> : 'ยังไม่ได้กรอกประวัติลงไป'}
             </Typography>
           </Stack>
         </Stack>

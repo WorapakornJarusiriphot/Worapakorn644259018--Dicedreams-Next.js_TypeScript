@@ -44,6 +44,7 @@ export default function App({ onImageUpload }) {
           width: "100%", // ทำให้ responsive
           maxWidth: "100%", // จำกัดความกว้างสูงสุดให้ไม่เกิน 100%
         }}
+        id="games_image"
         onChange={updateFiles}
         minHeight="195px"
         onClean={handleClean}

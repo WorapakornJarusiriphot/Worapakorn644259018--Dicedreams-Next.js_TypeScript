@@ -286,7 +286,7 @@ export default function SignIn() {
             >
               เข้าสู่ระบบ
             </Button>
-{/* 
+
             <Divider sx={{ my: 3 }}>
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 OR
@@ -315,7 +315,7 @@ export default function SignIn() {
               >
                 <Iconify icon="eva:facebook-fill" color="#1877F2" />
               </Button>
-            </Stack> */}
+            </Stack>
 
             <br />
             <br />
