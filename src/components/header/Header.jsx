@@ -302,7 +302,7 @@ function Header() {
             sx={{ flexGrow: 1, textAlign: "left", color: "black" }}
           >
             <Link href="/" passHref>
-              <Avatar src={DiceDreamsUrl} alt="DiceDreams" />
+              <Avatar src={DiceDreamsUrl} alt="DiceDreams" id="Home-page" />
             </Link>
           </Typography>
 
@@ -316,6 +316,7 @@ function Header() {
                 {user.userType === "store" ? (
                   <Button
                     variant="contained"
+                    id="Create-PostActivity"
                     sx={{
                       background: "black",
                       color: "white",
@@ -339,6 +340,7 @@ function Header() {
                 ) : user.userType === "admin" ? (
                   <Button
                     variant="contained"
+                    id="Manage-Users"
                     sx={{
                       background: "black",
                       color: "white",
@@ -358,6 +360,7 @@ function Header() {
                 ) : (
                   <Button
                     variant="contained"
+                    id="Create-PostGames"
                     sx={{
                       background: "black",
                       color: "white",
@@ -377,6 +380,7 @@ function Header() {
                 )}
                 <Button
                   variant="contained"
+                  id="Sign-Out"
                   sx={{
                     background: "darkred",
                     color: "white",
@@ -400,6 +404,7 @@ function Header() {
                 <Box sx={{ zIndex: 1400 }}>
                   <Avatar
                     src={user.profilePictureUrl}
+                    id="account"
                     alt={altText}
                     onClick={userPopover.handleOpen}
                     ref={userPopover.anchorRef}
@@ -423,6 +428,7 @@ function Header() {
             <>
               <Button
                 variant="contained"
+                id="sign-up"
                 sx={{ background: "gray", color: "white", marginRight: "10px" }}
                 href="/sign-up"
                 replace="true"
@@ -431,6 +437,7 @@ function Header() {
               </Button>
               <Button
                 variant="contained"
+                id="sign-in"
                 sx={{ background: "red", color: "white", marginRight: "10px" }}
                 href="/sign-in"
                 replace="true"
@@ -452,6 +459,7 @@ function Header() {
           alignItems: "center",
           justifyContent: "center",
         }}
+        id="CircleNotificationsIcon"
       >
         <Box
           sx={{
@@ -464,6 +472,7 @@ function Header() {
             textAlign: "center",
             position: "relative",
           }}
+          id="CircleNotificationsIcon"
         >
           <Box
             sx={{
@@ -477,6 +486,7 @@ function Header() {
               height: 80,
               mx: "auto",
             }}
+            id="CircleNotificationsIcon"
           >
             <CircleNotificationsIcon sx={{ fontSize: 40, color: "#d32f2f" }} />
           </Box>
@@ -494,6 +504,7 @@ function Header() {
           <Button
             variant="contained"
             onClick={handleModalClose}
+            id="Go-login"
             sx={{
               backgroundColor: "#4285f4",
               color: "#fff",

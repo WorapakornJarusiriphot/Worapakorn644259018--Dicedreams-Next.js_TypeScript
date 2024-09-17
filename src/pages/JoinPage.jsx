@@ -405,6 +405,7 @@ function JoinPage() {
                 ),
                 style: { color: "white" },
               }}
+              id="search"
               sx={{ backgroundColor: "#333", color: "white", width: "30%" }}
             />
 
@@ -422,6 +423,7 @@ function JoinPage() {
                   }
                 })
               }
+              id="add"
             >
               ADD
             </Button>
@@ -518,6 +520,7 @@ function JoinPage() {
                             variant="contained"
                             color="error"
                             sx={{ borderRadius: "20px" }}
+                            id="Participation-unconfirmed"
                           >
                             ยังไม่ได้ยืนยันการเข้าร่วม
                           </Button>
@@ -567,6 +570,7 @@ function JoinPage() {
                 ),
                 style: { color: "white" },
               }}
+              id="search2"
               sx={{ backgroundColor: "#333", color: "white", width: "30%" }}
             />
 
@@ -575,6 +579,7 @@ function JoinPage() {
               color="error"
               sx={{ height: "55px" }}
               onClick={handleRemoveClick} // เรียกใช้ฟังก์ชันเปิด Dialog
+              id="remove"
             >
               REMOVE
             </Button>
@@ -639,6 +644,7 @@ function JoinPage() {
                                 "confirmed"
                               )
                             }
+                            id="checkbox"
                           />
                         </TableCell>
                         <TableCell>
@@ -669,6 +675,7 @@ function JoinPage() {
                             variant="contained"
                             color="success"
                             sx={{ borderRadius: "20px" }}
+                            id="Participation-confirmed"
                           >
                             ยืนยันการเข้าร่วมแล้ว
                           </Button>
@@ -704,6 +711,7 @@ function JoinPage() {
               <Button
                 onClick={() => setConfirmDialogOpen(false)}
                 color="inherit" // ใช้สีเทาเพื่อความเป็นกลาง
+                id="cancel"
               >
                 ยกเลิก
               </Button>
@@ -711,6 +719,7 @@ function JoinPage() {
                 onClick={handleRemoveConfirm}
                 color="error" // ใช้สีแดงเพื่อเน้นการกระทำที่สำคัญ
                 autoFocus
+                id="confirm"
               >
                 ยืนยัน
               </Button>

@@ -191,7 +191,7 @@ export default function NotificationsPopover() {
   return (
     <>
       <Tooltip title="การแจ้งเตือน">
-        <IconButton color={open ? "primary" : "default"} onClick={handleOpen}>
+        <IconButton color={open ? "primary" : "default"} onClick={handleOpen} id="Notification">
           <Badge
             badgeContent={totalUnRead > 9 ? "9+" : totalUnRead}
             color="error"
@@ -228,7 +228,7 @@ export default function NotificationsPopover() {
 
           {totalUnRead > 0 && (
             <Tooltip title="ทำเครื่องหมายทั้งหมดว่าอ่านแล้ว">
-              <IconButton color="primary" onClick={handleMarkAllAsRead}>
+              <IconButton color="primary" onClick={handleMarkAllAsRead} id="Mark-all-as-read">
                 <Iconify icon="eva:done-all-fill" />
               </IconButton>
             </Tooltip>
@@ -255,6 +255,7 @@ export default function NotificationsPopover() {
               {Array.isArray(notifications) &&
                 filterNewNotifications(notifications).map((notification) => (
                   <NotificationItem
+                    id="notification-new"
                     key={notification.notification_id}
                     notification={notification}
                     onMarkAsRead={handleMarkAsRead}
@@ -282,6 +283,7 @@ export default function NotificationsPopover() {
                   )
                   .map((notification) => (
                     <NotificationItem
+                      id="notification-old"
                       key={notification.notification_id}
                       notification={notification}
                       onMarkAsRead={handleMarkAsRead}

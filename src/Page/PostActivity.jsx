@@ -506,6 +506,7 @@ function PostActivity() {
                 {/* ปุ่มเปิด Pop Up ตัวเลือก */}
                 <IconButton
                   sx={{ color: "white" }}
+                  id="MoreVertOutlinedIcon"
                   aria-label="settings"
                   onClick={(event) =>
                     handleMenuClick(event, item.post_activity_id, item)
@@ -523,11 +524,12 @@ function PostActivity() {
                     onClick={(event) =>
                       handleLinkClick(event, selectedPostId, item.store_id)
                     }
+                    id="Edit-PostActivity"
                   >
                     <EditIcon sx={{ marginRight: 1 }} />
                     แก้ไขโพสต์กิจกรรม
                   </MenuItem>
-                  <MenuItem onClick={handleDeleteOpen}>
+                  <MenuItem onClick={handleDeleteOpen} id="Delete-PostActivity">
                     <DeleteIcon sx={{ marginRight: 1 }} />
                     ลบโพสต์กิจกรรม
                   </MenuItem>
@@ -550,10 +552,10 @@ function PostActivity() {
                 <Dialog open={deleteOpen} onClose={handleDeleteClose}>
                   <DialogTitle>คุณต้องการลบโพสต์นี้ใช่ไหม?</DialogTitle>
                   <DialogActions>
-                    <Button onClick={handleDeleteClose} color="primary">
+                    <Button onClick={handleDeleteClose} id="cancel" color="primary">
                       ยกเลิก
                     </Button>
-                    <Button onClick={handleUpdateStatus} color="error">
+                    <Button onClick={handleUpdateStatus} id="Delete-Post" color="error">
                       ลบโพสต์
                     </Button>
                   </DialogActions>

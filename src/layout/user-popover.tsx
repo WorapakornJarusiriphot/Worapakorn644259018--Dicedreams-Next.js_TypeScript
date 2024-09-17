@@ -136,7 +136,7 @@ export function UserPopover({ anchorEl, onClose, open, userId }: UserPopoverProp
           </ListItemIcon>
           ตั้งค่า
         </MenuItem> */}
-        <MenuItem component={RouterLink} href="/profile" onClick={onClose}>
+        <MenuItem component={RouterLink} id="profile" href="/profile" onClick={onClose}>
           <ListItemIcon>
             <UserIcon fontSize="var(--icon-fontSize-md)" />
           </ListItemIcon>

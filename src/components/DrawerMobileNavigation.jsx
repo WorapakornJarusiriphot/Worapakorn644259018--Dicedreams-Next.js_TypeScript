@@ -108,6 +108,7 @@ export default function DrawerMobileNavigation() {
             fontSize="sm"
             fontWeight="lg"
             sx={{ cursor: "pointer" }}
+            id="turn-off"
           >
             ปิด
           </Typography>
@@ -158,27 +159,28 @@ export default function DrawerMobileNavigation() {
           <ListItemButton
             sx={{ fontWeight: "lg" }}
             onClick={() => router.push("/")}
+            id="Home-page"
           >
             <HomeRoundedIcon />
             หน้าแรก
           </ListItemButton>
-          <ListItemButton onClick={handleProfileClick}>
+          <ListItemButton onClick={handleProfileClick} id="Our-profile">
             <AccountCircleIcon />
             โปรไฟล์ของเรา
           </ListItemButton>
-          <ListItemButton onClick={handlePostMeClick}>
+          <ListItemButton onClick={handlePostMeClick} id="Our-posts">
             <PostAddIcon />
             โพสต์ของเรา
           </ListItemButton>
-          <ListItemButton onClick={handleParticipatingClick}>
+          <ListItemButton onClick={handleParticipatingClick} id="Participation-history">
             <AccessTimeFilled />
             ประวัติการเข้าร่วม
           </ListItemButton>
-          <ListItemButton onClick={handleManageAccountsMeClick}>
+          <ListItemButton onClick={handleManageAccountsMeClick} id="Edit-Profile">
             <ManageAccountsIcon />
             แก้ไขโปรไฟล์
           </ListItemButton>
-          <ListItemButton onClick={() => router.push("/rules")}>
+          <ListItemButton onClick={() => router.push("/rules")} id="Website-rules">
             <InfoOutlined />
             กฏของเว็บไซต์
           </ListItemButton>
