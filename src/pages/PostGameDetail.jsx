@@ -1123,6 +1123,7 @@ function PostGameDetail() {
                     },
                   }}
                   onClick={joinGameClick}
+                  id="JoinGame"
                 >
                   เข้าร่วม
                 </Button>
@@ -1273,6 +1274,7 @@ function PostGameDetail() {
                         backgroundColor: "darkred",
                       },
                     }}
+                    id="Manage-Participants"
                   >
                     จัดการผู้เข้าร่วม
                   </Button>
@@ -1291,6 +1293,7 @@ function PostGameDetail() {
                   onClick={() =>
                     router.push(`/PostPlayEdit?id=${postData?.post_games_id}`)
                   }
+                  id="Edit-Post"
                 >
                   แก้ไขโพสต์
                 </Button>
@@ -1303,6 +1306,7 @@ function PostGameDetail() {
                       backgroundColor: "#121212",
                     },
                   }}
+                  id="Close-System"
                   onClick={handleOpenCloseDialog} // เปิด dialog เพื่อยืนยันการปิดระบบนัดเล่น
                 >
                   ปิดระบบนัดเล่น
@@ -1395,6 +1399,7 @@ function PostGameDetail() {
                       onClick={(event) =>
                         handleMenuClick(event, chat.chat_id, chat)
                       }
+                      id="MoreVertOutlinedIcon"
                     >
                       <MoreVertOutlinedIcon />
                     </IconButton>
@@ -1408,11 +1413,12 @@ function PostGameDetail() {
                         onClick={(event) =>
                           handleEditChat(event, selectedChatId, chat.users_id)
                         }
+                        id="Edit-Chat"
                       >
                         <EditIcon sx={{ marginRight: 1 }} />
                         แก้ไขพูดคุย
                       </MenuItem>
-                      <MenuItem onClick={handleDeleteOpen}>
+                      <MenuItem onClick={handleDeleteOpen} id="Delete-Chat">
                         <DeleteIcon sx={{ marginRight: 1 }} />
                         ลบพูดคุย
                       </MenuItem>
@@ -1442,12 +1448,14 @@ function PostGameDetail() {
                     onClick={() => handleSaveEditChat(chat)}
                     variant="contained"
                     sx={{ marginTop: "10px" }}
+                    id="SaveEditChat"
                   >
                     บันทึก
                   </Button>
                   <Button
                     onClick={() => setEditingChatId(null)} // ยกเลิกโหมดแก้ไข
                     sx={{ marginTop: "10px", marginLeft: "10px" }}
+                    id="CancelEditChat"
                   >
                     ยกเลิก
                   </Button>
@@ -1456,6 +1464,7 @@ function PostGameDetail() {
                 <Typography
                   variant="body1"
                   sx={{ marginTop: "10px", textAlign: "left", color: "gray" }}
+                  id="Chat-Message"
                 >
                   {chat.message}
                 </Typography>
@@ -1465,10 +1474,10 @@ function PostGameDetail() {
               <Dialog open={deleteOpen} onClose={handleDeleteClose}>
                 <DialogTitle>คุณต้องการลบพูดคุยนี้ใช่ไหม?</DialogTitle>
                 <DialogActions>
-                  <Button onClick={handleDeleteClose} color="primary">
+                  <Button onClick={handleDeleteClose} id="Cancel-Delete-Chat" color="primary" >
                     ยกเลิก
                   </Button>
-                  <Button onClick={handleUpdateStatus} color="error">
+                  <Button onClick={handleUpdateStatus} id="Delete-Chat" color="error">
                     ลบพูดคุย
                   </Button>
                 </DialogActions>
@@ -1547,6 +1556,7 @@ function PostGameDetail() {
               />
               <Button
                 type="submit"
+                id="Send-Chat"
                 variant="contained"
                 size="medium"
                 startIcon={<SendIcon />}
@@ -1631,10 +1641,10 @@ function PostGameDetail() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="error">
+          <Button onClick={handleCloseDialog} id="cancel" color="error">
             ยกเลิก
           </Button>
-          <Button onClick={handleConfirmJoin} color="primary" autoFocus>
+          <Button onClick={handleConfirmJoin} id="agree" color="primary" autoFocus>
             ตกลง
           </Button>
         </DialogActions>

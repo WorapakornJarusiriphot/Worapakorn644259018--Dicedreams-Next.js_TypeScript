@@ -259,6 +259,7 @@ function Filter({
                 }
               >
                 <DatePicker
+                  id="search-date_meet"
                   value={selectedDate}
                   onChange={handleDateChange}
                   slotProps={{
@@ -276,6 +277,7 @@ function Filter({
                 }
               >
                 <TimePicker
+                  id="search-time_meet"
                   value={selectedTime}
                   onChange={handleTimeChange}
                   viewRenderers={{
@@ -301,6 +303,7 @@ function Filter({
         <FormControl component="fieldset">
           <Button
             variant="contained"
+            id="search"
             onClick={executeSearch}
             sx={{ background: "white", color: "black", marginTop: "10px" }}
           >
@@ -319,6 +322,7 @@ function Filter({
                   sx={{ color: "white" }}
                   checked={selectedGames[game]}
                   onChange={handleCheckboxChange}
+                  id="Checkbox-search"
                 />
               }
               label={game}

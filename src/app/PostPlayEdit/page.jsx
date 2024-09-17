@@ -576,6 +576,7 @@ const PostPlayEditContent = () => {
                     <Button
                       type="submit"
                       fullWidth
+                      id="Edit-PostGames"
                       variant="contained"
                       sx={{
                         mt: 3,
