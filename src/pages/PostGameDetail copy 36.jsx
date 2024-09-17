@@ -1531,14 +1531,7 @@ function PostGameDetail() {
               ) : (
                 <Typography
                   variant="body1"
-                  sx={{
-                    marginTop: "10px",
-                    textAlign: "left",
-                    color: "gray",
-                    wordWrap: "break-word", // จัดให้ตัดคำเมื่อข้อความยาวเกินกรอบ
-                    overflowWrap: "break-word", // บังคับให้ตัดคำเมื่อคำยาวเกินไป
-                    whiteSpace: "normal", // อนุญาตให้ข้อความถูกตัดและย้ายไปบรรทัดถัดไป
-                  }}
+                  sx={{ marginTop: "10px", textAlign: "left", color: "gray" }}
                   id="Chat-Message"
                 >
                   {truncateMessage(chat.message, chat.chat_id)}

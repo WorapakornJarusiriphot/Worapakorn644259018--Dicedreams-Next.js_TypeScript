@@ -146,8 +146,6 @@ const darkTheme = createTheme({
   },
 });
 
-const MAX_MESSAGE_LENGTH = 100; // กำหนดความยาวสูงสุดของข้อความ
-
 function PostGameDetail() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -178,45 +176,6 @@ function PostGameDetail() {
   // สร้าง state สำหรับเก็บ chat ที่กำลังถูกแก้ไข
   const [editingChatId, setEditingChatId] = useState(null); // แชทที่กำลังแก้ไข
   const [editedMessage, setEditedMessage] = useState(""); // ข้อความที่กำลังแก้ไข
-
-  const [expandedChatId, setExpandedChatId] = useState(null);
-
-  const toggleMessageExpand = (chatId) => {
-    setExpandedChatId((prev) => (prev === chatId ? null : chatId));
-  };
-
-  const truncateMessage = (message, chatId) => {
-    if (message.length > MAX_MESSAGE_LENGTH) {
-      if (expandedChatId === chatId) {
-        return (
-          <>
-            {message}{" "}
-            <Button
-              size="small"
-              onClick={() => toggleMessageExpand(chatId)}
-              sx={{ color: "#ffffff" }}
-            >
-              แสดงน้อยลง
-            </Button>
-          </>
-        );
-      } else {
-        return (
-          <>
-            {message.slice(0, MAX_MESSAGE_LENGTH)}...{" "}
-            <Button
-              size="small"
-              onClick={() => toggleMessageExpand(chatId)}
-              sx={{ color: "#ffffff" }}
-            >
-              ดูเพิ่มเติม
-            </Button>
-          </>
-        );
-      }
-    }
-    return message;
-  };
 
   // ฟังก์ชันสำหรับเริ่มการแก้ไข
   const handleEditChat = async (event) => {
@@ -634,7 +593,7 @@ function PostGameDetail() {
           body: JSON.stringify({
             message: chatMessage,
             datetime_chat: currentDateTime,
-            user_id: userId,
+            user_id: userId, // ใช้ userId ที่ได้รับจากการ decode token
             post_games_id: gameId,
           }),
         }
@@ -644,11 +603,6 @@ function PostGameDetail() {
         const result = await response.json();
         setChatMessage("");
         window.location.reload();
-      } else if (response.status === 500) {
-        // กรณีเกิดข้อผิดพลาด 500
-        setErrorMessage(
-          "ขออภัย ขณะนี้เซิร์ฟเวอร์มีปัญหาหรือตอนนี้มีคนใช้งานเยอะเกินไป กรุณาลองส่งใหม่อีกครั้ง"
-        );
       } else {
         const errorText = await response.text();
         console.error("Failed to send chat message:", errorText);
@@ -656,15 +610,7 @@ function PostGameDetail() {
       }
     } catch (error) {
       console.error("Error sending chat message:", error);
-
-      // เพิ่มการตรวจสอบข้อผิดพลาด 500 ใน catch
-      if (error.message.includes("500")) {
-        setErrorMessage(
-          "ขออภัย ขณะนี้เซิร์ฟเวอร์มีปัญหาหรือมีคนใช้งานเยอะเกินไป กรุณาลองส่งใหม่อีกครั้ง"
-        );
-      } else {
-        setErrorMessage("เกิดข้อผิดพลาดในการส่งข้อความ: " + error.message);
-      }
+      setErrorMessage("Error sending chat message: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -1531,17 +1477,10 @@ function PostGameDetail() {
               ) : (
                 <Typography
                   variant="body1"
-                  sx={{
-                    marginTop: "10px",
-                    textAlign: "left",
-                    color: "gray",
-                    wordWrap: "break-word", // จัดให้ตัดคำเมื่อข้อความยาวเกินกรอบ
-                    overflowWrap: "break-word", // บังคับให้ตัดคำเมื่อคำยาวเกินไป
-                    whiteSpace: "normal", // อนุญาตให้ข้อความถูกตัดและย้ายไปบรรทัดถัดไป
-                  }}
+                  sx={{ marginTop: "10px", textAlign: "left", color: "gray" }}
                   id="Chat-Message"
                 >
-                  {truncateMessage(chat.message, chat.chat_id)}
+                  {chat.message}
                 </Typography>
               )}
 

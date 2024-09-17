@@ -29,7 +29,7 @@ export default function NotificationsPopover() {
   const router = useRouter();
 
   // ฟังก์ชันสำหรับนำทางไปยังหน้า PostGameDetail หรือ Chat
-  const handleButtonClick = async (event, notification) => {
+  const handleButtonClick = (event, notification) => {
     event.preventDefault();
     const accessToken = localStorage.getItem("access_token");
 
@@ -39,11 +39,6 @@ export default function NotificationsPopover() {
         router.push("/sign-in");
       }, 2000);
       return;
-    }
-
-    // ทำการเปลี่ยนสถานะการอ่านก่อนนำทางไปยังหน้าอื่น
-    if (!notification.read) {
-      await handleMarkAsRead(notification.notification_id);
     }
 
     if (notification.type === "participate") {
@@ -128,7 +123,7 @@ export default function NotificationsPopover() {
         }
 
         const response = await fetch(
-          "https://dicedreams-backend-deploy-to-render.onrender.com/api/notification/mark-all-as-read",
+          "https://dicedreams-backend-deploy-to-render.onrender.com/api/notification/user/mark-all-as-read",
           {
             method: "PUT",
             headers: {
@@ -158,7 +153,7 @@ export default function NotificationsPopover() {
       }
 
       const response = await fetch(
-        "https://dicedreams-backend-deploy-to-render.onrender.com/api/notification",
+        "https://dicedreams-backend-deploy-to-render.onrender.com/api/notification/user",
         {
           method: "PUT",
           headers: {
@@ -196,11 +191,7 @@ export default function NotificationsPopover() {
   return (
     <>
       <Tooltip title="การแจ้งเตือน">
-        <IconButton
-          color={open ? "primary" : "default"}
-          onClick={handleOpen}
-          id="Notification"
-        >
+        <IconButton color={open ? "primary" : "default"} onClick={handleOpen} id="Notification">
           <Badge
             badgeContent={totalUnRead > 9 ? "9+" : totalUnRead}
             color="error"
@@ -237,11 +228,7 @@ export default function NotificationsPopover() {
 
           {totalUnRead > 0 && (
             <Tooltip title="ทำเครื่องหมายทั้งหมดว่าอ่านแล้ว">
-              <IconButton
-                color="primary"
-                onClick={handleMarkAllAsRead}
-                id="Mark-all-as-read"
-              >
+              <IconButton color="primary" onClick={handleMarkAllAsRead} id="Mark-all-as-read">
                 <Iconify icon="eva:done-all-fill" />
               </IconButton>
             </Tooltip>
@@ -407,14 +394,6 @@ function renderContent(
   handleMarkAsRead
 ) {
   let message = "";
-  const truncateText = (text, maxLength) => {
-    if (text.length > maxLength) {
-      return text.slice(0, maxLength) + "…";
-    }
-    return text;
-  };
-  const maxNameLength = 25; // กำหนดความยาวสูงสุดสำหรับ name_games
-  const maxMessageLength = 25; // กำหนดความยาวสูงสุดสำหรับ message
   if (notification.type === "participate") {
     message = (
       <>
@@ -425,7 +404,7 @@ function renderContent(
           component="span"
           sx={{ fontWeight: "bold", color: "black" }}
         >
-          {truncateText(notification.data.name_games, maxNameLength)}
+          {notification.data.name_games}
         </Typography>
         <Typography component="span">
           {expanded ? (
@@ -484,7 +463,7 @@ function renderContent(
           component="span"
           sx={{ fontWeight: "bold", color: "black" }}
         >
-          {truncateText(notification.data.message, maxMessageLength)}
+          {notification.data.message}
         </Typography>
       </>
     );
