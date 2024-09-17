@@ -102,11 +102,6 @@ export default function SignIn() {
         throw new Error('ข้อมูลผู้ใช้ไม่สมบูรณ์');
       }
 
-      // แยกชื่อจริงและนามสกุลจาก displayName
-      const displayNameParts = user.displayName?.split(' ');
-      const firstName = displayNameParts?.[0] || 'Unknown';
-      const lastName = displayNameParts?.[1] || 'Unknown';
-
       // ตรวจสอบว่าผู้ใช้มีอยู่ในระบบหรือไม่
       let response;
       try {
@@ -115,8 +110,8 @@ export default function SignIn() {
         // ถ้าไม่มีผู้ใช้อยู่ในระบบ ให้ทำการสมัครสมาชิกอัตโนมัติ
         if (error.response?.status === 404) {
           response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/users', {
-            first_name: firstName,  // ตรวจสอบชื่อจริง
-            last_name: lastName,    // ตรวจสอบนามสกุล
+            first_name: user.displayName?.split(' ')[0] || 'Unknown',  // ตรวจสอบชื่อจริง
+            last_name: user.displayName?.split(' ')[1] || 'Unknown',   // ตรวจสอบนามสกุล
             email: user.email,
             avatar: user.photoURL || '',  // ตรวจสอบรูปภาพโปรไฟล์
             provider: providerName,
@@ -142,7 +137,6 @@ export default function SignIn() {
       console.error(error);
     }
   };
-
 
   const handleGoogleLogin = () => {
     const provider = new GoogleAuthProvider();
@@ -286,7 +280,7 @@ export default function SignIn() {
             >
               เข้าสู่ระบบ
             </Button>
-{/* 
+
             <Divider sx={{ my: 3 }}>
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 OR
@@ -315,7 +309,7 @@ export default function SignIn() {
               >
                 <Iconify icon="eva:facebook-fill" color="#1877F2" />
               </Button>
-            </Stack> */}
+            </Stack>
 
             <br />
             <br />

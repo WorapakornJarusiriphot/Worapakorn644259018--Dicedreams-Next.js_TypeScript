@@ -97,34 +97,18 @@ export default function SignIn() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // ตรวจสอบว่าข้อมูลผู้ใช้มีค่าหรือไม่
-      if (!user.email || !user.displayName) {
-        throw new Error('ข้อมูลผู้ใช้ไม่สมบูรณ์');
-      }
+      // ตรวจสอบว่าผู้ใช้มีอยู่ในระบบแล้วหรือยัง โดยเรียก API ที่เราเพิ่มมาใหม่
+      let response = await axios.get(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/findByEmail?email=${user.email}`);
 
-      // แยกชื่อจริงและนามสกุลจาก displayName
-      const displayNameParts = user.displayName?.split(' ');
-      const firstName = displayNameParts?.[0] || 'Unknown';
-      const lastName = displayNameParts?.[1] || 'Unknown';
-
-      // ตรวจสอบว่าผู้ใช้มีอยู่ในระบบหรือไม่
-      let response;
-      try {
-        response = await axios.get(`https://dicedreams-backend-deploy-to-render.onrender.com/api/users/findByEmail?email=${user.email}`);
-      } catch (error: any) {
-        // ถ้าไม่มีผู้ใช้อยู่ในระบบ ให้ทำการสมัครสมาชิกอัตโนมัติ
-        if (error.response?.status === 404) {
-          response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/users', {
-            first_name: firstName,  // ตรวจสอบชื่อจริง
-            last_name: lastName,    // ตรวจสอบนามสกุล
-            email: user.email,
-            avatar: user.photoURL || '',  // ตรวจสอบรูปภาพโปรไฟล์
-            provider: providerName,
-          });
-        } else {
-          // หากเกิดข้อผิดพลาดอื่นๆ ให้โยนข้อผิดพลาดออกมา
-          throw error;
-        }
+      if (!response.data) {
+        // ถ้าไม่มีผู้ใช้อยู่ในระบบ ทำการสมัครสมาชิกอัตโนมัติ
+        response = await axios.post('https://dicedreams-backend-deploy-to-render.onrender.com/api/users', {
+          first_name: user.displayName?.split(' ')[0] || '',
+          last_name: user.displayName?.split(' ')[1] || '',
+          email: user.email,
+          avatar: user.photoURL,
+          provider: providerName,
+        });
       }
 
       // หลังจากสมัครสมาชิกหรือเข้าสู่ระบบสำเร็จ ให้ทำการสร้าง JWT Token
@@ -142,7 +126,6 @@ export default function SignIn() {
       console.error(error);
     }
   };
-
 
   const handleGoogleLogin = () => {
     const provider = new GoogleAuthProvider();
@@ -286,7 +269,7 @@ export default function SignIn() {
             >
               เข้าสู่ระบบ
             </Button>
-{/* 
+
             <Divider sx={{ my: 3 }}>
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 OR
@@ -315,7 +298,7 @@ export default function SignIn() {
               >
                 <Iconify icon="eva:facebook-fill" color="#1877F2" />
               </Button>
-            </Stack> */}
+            </Stack>
 
             <br />
             <br />

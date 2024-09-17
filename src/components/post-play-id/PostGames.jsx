@@ -353,13 +353,20 @@ const PostGames = ({ userId }) => {
                   transform: "translate(-50%, -50%)",
                   backgroundColor: "rgba(0, 0, 0, 0.65)",
                   borderRadius: "50%",
-                  width: "60%",
-                  height: "60%",
+                  width: "70%", // คงขนาดวงกลมเท่าเดิม
+                  height: "70%", // คงขนาดวงกลมเท่าเดิม
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
                   color: "white",
-                  fontSize: "3vw",
+                  fontSize: "2.5vw", // ใช้ vw เพื่อให้ขนาดยืดหยุ่นตามหน้าจอ
+                  fontWeight: 600,
+                  whiteSpace: "normal", // อนุญาตให้ข้อความแบ่งบรรทัดได้
+                  wordBreak: "break-word", // ทำให้การตัดคำเกิดขึ้นที่ขอบคำ
+                  maxWidth: "90%", // ให้ความกว้างของข้อความไม่เกินคอนเทนเนอร์
+                  lineHeight: 1.2, // ปรับระยะห่างบรรทัดให้พอดี
+                  textAlign: "center", // ทำให้ข้อความจัดชิดกลางในแนวตั้ง
+                  padding: "10px", // เพิ่ม padding เพื่อไม่ให้ข้อความชนขอบ
                   zIndex: 20,
                 }}
               >
@@ -374,13 +381,20 @@ const PostGames = ({ userId }) => {
                   transform: "translate(-50%, -50%)",
                   backgroundColor: "rgba(0, 0, 0, 0.65)",
                   borderRadius: "50%",
-                  width: "60%",
-                  height: "60%",
+                  width: "70%", // คงขนาดวงกลมเท่าเดิม
+                  height: "70%", // คงขนาดวงกลมเท่าเดิม
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
                   color: "white",
-                  fontSize: "3vw",
+                  fontSize: "2.5vw", // ใช้ vw เพื่อให้ขนาดยืดหยุ่นตามหน้าจอ
+                  fontWeight: 600,
+                  whiteSpace: "normal", // อนุญาตให้ข้อความแบ่งบรรทัดได้
+                  wordBreak: "break-word", // ทำให้การตัดคำเกิดขึ้นที่ขอบคำ
+                  maxWidth: "90%", // ให้ความกว้างของข้อความไม่เกินคอนเทนเนอร์
+                  lineHeight: 1.2, // ปรับระยะห่างบรรทัดให้พอดี
+                  textAlign: "center", // ทำให้ข้อความจัดชิดกลางในแนวตั้ง
+                  padding: "10px", // เพิ่ม padding เพื่อไม่ให้ข้อความชนขอบ
                   zIndex: 20,
                 }}
               >
@@ -462,9 +476,7 @@ const PostGames = ({ userId }) => {
         </Box>
       ))}
       {items.length === 0 && (
-        <Typography sx={{ color: "white" }}>
-          ไม่พบโพสต์ที่เคยโพสต์
-        </Typography>
+        <Typography sx={{ color: "white" }}>ไม่พบโพสต์ที่เคยโพสต์</Typography>
       )}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>ยืนยันการเข้าร่วม</DialogTitle>

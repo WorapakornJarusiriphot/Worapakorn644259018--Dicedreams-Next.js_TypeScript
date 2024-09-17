@@ -582,20 +582,13 @@ function PostActivity() {
                     transform: "translate(-50%, -50%)",
                     backgroundColor: "rgba(0, 0, 0, 0.65)",
                     borderRadius: "50%",
-                    width: "70%", // คงขนาดวงกลมเท่าเดิม
-                    height: "70%", // คงขนาดวงกลมเท่าเดิม
+                    width: "60%",
+                    height: "60%",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                     color: "white",
-                    fontSize: "2.5vw", // ใช้ vw เพื่อให้ขนาดยืดหยุ่นตามหน้าจอ
-                    fontWeight: 600,
-                    whiteSpace: "normal", // อนุญาตให้ข้อความแบ่งบรรทัดได้
-                    wordBreak: "break-word", // ทำให้การตัดคำเกิดขึ้นที่ขอบคำ
-                    maxWidth: "90%", // ให้ความกว้างของข้อความไม่เกินคอนเทนเนอร์
-                    lineHeight: 1.2, // ปรับระยะห่างบรรทัดให้พอดี
-                    textAlign: "center", // ทำให้ข้อความจัดชิดกลางในแนวตั้ง
-                    padding: "10px", // เพิ่ม padding เพื่อไม่ให้ข้อความชนขอบ
+                    fontSize: "3vw",
                     zIndex: 20,
                   }}
                 >

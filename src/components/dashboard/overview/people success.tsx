@@ -13,8 +13,6 @@ import IconButton from '@mui/material/IconButton';
 import { useEffect, useState } from "react";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import { format, parseISO } from "date-fns";
-import { th } from "date-fns/locale";
 
 export interface User {
   users_id: string;
@@ -52,12 +50,6 @@ export interface PeopleProps {
   stores: Store[];
   sx?: SxProps;
 }
-
-const formatThaiDate = (dateString: any) => {
-  const date = parseISO(dateString);
-  const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy", { locale: th });
-  return formattedDate;
-};
 
 export function People({ users = [], stores = [], sx }: PeopleProps): React.JSX.Element {
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -120,32 +112,17 @@ export function People({ users = [], stores = [], sx }: PeopleProps): React.JSX.
                 <div>อัปเดตเมื่อ: {store.updatedAt}</div> */}
                 </>
               }
-              sx={{
-                marginLeft: 2,
-                flexGrow: 1,
-                overflow: 'hidden',        // ซ่อนข้อความที่ยาวเกินไปในคอนเทนเนอร์
-                whiteSpace: 'normal',      // อนุญาตให้ข้อความขึ้นบรรทัดใหม่
-                wordBreak: 'break-word',   // ตัดคำเมื่อข้อความยาวเกินไป
-              }}
+              sx={{ marginLeft: 2 }}
             />
             <Button
               variant="contained"
-              sx={{
-                marginLeft: 'auto',
-                marginRight: 2,
-                backgroundColor: 'black', // เปลี่ยนสีพื้นหลังเป็นสีดำ
-                color: 'white', // เปลี่ยนสีของข้อความเป็นสีขาวเพื่อให้เห็นชัดเจนบนพื้นหลังสีดำ
-                '&:hover': {
-                  backgroundColor: '#333', // เปลี่ยนสีเมื่อเอาเมาส์ไปชี้ให้เป็นสีเทาเข้ม
-                },
-              }}
+              sx={{ marginLeft: 'auto', marginRight: 2 }}
             >
-              โปรไฟล์ร้านค้า
+              ติดตาม
             </Button>
-
-            {/* <IconButton edge="end">
+            <IconButton edge="end">
               <DotsThreeVerticalIcon weight="bold" />
-            </IconButton> */}
+            </IconButton>
           </Card>
         ))}
         {sortedUsers.map((user, index) => (
@@ -172,37 +149,22 @@ export function People({ users = [], stores = [], sx }: PeopleProps): React.JSX.
                   <div>อีเมล: {user.email}</div>
                   <div>เบอร์โทรศัพท์: {user.phone_number}</div>
                   <div>เพศ: {user.gender}</div>
-                  <div>วันเกิด: {formatThaiDate(user.birthday)}</div>
+                  <div>วันเกิด: {user.birthday}</div>
                   {/* <div>สร้างเมื่อ: {user.createdAt}</div>
                 <div>อัปเดตเมื่อ: {user.updatedAt}</div> */}
                 </>
               }
-              sx={{
-                marginLeft: 2,
-                flexGrow: 1,
-                overflow: 'hidden',        // ซ่อนข้อความที่ยาวเกินไปในคอนเทนเนอร์
-                whiteSpace: 'normal',      // อนุญาตให้ข้อความขึ้นบรรทัดใหม่
-                wordBreak: 'break-word',   // ตัดคำเมื่อข้อความยาวเกินไป
-              }}
+              sx={{ marginLeft: 2 }}
             />
             <Button
               variant="contained"
-              sx={{
-                marginLeft: 'auto',
-                marginRight: 2,
-                backgroundColor: 'black', // เปลี่ยนสีพื้นหลังเป็นสีดำ
-                color: 'white', // เปลี่ยนสีของข้อความเป็นสีขาวเพื่อให้เห็นชัดเจนบนพื้นหลังสีดำ
-                '&:hover': {
-                  backgroundColor: '#333', // เปลี่ยนสีเมื่อเอาเมาส์ไปชี้ให้เป็นสีเทาเข้ม
-                },
-              }}
+              sx={{ marginLeft: 'auto', marginRight: 2 }}
             >
-              โปรไฟล์
+              เพิ่มเป็นเพื่อน
             </Button>
-
-            {/* <IconButton edge="end">
+            <IconButton edge="end">
               <DotsThreeVerticalIcon weight="bold" />
-            </IconButton> */}
+            </IconButton>
           </Card>
         ))}
       </Box>

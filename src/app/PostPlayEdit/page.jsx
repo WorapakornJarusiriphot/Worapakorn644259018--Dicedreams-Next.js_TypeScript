@@ -383,6 +383,7 @@ const PostPlayEditContent = () => {
                         <TextField
                           required
                           fullWidth
+                          id="name_games"
                           label="ชื่อโพสต์"
                           name="nameGames"
                           value={values.nameGames}
@@ -395,6 +396,7 @@ const PostPlayEditContent = () => {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
+                          id="detail_post"
                           label="รายละเอียดของโพสต์"
                           name="detailPost"
                           value={values.detailPost}
@@ -416,6 +418,7 @@ const PostPlayEditContent = () => {
                           <Select
                             labelId="number-select-label"
                             name="numPeople"
+                            id="num_people"
                             value={values.numPeople}
                             label="จำนวนผู้เล่นที่จะนัดเจอกัน"
                             onChange={handleChange}
@@ -443,6 +446,7 @@ const PostPlayEditContent = () => {
                             <DemoItem label={"เลือกวันที่เจอกัน *"}>
                               <DatePicker
                                 name="dateMeet"
+                                id="date_meet"
                                 value={values.dateMeet}
                                 onChange={(newDate) =>
                                   setFieldValue("dateMeet", newDate)
@@ -464,6 +468,7 @@ const PostPlayEditContent = () => {
                             <DemoItem label={"เลือกเวลาที่เจอกัน *"}>
                               <TimePicker
                                 name="timeMeet"
+                                id="time_meet"
                                 value={dayjs(values.timeMeet, "hh:mm A")}
                                 onChange={(newTime) =>
                                   setFieldValue("timeMeet", newTime)

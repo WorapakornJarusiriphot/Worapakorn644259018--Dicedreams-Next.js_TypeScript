@@ -7,8 +7,8 @@ import PostGames from '@/components/post-play-id/PostGames';
 import Participating from '@/components/participating-id/Participating';
 import PostActivity from '@/components/post-activity-id/PostActivity';
 
-interface TabsProfileStoreProps {
-  storeId: string;
+interface TabsProfileProps {
+  userId: string;
 }
 
 interface TabPanelProps {
@@ -44,7 +44,7 @@ function a11yProps(index: number) {
   };
 }
 
-export default function TabsProfileStore({ storeId }: TabsProfileStoreProps) {
+export default function TabsProfile({ userId }: TabsProfileProps) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -55,13 +55,15 @@ export default function TabsProfileStore({ storeId }: TabsProfileStoreProps) {
     <Box sx={{ width: '100%' }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-          <Tab label="โพสต์กิจกรรม" {...a11yProps(0)} />
+          <Tab label="โพสต์นัดเล่น" {...a11yProps(0)} />
+          <Tab label="ประวัติการเข้าร่วม" {...a11yProps(1)} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-        <Box sx={{ maxWidth: '900px', margin: '0 auto' }}> {/* ลดขนาดและทำให้เป็นศูนย์กลาง */}
-          <PostActivity storeId={storeId} />
-        </Box>
+        <PostGames userId={userId} />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={1}>
+        <Participating userId={userId} />
       </CustomTabPanel>
     </Box>
   );

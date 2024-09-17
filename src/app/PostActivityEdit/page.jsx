@@ -387,6 +387,7 @@ const PostActivityEditContent = () => {
                         <TextField
                           required
                           fullWidth
+                          id="name_activity"
                           label="ชื่อโพสต์"
                           name="nameActivity"
                           value={values.nameActivity}
@@ -401,6 +402,7 @@ const PostActivityEditContent = () => {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
+                          id="detail_post"
                           label="รายละเอียดของโพสต์"
                           name="detailPost"
                           value={values.detailPost}
@@ -422,6 +424,7 @@ const PostActivityEditContent = () => {
                             <DemoItem label={"เลือกวันที่เจอกัน *"}>
                               <DatePicker
                                 name="dateActivity"
+                                id="date_activity"
                                 value={values.dateActivity}
                                 onChange={(newDate) =>
                                   setFieldValue("dateActivity", newDate)
@@ -444,6 +447,7 @@ const PostActivityEditContent = () => {
                             <DemoItem label={"เลือกเวลาที่เจอกัน *"}>
                               <TimePicker
                                 name="timeActivity"
+                                id="time_activity"
                                 value={dayjs(values.timeActivity, "hh:mm A")}
                                 onChange={(newTime) =>
                                   setFieldValue("timeActivity", newTime)
