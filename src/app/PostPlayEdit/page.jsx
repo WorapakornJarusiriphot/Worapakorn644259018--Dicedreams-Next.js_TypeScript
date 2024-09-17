@@ -134,6 +134,13 @@ const PostPlayEditContent = () => {
   const [fullImageOpen, setFullImageOpen] = useState(false);
 
   useEffect(() => {
+    if (!window.location.hash) {
+      window.location.hash = 'loaded';
+      window.location.reload();
+    }
+  }, []);
+
+  useEffect(() => {
     const fetchPostData = async () => {
       try {
         const token = localStorage.getItem("access_token");
