@@ -386,31 +386,14 @@ function Participating({ userId }) {
           </div>
 
           <div className="text-left">
-            <Typography
-              sx={{
-                color: "white",
-                fontWeight: "bold",
-                wordWrap: "break-word", // จัดให้ตัดคำเมื่อข้อความยาวเกินกรอบ
-                overflowWrap: "break-word", // บังคับให้ตัดคำเมื่อคำยาวเกินไป
-                whiteSpace: "normal", // อนุญาตให้ข้อความถูกตัดและย้ายไปบรรทัดถัดไป
-              }}
-            >
+            <Typography sx={{ color: "white", fontWeight: "bold" }}>
               {item.name_games}
             </Typography>
             <Typography sx={{ color: "white" }}>
               วันที่เจอกัน: {formatThaiDate(item.date_meet)}
             </Typography>
             <br />
-            <Typography
-              sx={{
-                color: "white",
-                wordWrap: "break-word", // จัดให้ตัดคำเมื่อข้อความยาวเกินกรอบ
-                overflowWrap: "break-word", // บังคับให้ตัดคำเมื่อคำยาวเกินไป
-                whiteSpace: "normal", // อนุญาตให้ข้อความถูกตัดและย้ายไปบรรทัดถัดไป
-              }}
-            >
-              {item.detail_post}
-            </Typography>
+            <Typography sx={{ color: "white" }}>{item.detail_post}</Typography>
 
             <Typography sx={{ color: "white" }}>
               สถานที่ : 43/5 ถนนราชดำเนิน (ถนนต้นสน)

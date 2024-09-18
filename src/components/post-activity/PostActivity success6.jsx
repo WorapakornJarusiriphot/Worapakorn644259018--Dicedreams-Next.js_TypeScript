@@ -604,16 +604,7 @@ function PostActivity() {
               )}
             </div>
 
-            <Typography
-              variant="h6"
-              sx={{
-                wordWrap: "break-word", // จัดให้ตัดคำเมื่อข้อความยาวเกินกรอบ
-                overflowWrap: "break-word", // บังคับให้ตัดคำเมื่อคำยาวเกินไป
-                whiteSpace: "normal", // อนุญาตให้ข้อความถูกตัดและย้ายไปบรรทัดถัดไป
-              }}
-              component="h3"
-              gutterBottom
-            >
+            <Typography variant="h6" component="h3" gutterBottom>
               {item.name_activity}
             </Typography>
             <Typography variant="body1" gutterBottom>
@@ -625,15 +616,7 @@ function PostActivity() {
 
             <br />
 
-            <Typography
-              variant="body1"
-              sx={{
-                wordWrap: "break-word", // จัดให้ตัดคำเมื่อข้อความยาวเกินกรอบ
-                overflowWrap: "break-word", // บังคับให้ตัดคำเมื่อคำยาวเกินไป
-                whiteSpace: "normal", // อนุญาตให้ข้อความถูกตัดและย้ายไปบรรทัดถัดไป
-              }}
-              gutterBottom
-            >
+            <Typography variant="body1" gutterBottom>
               {item.detail_post}
             </Typography>
             <Typography variant="body1" gutterBottom>
