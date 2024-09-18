@@ -404,7 +404,15 @@ const PostGames = ({ userId }) => {
           </div>
 
           <div className="text-left">
-            <Typography sx={{ color: "white", fontWeight: "bold" }}>
+            <Typography
+              sx={{
+                color: "white",
+                fontWeight: "bold",
+                wordWrap: "break-word", // จัดให้ตัดคำเมื่อข้อความยาวเกินกรอบ
+                overflowWrap: "break-word", // บังคับให้ตัดคำเมื่อคำยาวเกินไป
+                whiteSpace: "normal", // อนุญาตให้ข้อความถูกตัดและย้ายไปบรรทัดถัดไป
+              }}
+            >
               {item.name_games}
             </Typography>
             <Typography sx={{ color: "white" }}>
@@ -414,7 +422,16 @@ const PostGames = ({ userId }) => {
               เวลาที่เจอกัน: {formatThaiTime(item.time_meet)}
             </Typography>
             <br />
-            <Typography sx={{ color: "white" }}>{item.detail_post}</Typography>
+            <Typography
+              sx={{
+                color: "white",
+                wordWrap: "break-word", // จัดให้ตัดคำเมื่อข้อความยาวเกินกรอบ
+                overflowWrap: "break-word", // บังคับให้ตัดคำเมื่อคำยาวเกินไป
+                whiteSpace: "normal", // อนุญาตให้ข้อความถูกตัดและย้ายไปบรรทัดถัดไป
+              }}
+            >
+              {item.detail_post}
+            </Typography>
             <Typography sx={{ color: "white" }}>
               สถานที่ : 43/5 ถนนราชดำเนิน (ถนนต้นสน)
               ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง

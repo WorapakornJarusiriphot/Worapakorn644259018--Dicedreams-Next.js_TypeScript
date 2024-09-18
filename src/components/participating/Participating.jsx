@@ -390,7 +390,16 @@ function Participating() {
               วันที่เจอกัน: {formatThaiDate(item.date_meet)}
             </Typography>
             <br />
-            <Typography sx={{ color: "white" }}>{item.detail_post}</Typography>
+            <Typography
+              sx={{
+                color: "white",
+                wordWrap: "break-word", // จัดให้ตัดคำเมื่อข้อความยาวเกินกรอบ
+                overflowWrap: "break-word", // บังคับให้ตัดคำเมื่อคำยาวเกินไป
+                whiteSpace: "normal", // อนุญาตให้ข้อความถูกตัดและย้ายไปบรรทัดถัดไป
+              }}
+            >
+              {item.detail_post}
+            </Typography>
 
             <Typography sx={{ color: "white" }}>
               สถานที่ : 43/5 ถนนราชดำเนิน (ถนนต้นสน)
