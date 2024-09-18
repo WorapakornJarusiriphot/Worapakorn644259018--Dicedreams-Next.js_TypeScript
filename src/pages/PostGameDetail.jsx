@@ -267,9 +267,9 @@ function PostGameDetail() {
       const decodedToken = jwtDecode(accessToken);
       const userId = decodedToken.users_id;
 
-      // ตรวจสอบว่าผู้ใช้เป็นเจ้าของโพสต์ที่เลือกหรือไม่
+      // ตรวจสอบว่าผู้ใช้เป็นเจ้าของพูดคุยที่เลือกหรือไม่
       if (userId !== selectedPost.user_id) {
-        setSnackbarMessage("คุณไม่มีสิทธิ์ในการแก้ไขโพสต์นี้");
+        setSnackbarMessage("คุณไม่มีสิทธิ์ในการแก้ไขพูดคุยนี้");
         setSnackbarSeverity("error");
         setOpenSnackbar(true);
         return;
