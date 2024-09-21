@@ -393,19 +393,6 @@ const PostPlayEditContent = () => {
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
-                validateOnChange={true}
-                validateOnBlur={true}
-                validate={(values) => {
-                  try {
-                    validationSchema.validateSync(values, {
-                      abortEarly: false,
-                    });
-                    setFormErrors([]); // เคลียร์ข้อผิดพลาดทั้งหมด
-                  } catch (errors) {
-                    // ส่งข้อผิดพลาดที่ตรวจพบไปยัง handleValidationErrors
-                    handleValidationErrors(errors.inner);
-                  }
-                }}
               >
                 {({
                   values,
@@ -433,7 +420,7 @@ const PostPlayEditContent = () => {
                           <Select
                             labelId="game-select-label"
                             id="game-select"
-                            name="nameGames" // ใช้ nameGames จาก Formik
+                            name="nameGames"
                             value={
                               predefinedGames.includes(values.nameGames) // เช็คว่าชื่อบอร์ดเกมอยู่ใน predefinedGames หรือไม่
                                 ? values.nameGames
@@ -442,9 +429,9 @@ const PostPlayEditContent = () => {
                             onChange={(e) => {
                               const selectedGame = e.target.value;
                               if (selectedGame === "Other") {
-                                setFieldValue("nameGames", ""); // ถ้าเลือก "Other" ให้ตั้งค่า nameGames เป็นค่าว่าง เพื่อแสดง TextField
+                                setFieldValue("nameGames", "Other"); // ตั้งค่า nameGames เป็น "Other" เมื่อเลือก "อื่นๆ"
                               } else {
-                                setFieldValue("nameGames", selectedGame); // ถ้าเลือกเกมที่อยู่ในลิสต์ ให้ตั้งค่าตามเกมที่เลือก
+                                setFieldValue("nameGames", selectedGame); // ถ้าเลือกบอร์ดเกมในลิสต์ ให้ตั้งค่าเป็นเกมนั้น
                               }
                             }}
                             error={
@@ -467,26 +454,28 @@ const PostPlayEditContent = () => {
                           <br />
 
                           {/* แสดง TextField เมื่อเลือก "Other" */}
-                          {/* {values.nameGames === "" && ( */}
-                          <TextField
-                            required
-                            fullWidth
-                            id="nameGames"
-                            label="ชื่อบอร์ดเกม"
-                            name="nameGames"
-                            value={values.nameGames}
-                            onChange={handleChange} // อัปเดตค่าเมื่อมีการพิมพ์ใน TextField
-                            onBlur={handleBlur}
-                            helperText={`${values.nameGames.length || 0} / 100 ${
-                              touched.nameGames && errors.nameGames
-                                ? ` - ${errors.nameGames}`
-                                : ""
-                            }`}
-                            error={
-                              touched.nameGames && Boolean(errors.nameGames)
-                            }
-                          />
-                          {/* )} */}
+                          {values.nameGames === "Other" && (
+                            <TextField
+                              required
+                              fullWidth
+                              id="otherNameGames"
+                              label="ชื่อบอร์ดเกม"
+                              name="nameGames"
+                              value={postData.name_games || ""} // แสดงค่าจากฐานข้อมูลถ้ามี
+                              onChange={(e) =>
+                                setFieldValue("nameGames", e.target.value)
+                              } // ตั้งค่าให้สามารถแก้ไขชื่อบอร์ดเกม
+                              onBlur={handleBlur}
+                              helperText={`${values.nameGames.length || 0} / 100 ${
+                                touched.nameGames && errors.nameGames
+                                  ? ` - ${errors.nameGames}`
+                                  : ""
+                              }`}
+                              error={
+                                touched.nameGames && Boolean(errors.nameGames)
+                              }
+                            />
+                          )}
                         </FormControl>
                       </Grid>
                       <Grid item xs={12}>

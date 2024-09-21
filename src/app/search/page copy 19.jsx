@@ -68,7 +68,9 @@ function SearchComponent() {
     const params = new URLSearchParams();
 
     if (search) {
-      search.split("&").forEach((term) => {
+      // แยกคำค้นหาด้วยเว้นวรรคหรือเครื่องหมายใด ๆ ที่คุณต้องการ
+      const searchTerms = search.split(" ");
+      searchTerms.forEach((term) => {
         params.append("search", term);
       });
     }
@@ -88,93 +90,56 @@ function SearchComponent() {
     return params.toString();
   };
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const queryParams = buildQueryParams();
-  //       console.log("Fetching data with query:", queryParams);
-
-  //       // ดึงข้อมูลจาก postGame
-  //       const gamesRes = await fetch(
-  //         `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/search?${queryParams}`
-  //       );
-
-  //       // ดึงข้อมูลจาก postActivity
-  //       const activitiesRes = await fetch(
-  //         `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/search?${queryParams}`
-  //       );
-
-  //       if (!gamesRes.ok) {
-  //         throw new Error(`Failed to fetch games: ${gamesRes.statusText}`);
-  //       }
-  //       if (!activitiesRes.ok) {
-  //         throw new Error(
-  //           `Failed to fetch activities: ${activitiesRes.statusText}`
-  //         );
-  //       }
-
-  //       let gamesData = await gamesRes.json();
-  //       let activitiesData = await activitiesRes.json();
-
-  //       // จัดเรียงโพสต์ของ postGame ตามวันที่และเวลาที่ใกล้เคียงที่สุด
-  //       gamesData = gamesData.sort((a, b) => {
-  //         const timeA = new Date(`${a.date_meet}T${a.time_meet}`).getTime();
-  //         const timeB = new Date(`${b.date_meet}T${b.time_meet}`).getTime();
-  //         return timeA - timeB;
-  //       });
-
-  //       // จัดเรียงโพสต์ของ postActivity ตามวันที่และเวลาที่ใกล้เคียงที่สุด
-  //       activitiesData = activitiesData.sort((a, b) => {
-  //         const timeA = new Date(
-  //           `${a.date_activity}T${a.time_activity}`
-  //         ).getTime();
-  //         const timeB = new Date(
-  //           `${b.date_activity}T${b.time_activity}`
-  //         ).getTime();
-  //         return timeA - timeB;
-  //       });
-
-  //       // อัพเดต state ของ games และ activities
-  //       setGames(gamesData.length > 0 ? gamesData : []);
-  //       setActivities(activitiesData.length > 0 ? activitiesData : []);
-  //     } catch (error) {
-  //       console.error("Error fetching data:", error);
-  //       setError(error.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, [search, searchDateMeet, searchTimeMeet, searchNumPeople]);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
         const queryParams = buildQueryParams();
         console.log("Fetching data with query:", queryParams);
 
-        const gamesRes = await fetch(
-          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/search?${queryParams}`
-        );
+        const [gamesRes, activitiesRes] = await Promise.all([
+          fetch(
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/search?${queryParams}`
+          ),
+          fetch(
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/search?${queryParams}`
+          ),
+        ]);
 
         if (!gamesRes.ok) {
           throw new Error(`Failed to fetch games: ${gamesRes.statusText}`);
         }
+        if (!activitiesRes.ok) {
+          throw new Error(
+            `Failed to fetch activities: ${activitiesRes.statusText}`
+          );
+        }
 
         let gamesData = await gamesRes.json();
+        let activitiesData = await activitiesRes.json();
 
-        // จัดเรียงโพสต์ตามเวลาที่ใกล้เคียงที่สุด
+        // จัดเรียงโพสต์ของ postGame ตามวันที่และเวลาที่ใกล้เคียงที่สุด
         gamesData = gamesData.sort((a, b) => {
           const timeA = new Date(`${a.date_meet}T${a.time_meet}`).getTime();
           const timeB = new Date(`${b.date_meet}T${b.time_meet}`).getTime();
           return timeA - timeB;
         });
 
-        // อัปเดต state ของ games
+        // จัดเรียงโพสต์ของ postActivity ตามวันที่และเวลาที่ใกล้เคียงที่สุด
+        activitiesData = activitiesData.sort((a, b) => {
+          const timeA = new Date(
+            `${a.date_activity}T${a.time_activity}`
+          ).getTime();
+          const timeB = new Date(
+            `${b.date_activity}T${b.time_activity}`
+          ).getTime();
+          return timeA - timeB;
+        });
+
+        // อัปเดต state ของ games และ activities
         setGames(gamesData.length > 0 ? gamesData : []);
+        setActivities(activitiesData.length > 0 ? activitiesData : []);
       } catch (error) {
-        console.error("Error fetching games data:", error);
+        console.error("Error fetching data:", error);
         setError(error.message);
       } finally {
         setLoading(false);
@@ -183,43 +148,6 @@ function SearchComponent() {
 
     fetchData();
   }, [search, searchDateMeet, searchTimeMeet, searchNumPeople]);
-
-  useEffect(() => {
-    if (search) {
-      const fetchData = async () => {
-        try {
-          const queryParams = buildQueryParams();
-          const activitiesRes = await fetch(
-            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/search?${queryParams}`
-          );
-          if (!activitiesRes.ok) {
-            throw new Error(
-              `Failed to fetch activities: ${activitiesRes.statusText}`
-            );
-          }
-
-          const activitiesData = await activitiesRes.json();
-          setActivities(activitiesData);
-          console.log("Fetched activities data:", activitiesData);
-        } catch (error) {
-          console.error("Error fetching activities data:", error);
-          setError(error.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchData();
-    } else {
-      console.log("No search query found");
-      setLoading(false);
-    }
-  }, [search, searchDateMeet, searchTimeMeet, searchNumPeople]);
-
-  useEffect(() => {
-    console.log("Activities state:", activities);
-    console.log("Games state:", games);
-  }, [activities, games]);
 
   if (loading) return <Typography color="white">กำลังโหลด...</Typography>;
   if (error)

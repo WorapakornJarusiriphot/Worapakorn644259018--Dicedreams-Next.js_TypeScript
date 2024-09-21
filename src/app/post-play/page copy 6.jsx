@@ -15,49 +15,44 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-
 import dayjs from "dayjs";
 import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-
+import { DatePicker, DatePickerProps } from "@mui/x-date-pickers/DatePicker";
+import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
+import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import { StaticDatePicker } from "@mui/x-date-pickers/StaticDatePicker";
 import { styled } from "@mui/material/styles";
-
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import { TextFieldProps } from "@mui/material/TextField";
 import Alert from "@mui/material/Alert";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/firebaseConfig";
-
 import Snackbar from "@mui/material/Snackbar";
 import { useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 // import { FileUpload, FileUploadProps } from '@/components/FileUpload/FileUpload';
 import App from "./App";
-
+import { renderTimeViewClock } from "@mui/x-date-pickers/timeViewRenderers";
 import locationImage from "./location.png";
-
-import { useEffect } from "react";
 import { InputLabel, MenuItem, Modal, Select } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import Tooltip from "@mui/material/Tooltip";
 import Stack from "@mui/material/Stack";
 import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
-
 import { jwtDecode } from "jwt-decode";
 import { JwtPayload } from "jwt-decode";
-
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
-
-import { renderTimeViewClock } from "@mui/x-date-pickers/timeViewRenderers";
+import { useEffect } from "react";
+import { predefinedGames } from "./constants/gameList";
 
 const darkTheme = createTheme({
   palette: {
@@ -94,85 +89,70 @@ const darkTheme = createTheme({
 });
 
 const initialValues = {
-  nameActivity: "",
+  nameGames: "",
   detailPost: "",
-  dateActivity: dayjs().add(1, "day"),
-  timeActivity: dayjs().add(5, "minute"),
-  postActivityImage: "",
+  numPeople: 2,
+  dateMeet: dayjs(),
+  timeMeet: dayjs().add(5, "minute"),
+  gamesImage: "",
 };
 
 const validationSchema = Yup.object().shape({
-  nameActivity: Yup.string()
-    .required("กรุณากรอกชื่อโพสต์")
+  nameGames: Yup.string()
+    .required("กรุณาเลือกชื่อบอร์ดเกม หรือกรอกชื่อบอร์ดเกม") // เพิ่มการตรวจสอบการเลือกหรือกรอก
     .max(100, "ไม่สามารถพิมพ์เกิน 100 ตัวอักษรได้"),
   detailPost: Yup.string()
     .required("กรุณากรอกรายละเอียดของโพสต์")
     .max(500, "ไม่สามารถพิมพ์เกิน 500 ตัวอักษรได้"),
-  dateActivity: Yup.date()
+  numPeople: Yup.number()
+    .min(2, "กรุณาเลือกจำนวนผู้เล่นอย่างน้อย 2 คน")
+    .required("กรุณาเลือกจำนวนผู้เล่น"),
+  dateMeet: Yup.date()
     .required("กรุณาเลือกวันที่เจอกัน")
-    .test("dateActivity", "เลือกวันที่เจอกันต้องไม่เป็นอดีต", function (value) {
+    .test("dateMeet", "เลือกวันที่เจอกันต้องไม่เป็นอดีต", function (value) {
       const selectedDate = dayjs(value);
       const currentDate = dayjs().startOf("day");
       return selectedDate.isAfter(currentDate);
     }),
-  timeActivity: Yup.date()
+  timeMeet: Yup.date()
     .required("กรุณาเลือกเวลาที่เจอกัน")
     .test(
-      "timeActivity",
+      "timeMeet",
       "เลือกเวลาที่เจอกันต้องไม่เป็นอดีตหรือปัจจุบัน",
       function (value) {
-        const selectedDate = this.parent.dateActivity;
+        const selectedDate = this.parent.dateMeet;
         if (selectedDate && dayjs(selectedDate).isSame(dayjs(), "day")) {
           return dayjs(value).isAfter(dayjs());
         }
         return true;
       }
     ),
-  postActivityImage: Yup.mixed().required("กรุณาอัพโหลดรูปภาพด้วย"),
+  gamesImage: Yup.mixed().required("กรุณาอัพโหลดรูปภาพด้วย"),
 });
 
-const Label = styled(({ className, componentName, valueType }) => (
-  <span className={className}>
-    <strong>{componentName}</strong> ({valueType})
-  </span>
-))(({ theme }) => ({
-  color: theme.palette.primary.main,
-}));
-
-const handleWordLimit = (text, limit) => {
-  const words = text.split(/\s+/);
-  if (words.length > limit) {
-    return words.slice(0, limit).join(" ");
-  }
-  return text;
-};
-
-export default function PostActivity() {
+const PostPlay = () => {
   const router = useRouter();
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState("success");
-  const [nameActivity, setNameActivity] = useState("");
+  const [nameGames, setNameGames] = useState("");
   const [detailPost, setDetailPost] = useState("");
-  const [dateActivity, setDateActivity] = useState(dayjs());
-  const [timeActivity, setTimeActivity] = useState(dayjs());
-  const [statusPost, setStatusPost] = useState("");
-  const [postActivityImage, setPostActivityImage] = useState("");
-  const [storeId, setStoreId] = useState("");
+  const [numPeople, setNumPeople] = useState(2);
+  const [dateMeet, setDateMeet] = useState(dayjs());
+  const [timeMeet, setTimeMeet] = useState(dayjs());
+  const [gamesImage, setGamesImage] = useState("");
+  const [userId, setUserId] = useState("");
+  const [gameOption, setGameOption] = useState("");
+
   const [googleMapLink, setGoogleMapLink] = useState("");
+
   const [fullImageOpen, setFullImageOpen] = useState(false);
 
   const [formErrors, setFormErrors] = useState([]); // สถานะสำหรับเก็บข้อผิดพลาด
 
   const handleValidationErrors = (errors) => {
-    // ตรวจสอบว่าข้อผิดพลาดมีค่าหรือไม่และแปลงจาก object ให้เป็น array ของข้อผิดพลาด
-    const errorMessages = errors.map((error) => ({
-      path: error.path,
-      message: error.message,
-    }));
-
-    // ตั้งค่า formErrors ให้เก็บ array ของข้อผิดพลาด
-    setFormErrors(errorMessages);
+    // เก็บข้อผิดพลาดที่ได้รับจาก Yup ในรูปแบบ array
+    setFormErrors(Object.values(errors));
   };
 
   const handleGameOptionChange = (event) => {
@@ -185,16 +165,14 @@ export default function PostActivity() {
     }
   };
 
-  const limitText = (text, limit) => {
-    return text.slice(0, limit);
-  };
-
   const handleNameChange = (event) => {
-    setNameActivity(limitText(event.target.value, 100));
+    const newText = event.target.value.slice(0, 100);
+    setNameGames(newText);
   };
 
   const handleDetailChange = (event) => {
-    setDetailPost(limitText(event.target.value, 500));
+    const newText = event.target.value.slice(0, 500);
+    setDetailPost(newText);
   };
 
   useEffect(() => {
@@ -203,7 +181,7 @@ export default function PostActivity() {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        setStoreId(decoded.store_id);
+        setUserId(decoded.users_id);
       } catch (error) {
         console.error("Error decoding token:", error);
       }
@@ -222,9 +200,7 @@ export default function PostActivity() {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     const token = localStorage.getItem("access_token");
-
     if (!token) {
-      console.error("JWT token is missing");
       setAlertMessage("ไม่พบ JWT token กรุณาเข้าสู่ระบบอีกครั้ง");
       setAlertSeverity("error");
       setOpenSnackbar(true);
@@ -232,31 +208,20 @@ export default function PostActivity() {
       return;
     }
 
-    if (!storeId) {
-      console.error("store_id is missing");
-      setAlertMessage("ไม่พบ store_id กรุณาตรวจสอบข้อมูลผู้ใช้");
-      setAlertSeverity("error");
-      setOpenSnackbar(true);
-      return;
-    }
-
-    const formattedDate = values.dateActivity.format("MM/DD/YYYY");
-    const formattedTime = values.timeActivity.format("HH:mm:ss");
-
     const data = {
-      name_activity: values.nameActivity,
+      name_games: values.nameGames,
       detail_post: values.detailPost,
-      creation_date: new Date().toISOString(),
-      date_activity: formattedDate,
-      time_activity: formattedTime,
+      num_people: values.numPeople,
+      date_meet: values.dateMeet.format("MM/DD/YYYY"),
+      time_meet: values.timeMeet.format("HH:mm:ss"),
       status_post: "active",
-      store_id: storeId,
-      post_activity_image: values.postActivityImage,
+      users_id: userId,
+      games_image: values.gamesImage,
     };
 
     try {
       const response = await axios.post(
-        "https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity",
+        "https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame",
         data,
         {
           headers: {
@@ -278,30 +243,16 @@ export default function PostActivity() {
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.error("Error response:", error.response);
         setAlertMessage(
           `สร้างโพสต์ไม่สำเร็จ: ${error.response.data.message || "เกิดข้อผิดพลาด"}`
         );
       } else {
-        console.error("Unknown error:", error);
         setAlertMessage("สร้างโพสต์ไม่สำเร็จ: เกิดข้อผิดพลาด");
       }
       setAlertSeverity("error");
     }
     setOpenSnackbar(true);
     setSubmitting(false);
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        setPostActivityImage(base64String);
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   const handleImageUpload = (file, setFieldValue) => {
@@ -313,7 +264,7 @@ export default function PostActivity() {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result;
-      setFieldValue("postActivityImage", base64String);
+      setFieldValue("gamesImage", base64String);
     };
     reader.readAsDataURL(file);
   };
@@ -368,7 +319,7 @@ export default function PostActivity() {
                 lineHeight: 1.2, // ปรับระยะห่างบรรทัดให้พอดี
               }}
             >
-              สร้างโพสต์กิจกรรม
+              สร้างโพสต์นัดเล่น
             </Typography>
             <Formik
               initialValues={initialValues}
@@ -379,9 +330,8 @@ export default function PostActivity() {
               validate={(values) => {
                 try {
                   validationSchema.validateSync(values, { abortEarly: false });
-                  setFormErrors([]); // เคลียร์ข้อผิดพลาดทั้งหมด
+                  setFormErrors([]); // เคลียร์ข้อผิดพลาด
                 } catch (errors) {
-                  // ส่งข้อผิดพลาดที่ตรวจพบไปยัง handleValidationErrors
                   handleValidationErrors(errors.inner);
                 }
               }}
@@ -404,29 +354,69 @@ export default function PostActivity() {
                 >
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
-                      <TextField
-                        required
-                        fullWidth
-                        id="name_activity"
-                        label="ชื่อโพสต์กิจกรรม"
-                        name="nameActivity"
-                        value={values.nameActivity}
-                        onChange={(e) => {
-                          handleChange(e);
-                          handleNameChange(e);
-                        }}
-                        onBlur={handleBlur}
-                        helperText={`${values.nameActivity.length} / 100 ${touched.nameActivity && errors.nameActivity ? ` - ${errors.nameActivity}` : ""}`}
-                        error={
-                          touched.nameActivity && Boolean(errors.nameActivity)
-                        }
-                      />
+                      {/* Select สำหรับเลือกเกม */}
+                      <FormControl fullWidth>
+                        <InputLabel id="game-select-label">
+                          เลือกชื่อบอร์ดเกม
+                        </InputLabel>
+                        <Select
+                          labelId="game-select-label"
+                          id="game-select"
+                          name="gameOption" // ใช้ gameOption แทน nameGames เพื่อการตรวจสอบที่ชัดเจน
+                          value={gameOption} // ใช้ค่าจาก state gameOption
+                          onChange={(e) => {
+                            const selectedGame = e.target.value;
+                            setGameOption(selectedGame);
+                            if (selectedGame === "Other") {
+                              setFieldValue("nameGames", ""); // ตั้งค่าเป็นค่าว่างเมื่อเลือก "Other"
+                            } else {
+                              setFieldValue("nameGames", selectedGame);
+                            }
+                          }}
+                          error={touched.nameGames && Boolean(errors.nameGames)}
+                        >
+                          {predefinedGames.map((game) => (
+                            <MenuItem key={game} value={game}>
+                              {game}
+                            </MenuItem>
+                          ))}
+                          <MenuItem value="Other">อื่นๆ</MenuItem>
+                        </Select>
+                        {/* แสดงคำแจ้งเตือนเมื่อมีข้อผิดพลาด */}
+                        {touched.nameGames && errors.nameGames && (
+                          <Alert severity="error">{errors.nameGames}</Alert>
+                        )}
+
+                        <br />
+
+                        {/* แสดง TextField เมื่อเลือก "Other" */}
+                        {gameOption === "Other" && (
+                          <TextField
+                            required
+                            fullWidth
+                            id="otherNameGames"
+                            label="ชื่อบอร์ดเกม"
+                            name="nameGames"
+                            value={values.nameGames}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            helperText={`${values.nameGames.length} / 100 ${
+                              touched.nameGames && errors.nameGames
+                                ? ` - ${errors.nameGames}`
+                                : ""
+                            }`}
+                            error={
+                              touched.nameGames && Boolean(errors.nameGames)
+                            }
+                          />
+                        )}
+                      </FormControl>
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
                         id="detail_post"
-                        label="รายละเอียดของโพสต์กิจกรรม"
+                        label="รายละเอียดของโพสต์"
                         name="detailPost"
                         value={values.detailPost}
                         onChange={(e) => {
@@ -441,45 +431,67 @@ export default function PostActivity() {
                       />
                     </Grid>
                     <Grid item xs={12}>
+                      <FormControl fullWidth>
+                        <InputLabel id="number-select-label">
+                          จำนวนผู้เล่นที่จะนัดเจอกัน *
+                        </InputLabel>
+                        <Select
+                          labelId="number-select-label"
+                          name="numPeople"
+                          id="num_people"
+                          value={values.numPeople}
+                          label="จำนวนผู้เล่นที่จะนัดเจอกัน"
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          error={touched.numPeople && Boolean(errors.numPeople)}
+                        >
+                          {Array.from({ length: 74 }, (_, index) => (
+                            <MenuItem key={index + 2} value={index + 2}>
+                              {index + 2}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {touched.numPeople && errors.numPeople && (
+                          <Alert severity="error">{errors.numPeople}</Alert>
+                        )}
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DemoContainer
                           components={["DateTimePicker", "TimePicker"]}
                         >
-                          <DemoItem label={"เลือกวันที่กิจกรรมเริ่ม *"}>
+                          <DemoItem label={"เลือกวันที่เจอกัน *"}>
                             <DatePicker
-                              name="dateActivity"
-                              id="date_activity"
-                              value={values.dateActivity}
+                              name="dateMeet"
+                              id="date_meet"
+                              value={values.dateMeet}
                               onChange={(newDate) =>
-                                setFieldValue("dateActivity", newDate)
+                                setFieldValue("dateMeet", newDate)
                               }
                               onBlur={handleBlur}
                               error={
-                                touched.dateActivity &&
-                                Boolean(errors.dateActivity)
+                                touched.dateMeet && Boolean(errors.dateMeet)
                               }
                               renderInput={(params) => (
                                 <TextField {...params} />
                               )}
                             />
-                            {touched.dateActivity && errors.dateActivity && (
-                              <Alert severity="error">
-                                {errors.dateActivity}
-                              </Alert>
+                            {touched.dateMeet && errors.dateMeet && (
+                              <Alert severity="error">{errors.dateMeet}</Alert>
                             )}
                           </DemoItem>
-                          <DemoItem label={"เลือกเวลาที่กิจกรรมเริ่ม *"}>
+                          <DemoItem label={"เลือกเวลาที่เจอกัน *"}>
                             <TimePicker
-                              name="timeActivity"
-                              id="time_activity"
-                              value={values.timeActivity}
+                              name="timeMeet"
+                              id="time_meet"
+                              value={values.timeMeet}
                               onChange={(newTime) =>
-                                setFieldValue("timeActivity", newTime)
+                                setFieldValue("timeMeet", newTime)
                               }
                               onBlur={handleBlur}
                               error={
-                                touched.timeActivity &&
-                                Boolean(errors.timeActivity)
+                                touched.timeMeet && Boolean(errors.timeMeet)
                               }
                               renderInput={(params) => (
                                 <TextField {...params} />
@@ -490,16 +502,13 @@ export default function PostActivity() {
                                 seconds: renderTimeViewClock,
                               }}
                             />
-                            {touched.timeActivity && errors.timeActivity && (
-                              <Alert severity="error">
-                                {errors.timeActivity}
-                              </Alert>
+                            {touched.timeMeet && errors.timeMeet && (
+                              <Alert severity="error">{errors.timeMeet}</Alert>
                             )}
                           </DemoItem>
                         </DemoContainer>
                       </LocalizationProvider>
                     </Grid>
-
                     <Grid item xs={12}>
                       <DemoItem label={"รูปภาพ *"}>
                         <App
@@ -507,15 +516,11 @@ export default function PostActivity() {
                             handleImageUpload(file, setFieldValue)
                           }
                         />
-                        {touched.postActivityImage &&
-                          errors.postActivityImage && (
-                            <Alert severity="error">
-                              {errors.postActivityImage}
-                            </Alert>
-                          )}
+                        {touched.gamesImage && errors.gamesImage && (
+                          <Alert severity="error">{errors.gamesImage}</Alert>
+                        )}
                       </DemoItem>
                     </Grid>
-
                     <Grid item xs={12}>
                       <DemoItem label={"สถานที่ *"}>
                         <img
@@ -562,9 +567,7 @@ export default function PostActivity() {
                     </Grid>
                   </Grid>
 
-                  <br />
-
-                  {/* แสดง Alert สำหรับข้อผิดพลาดทั้งหมด */}
+                  {/* แสดง Alert สำหรับข้อผิดพลาด */}
                   {formErrors.length > 0 && (
                     <Grid item xs={12}>
                       {formErrors.map((error, index) => (
@@ -575,14 +578,10 @@ export default function PostActivity() {
                     </Grid>
                   )}
 
-                  {touched.postActivityImage && errors.postActivityImage && (
-                    <Alert severity="error">{errors.postActivityImage}</Alert>
-                  )}
-
                   <Button
                     type="submit"
                     fullWidth
-                    id="PostActivities"
+                    id="PostGames"
                     variant="contained"
                     sx={{
                       mt: 3,
@@ -593,8 +592,9 @@ export default function PostActivity() {
                         backgroundColor: "darkred",
                       },
                     }}
+                    disabled={isSubmitting}
                   >
-                    สร้างโพสต์กิจกรรม
+                    สร้างโพสต์นัดเล่น
                   </Button>
                   <Snackbar
                     open={openSnackbar}
@@ -617,4 +617,6 @@ export default function PostActivity() {
       </ThemeProvider>
     </>
   );
-}
+};
+
+export default PostPlay;

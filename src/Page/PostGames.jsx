@@ -277,11 +277,13 @@ function PostGames() {
     const accessToken = localStorage.getItem("access_token");
 
     if (!accessToken) {
-      setOpenSnackbar(true);
+      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true); // แสดง Snackbar
       setTimeout(() => {
-        router.push("/sign-in");
+        router.push("/sign-in"); // เปลี่ยนหน้าไปยังหน้าล็อกอินหลังจาก 2 วินาที
       }, 2000);
-      return;
+      return; // ยุติการทำงานของฟังก์ชันเมื่อผู้ใช้ยังไม่เข้าสู่ระบบ
     }
 
     setSelectedPost(post);
@@ -343,11 +345,13 @@ function PostGames() {
     const accessToken = localStorage.getItem("access_token");
 
     if (!accessToken) {
-      setOpenSnackbar(true);
+      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true); // แสดง Snackbar
       setTimeout(() => {
-        router.push("/sign-in");
+        router.push("/sign-in"); // เปลี่ยนหน้าไปยังหน้าล็อกอินหลังจาก 2 วินาที
       }, 2000);
-      return;
+      return; // ยุติการทำงานของฟังก์ชันเมื่อผู้ใช้ยังไม่เข้าสู่ระบบ
     }
 
     router.push(`/PostGameDetail?id=${id}#chat`);
@@ -358,11 +362,13 @@ function PostGames() {
     const accessToken = localStorage.getItem("access_token");
 
     if (!accessToken) {
-      setOpenSnackbar(true);
+      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true); // แสดง Snackbar
       setTimeout(() => {
-        router.push("/sign-in");
+        router.push("/sign-in"); // เปลี่ยนหน้าไปยังหน้าล็อกอินหลังจาก 2 วินาที
       }, 2000);
-      return;
+      return; // ยุติการทำงานของฟังก์ชันเมื่อผู้ใช้ยังไม่เข้าสู่ระบบ
     }
 
     router.push(`/PostGameDetail?id=${id}`);
@@ -381,11 +387,13 @@ function PostGames() {
     const accessToken = localStorage.getItem("access_token");
 
     if (!accessToken) {
-      setOpenSnackbar(true);
+      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true); // แสดง Snackbar
       setTimeout(() => {
-        router.push("/sign-in");
+        router.push("/sign-in"); // เปลี่ยนหน้าไปยังหน้าล็อกอินหลังจาก 2 วินาที
       }, 2000);
-      return;
+      return; // ยุติการทำงานของฟังก์ชันเมื่อผู้ใช้ยังไม่เข้าสู่ระบบ
     }
 
     router.push(`/profile/${userId}`);
@@ -640,10 +648,18 @@ function PostGames() {
                 <Dialog open={deleteOpen} onClose={handleDeleteClose}>
                   <DialogTitle>คุณต้องการลบโพสต์นี้ใช่ไหม?</DialogTitle>
                   <DialogActions>
-                    <Button onClick={handleDeleteClose} id="cancel" color="primary">
+                    <Button
+                      onClick={handleDeleteClose}
+                      id="cancel"
+                      color="primary"
+                    >
                       ยกเลิก
                     </Button>
-                    <Button onClick={handleUpdateStatus} id="Delete-Post" color="error">
+                    <Button
+                      onClick={handleUpdateStatus}
+                      id="Delete-Post"
+                      color="error"
+                    >
                       ลบโพสต์
                     </Button>
                   </DialogActions>
@@ -876,7 +892,12 @@ function PostGames() {
             <Button onClick={handleCloseDialog} id="cancel" color="error">
               ยกเลิก
             </Button>
-            <Button onClick={handleConfirmJoin} id="agree" color="primary" autoFocus>
+            <Button
+              onClick={handleConfirmJoin}
+              id="agree"
+              color="primary"
+              autoFocus
+            >
               ตกลง
             </Button>
           </DialogActions>

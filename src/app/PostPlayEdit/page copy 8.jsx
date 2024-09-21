@@ -393,19 +393,6 @@ const PostPlayEditContent = () => {
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
-                validateOnChange={true}
-                validateOnBlur={true}
-                validate={(values) => {
-                  try {
-                    validationSchema.validateSync(values, {
-                      abortEarly: false,
-                    });
-                    setFormErrors([]); // เคลียร์ข้อผิดพลาดทั้งหมด
-                  } catch (errors) {
-                    // ส่งข้อผิดพลาดที่ตรวจพบไปยัง handleValidationErrors
-                    handleValidationErrors(errors.inner);
-                  }
-                }}
               >
                 {({
                   values,
@@ -433,18 +420,18 @@ const PostPlayEditContent = () => {
                           <Select
                             labelId="game-select-label"
                             id="game-select"
-                            name="nameGames" // ใช้ nameGames จาก Formik
+                            name="nameGames"
                             value={
                               predefinedGames.includes(values.nameGames) // เช็คว่าชื่อบอร์ดเกมอยู่ใน predefinedGames หรือไม่
                                 ? values.nameGames
-                                : "Other" // ถ้าไม่อยู่ในลิสต์ ให้ตั้งค่าเป็น "Other"
+                                : "Other" // ถ้าไม่ตรง ให้เซ็ตเป็น Other
                             }
                             onChange={(e) => {
                               const selectedGame = e.target.value;
                               if (selectedGame === "Other") {
-                                setFieldValue("nameGames", ""); // ถ้าเลือก "Other" ให้ตั้งค่า nameGames เป็นค่าว่าง เพื่อแสดง TextField
+                                setFieldValue("nameGames", postData.name_games); // ถ้าเลือก Other แสดงชื่อบอร์ดเกมจากฐานข้อมูล
                               } else {
-                                setFieldValue("nameGames", selectedGame); // ถ้าเลือกเกมที่อยู่ในลิสต์ ให้ตั้งค่าตามเกมที่เลือก
+                                setFieldValue("nameGames", selectedGame); // เซ็ตค่าตามที่เลือก
                               }
                             }}
                             error={
@@ -467,26 +454,28 @@ const PostPlayEditContent = () => {
                           <br />
 
                           {/* แสดง TextField เมื่อเลือก "Other" */}
-                          {/* {values.nameGames === "" && ( */}
-                          <TextField
-                            required
-                            fullWidth
-                            id="nameGames"
-                            label="ชื่อบอร์ดเกม"
-                            name="nameGames"
-                            value={values.nameGames}
-                            onChange={handleChange} // อัปเดตค่าเมื่อมีการพิมพ์ใน TextField
-                            onBlur={handleBlur}
-                            helperText={`${values.nameGames.length || 0} / 100 ${
-                              touched.nameGames && errors.nameGames
-                                ? ` - ${errors.nameGames}`
-                                : ""
-                            }`}
-                            error={
-                              touched.nameGames && Boolean(errors.nameGames)
-                            }
-                          />
-                          {/* )} */}
+                          {values.nameGames === "Other" && (
+                            <TextField
+                              required
+                              fullWidth
+                              id="otherNameGames"
+                              label="ชื่อบอร์ดเกม"
+                              name="otherNameGames"
+                              value={postData.name_games || ""} // แสดงชื่อบอร์ดเกมจากฐานข้อมูล
+                              onChange={(e) =>
+                                setFieldValue("nameGames", e.target.value)
+                              } // ตั้งค่าให้สามารถแก้ไขชื่อบอร์ดเกม
+                              onBlur={handleBlur}
+                              helperText={`${postData.name_games.length || 0} / 100 ${
+                                touched.nameGames && errors.nameGames
+                                  ? ` - ${errors.nameGames}`
+                                  : ""
+                              }`}
+                              error={
+                                touched.nameGames && Boolean(errors.nameGames)
+                              }
+                            />
+                          )}
                         </FormControl>
                       </Grid>
                       <Grid item xs={12}>

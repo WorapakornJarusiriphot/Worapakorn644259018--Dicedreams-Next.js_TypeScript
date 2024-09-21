@@ -88,66 +88,6 @@ function SearchComponent() {
     return params.toString();
   };
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const queryParams = buildQueryParams();
-  //       console.log("Fetching data with query:", queryParams);
-
-  //       // ดึงข้อมูลจาก postGame
-  //       const gamesRes = await fetch(
-  //         `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/search?${queryParams}`
-  //       );
-
-  //       // ดึงข้อมูลจาก postActivity
-  //       const activitiesRes = await fetch(
-  //         `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/search?${queryParams}`
-  //       );
-
-  //       if (!gamesRes.ok) {
-  //         throw new Error(`Failed to fetch games: ${gamesRes.statusText}`);
-  //       }
-  //       if (!activitiesRes.ok) {
-  //         throw new Error(
-  //           `Failed to fetch activities: ${activitiesRes.statusText}`
-  //         );
-  //       }
-
-  //       let gamesData = await gamesRes.json();
-  //       let activitiesData = await activitiesRes.json();
-
-  //       // จัดเรียงโพสต์ของ postGame ตามวันที่และเวลาที่ใกล้เคียงที่สุด
-  //       gamesData = gamesData.sort((a, b) => {
-  //         const timeA = new Date(`${a.date_meet}T${a.time_meet}`).getTime();
-  //         const timeB = new Date(`${b.date_meet}T${b.time_meet}`).getTime();
-  //         return timeA - timeB;
-  //       });
-
-  //       // จัดเรียงโพสต์ของ postActivity ตามวันที่และเวลาที่ใกล้เคียงที่สุด
-  //       activitiesData = activitiesData.sort((a, b) => {
-  //         const timeA = new Date(
-  //           `${a.date_activity}T${a.time_activity}`
-  //         ).getTime();
-  //         const timeB = new Date(
-  //           `${b.date_activity}T${b.time_activity}`
-  //         ).getTime();
-  //         return timeA - timeB;
-  //       });
-
-  //       // อัพเดต state ของ games และ activities
-  //       setGames(gamesData.length > 0 ? gamesData : []);
-  //       setActivities(activitiesData.length > 0 ? activitiesData : []);
-  //     } catch (error) {
-  //       console.error("Error fetching data:", error);
-  //       setError(error.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, [search, searchDateMeet, searchTimeMeet, searchNumPeople]);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -164,15 +104,21 @@ function SearchComponent() {
 
         let gamesData = await gamesRes.json();
 
-        // จัดเรียงโพสต์ตามเวลาที่ใกล้เคียงที่สุด
-        gamesData = gamesData.sort((a, b) => {
-          const timeA = new Date(`${a.date_meet}T${a.time_meet}`).getTime();
-          const timeB = new Date(`${b.date_meet}T${b.time_meet}`).getTime();
-          return timeA - timeB;
-        });
+        // ตรวจสอบว่ามีค่า search หรือไม่ ถ้าไม่มีกำหนดให้เป็น string ว่าง
+        const searchValue = search ? search.toLowerCase() : "";
 
-        // อัปเดต state ของ games
-        setGames(gamesData.length > 0 ? gamesData : []);
+        // ตรวจสอบว่าชื่อเกมหรือรายละเอียดตรงกับคำค้นหาหรือไม่
+        gamesData = gamesData.filter(
+          (game) =>
+            game.name_games?.toLowerCase().includes(searchValue) ||
+            game.detail_post?.toLowerCase().includes(searchValue)
+        );
+
+        // Log gamesData ที่ถูกกรองแล้ว เพื่อให้แน่ใจว่าผลลัพธ์ถูกต้อง
+        console.log("Filtered games data:", gamesData);
+
+        // อัพเดตค่า state ของ games ด้วยข้อมูลที่ถูกกรองแล้ว
+        setGames(gamesData.length > 0 ? gamesData : []); // ถ้าไม่มีข้อมูลให้ตั้งค่า games เป็น array ว่าง
       } catch (error) {
         console.error("Error fetching games data:", error);
         setError(error.message);

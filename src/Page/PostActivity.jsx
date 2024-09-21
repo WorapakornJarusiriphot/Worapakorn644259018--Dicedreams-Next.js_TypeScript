@@ -288,11 +288,13 @@ function PostActivity() {
     const accessToken = localStorage.getItem("access_token");
 
     if (!accessToken) {
-      setOpenSnackbar(true);
+      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true); // แสดง Snackbar
       setTimeout(() => {
-        router.push("/sign-in");
+        router.push("/sign-in"); // เปลี่ยนหน้าไปยังหน้าล็อกอินหลังจาก 2 วินาที
       }, 2000);
-      return;
+      return; // ยุติการทำงานของฟังก์ชันเมื่อผู้ใช้ยังไม่เข้าสู่ระบบ
     }
 
     router.push(`/profile/${userId}`);
@@ -353,8 +355,11 @@ function PostActivity() {
     if (!accessToken) {
       setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
       setSnackbarSeverity("error");
-      setOpenSnackbar(true);
-      return;
+      setOpenSnackbar(true); // แสดง Snackbar
+      setTimeout(() => {
+        router.push("/sign-in"); // เปลี่ยนหน้าไปยังหน้าล็อกอินหลังจาก 2 วินาที
+      }, 2000);
+      return; // ยุติการทำงานของฟังก์ชันเมื่อผู้ใช้ยังไม่เข้าสู่ระบบ
     }
 
     try {
@@ -552,10 +557,18 @@ function PostActivity() {
                 <Dialog open={deleteOpen} onClose={handleDeleteClose}>
                   <DialogTitle>คุณต้องการลบโพสต์นี้ใช่ไหม?</DialogTitle>
                   <DialogActions>
-                    <Button onClick={handleDeleteClose} id="cancel" color="primary">
+                    <Button
+                      onClick={handleDeleteClose}
+                      id="cancel"
+                      color="primary"
+                    >
                       ยกเลิก
                     </Button>
-                    <Button onClick={handleUpdateStatus} id="Delete-Post" color="error">
+                    <Button
+                      onClick={handleUpdateStatus}
+                      id="Delete-Post"
+                      color="error"
+                    >
                       ลบโพสต์
                     </Button>
                   </DialogActions>
