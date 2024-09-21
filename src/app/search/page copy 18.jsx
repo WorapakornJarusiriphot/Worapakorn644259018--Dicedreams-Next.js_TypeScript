@@ -88,65 +88,65 @@ function SearchComponent() {
     return params.toString();
   };
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const queryParams = buildQueryParams();
-  //       console.log("Fetching data with query:", queryParams);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const queryParams = buildQueryParams();
+        console.log("Fetching data with query:", queryParams);
 
-  //       // ดึงข้อมูลจาก postGame
-  //       const gamesRes = await fetch(
-  //         `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/search?${queryParams}`
-  //       );
+        // ดึงข้อมูลจาก postGame
+        const gamesRes = await fetch(
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/search?${queryParams}`
+        );
 
-  //       // ดึงข้อมูลจาก postActivity
-  //       const activitiesRes = await fetch(
-  //         `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/search?${queryParams}`
-  //       );
+        // ดึงข้อมูลจาก postActivity
+        const activitiesRes = await fetch(
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/search?${queryParams}`
+        );
 
-  //       if (!gamesRes.ok) {
-  //         throw new Error(`Failed to fetch games: ${gamesRes.statusText}`);
-  //       }
-  //       if (!activitiesRes.ok) {
-  //         throw new Error(
-  //           `Failed to fetch activities: ${activitiesRes.statusText}`
-  //         );
-  //       }
+        if (!gamesRes.ok) {
+          throw new Error(`Failed to fetch games: ${gamesRes.statusText}`);
+        }
+        if (!activitiesRes.ok) {
+          throw new Error(
+            `Failed to fetch activities: ${activitiesRes.statusText}`
+          );
+        }
 
-  //       let gamesData = await gamesRes.json();
-  //       let activitiesData = await activitiesRes.json();
+        let gamesData = await gamesRes.json();
+        let activitiesData = await activitiesRes.json();
 
-  //       // จัดเรียงโพสต์ของ postGame ตามวันที่และเวลาที่ใกล้เคียงที่สุด
-  //       gamesData = gamesData.sort((a, b) => {
-  //         const timeA = new Date(`${a.date_meet}T${a.time_meet}`).getTime();
-  //         const timeB = new Date(`${b.date_meet}T${b.time_meet}`).getTime();
-  //         return timeA - timeB;
-  //       });
+        // จัดเรียงโพสต์ของ postGame ตามวันที่และเวลาที่ใกล้เคียงที่สุด
+        gamesData = gamesData.sort((a, b) => {
+          const timeA = new Date(`${a.date_meet}T${a.time_meet}`).getTime();
+          const timeB = new Date(`${b.date_meet}T${b.time_meet}`).getTime();
+          return timeA - timeB;
+        });
 
-  //       // จัดเรียงโพสต์ของ postActivity ตามวันที่และเวลาที่ใกล้เคียงที่สุด
-  //       activitiesData = activitiesData.sort((a, b) => {
-  //         const timeA = new Date(
-  //           `${a.date_activity}T${a.time_activity}`
-  //         ).getTime();
-  //         const timeB = new Date(
-  //           `${b.date_activity}T${b.time_activity}`
-  //         ).getTime();
-  //         return timeA - timeB;
-  //       });
+        // จัดเรียงโพสต์ของ postActivity ตามวันที่และเวลาที่ใกล้เคียงที่สุด
+        activitiesData = activitiesData.sort((a, b) => {
+          const timeA = new Date(
+            `${a.date_activity}T${a.time_activity}`
+          ).getTime();
+          const timeB = new Date(
+            `${b.date_activity}T${b.time_activity}`
+          ).getTime();
+          return timeA - timeB;
+        });
 
-  //       // อัพเดต state ของ games และ activities
-  //       setGames(gamesData.length > 0 ? gamesData : []);
-  //       setActivities(activitiesData.length > 0 ? activitiesData : []);
-  //     } catch (error) {
-  //       console.error("Error fetching data:", error);
-  //       setError(error.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+        // อัพเดต state ของ games และ activities
+        setGames(gamesData.length > 0 ? gamesData : []);
+        setActivities(activitiesData.length > 0 ? activitiesData : []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  //   fetchData();
-  // }, [search, searchDateMeet, searchTimeMeet, searchNumPeople]);
+    fetchData();
+  }, [search, searchDateMeet, searchTimeMeet, searchNumPeople]);
 
   useEffect(() => {
     const fetchData = async () => {

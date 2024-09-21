@@ -52,6 +52,7 @@ import { JwtPayload } from "jwt-decode";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { useEffect } from "react";
+import { predefinedGames } from "./constants/gameList";
 
 const darkTheme = createTheme({
   palette: {
@@ -98,7 +99,7 @@ const initialValues = {
 
 const validationSchema = Yup.object().shape({
   nameGames: Yup.string()
-    .required("กรุณากรอกชื่อโพสต์")
+    .required("กรุณาเลือกชื่อบอร์ดเกม หรือกรอกชื่อบอร์ดเกม") // เพิ่มการตรวจสอบการเลือกหรือกรอก
     .max(100, "ไม่สามารถพิมพ์เกิน 100 ตัวอักษรได้"),
   detailPost: Yup.string()
     .required("กรุณากรอกรายละเอียดของโพสต์")
@@ -141,10 +142,34 @@ const PostPlay = () => {
   const [timeMeet, setTimeMeet] = useState(dayjs());
   const [gamesImage, setGamesImage] = useState("");
   const [userId, setUserId] = useState("");
+  const [gameOption, setGameOption] = useState("");
 
   const [googleMapLink, setGoogleMapLink] = useState("");
 
   const [fullImageOpen, setFullImageOpen] = useState(false);
+
+  const [formErrors, setFormErrors] = useState([]); // สถานะสำหรับเก็บข้อผิดพลาด
+
+  const handleValidationErrors = (errors) => {
+    // ตรวจสอบว่าข้อผิดพลาดมีค่าหรือไม่และแปลงจาก object ให้เป็น array ของข้อผิดพลาด
+    const errorMessages = errors.map((error) => ({
+      path: error.path,
+      message: error.message,
+    }));
+
+    // ตั้งค่า formErrors ให้เก็บ array ของข้อผิดพลาด
+    setFormErrors(errorMessages);
+  };
+
+  const handleGameOptionChange = (event) => {
+    const selectedGame = event.target.value;
+    setGameOption(selectedGame);
+
+    // อัปเดตค่า nameGames ตามที่ผู้ใช้เลือก
+    if (selectedGame !== "Other") {
+      setNameGames(selectedGame);
+    }
+  };
 
   const handleNameChange = (event) => {
     const newText = event.target.value.slice(0, 100);
@@ -306,6 +331,17 @@ const PostPlay = () => {
               initialValues={initialValues}
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
+              validateOnChange={true}
+              validateOnBlur={true}
+              validate={(values) => {
+                try {
+                  validationSchema.validateSync(values, { abortEarly: false });
+                  setFormErrors([]); // เคลียร์ข้อผิดพลาดทั้งหมด
+                } catch (errors) {
+                  // ส่งข้อผิดพลาดที่ตรวจพบไปยัง handleValidationErrors
+                  handleValidationErrors(errors.inner);
+                }
+              }}
             >
               {({
                 values,
@@ -325,21 +361,63 @@ const PostPlay = () => {
                 >
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
-                      <TextField
-                        required
-                        fullWidth
-                        id="name_games"
-                        label="ชื่อโพสต์"
-                        name="nameGames"
-                        value={values.nameGames}
-                        onChange={(e) => {
-                          handleChange(e);
-                          handleNameChange(e);
-                        }}
-                        onBlur={handleBlur}
-                        helperText={`${values.nameGames.length} / 100 ${touched.nameGames && errors.nameGames ? ` - ${errors.nameGames}` : ""}`}
-                        error={touched.nameGames && Boolean(errors.nameGames)}
-                      />
+                      {/* Select สำหรับเลือกเกม */}
+                      <FormControl fullWidth>
+                        <InputLabel id="game-select-label">
+                          เลือกชื่อบอร์ดเกม
+                        </InputLabel>
+                        <Select
+                          labelId="game-select-label"
+                          id="game-select"
+                          name="gameOption" // ใช้ gameOption แทน nameGames เพื่อการตรวจสอบที่ชัดเจน
+                          value={gameOption} // ใช้ค่าจาก state gameOption
+                          onChange={(e) => {
+                            const selectedGame = e.target.value;
+                            setGameOption(selectedGame);
+                            if (selectedGame === "Other") {
+                              setFieldValue("nameGames", ""); // ตั้งค่าเป็นค่าว่างเมื่อเลือก "Other"
+                            } else {
+                              setFieldValue("nameGames", selectedGame);
+                            }
+                          }}
+                          error={touched.nameGames && Boolean(errors.nameGames)}
+                        >
+                          {predefinedGames.map((game) => (
+                            <MenuItem key={game} value={game}>
+                              {game}
+                            </MenuItem>
+                          ))}
+                          <MenuItem value="Other">อื่นๆ</MenuItem>
+                        </Select>
+                        {/* แสดงคำแจ้งเตือนเมื่อมีข้อผิดพลาด */}
+                        {touched.nameGames && errors.nameGames && (
+                          <Alert severity="error">{errors.nameGames}</Alert>
+                        )}
+
+                        <br />
+
+                        {/* แสดง TextField เมื่อเลือก "Other" */}
+                        {gameOption === "Other" && (
+                          <TextField
+                            required
+                            fullWidth
+                            id="nameGames"
+                            label="ชื่อบอร์ดเกม"
+                            name="nameGames"
+                            value={values.nameGames}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            helperText={`${values.nameGames.length} / 100 ${
+                              touched.nameGames && errors.nameGames
+                                ? ` - ${errors.nameGames}`
+                                : ""
+                            }`}
+                            error={
+                              touched.nameGames && Boolean(errors.nameGames)
+                            }
+                          />
+                        )}
+                      </FormControl>
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
@@ -495,6 +573,22 @@ const PostPlay = () => {
                       </DemoItem>
                     </Grid>
                   </Grid>
+
+                  {/* แสดง Alert สำหรับข้อผิดพลาดทั้งหมด */}
+                  {formErrors.length > 0 && (
+                    <Grid item xs={12}>
+                      {formErrors.map((error, index) => (
+                        <Alert severity="error" key={index} sx={{ mt: 2 }}>
+                          {error.message}
+                        </Alert>
+                      ))}
+                    </Grid>
+                  )}
+
+                  {touched.gamesImage && errors.gamesImage && (
+                    <Alert severity="error">{errors.gamesImage}</Alert>
+                  )}
+
                   <Button
                     type="submit"
                     fullWidth

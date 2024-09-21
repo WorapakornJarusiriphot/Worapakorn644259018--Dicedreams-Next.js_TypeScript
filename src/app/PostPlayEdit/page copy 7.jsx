@@ -393,19 +393,6 @@ const PostPlayEditContent = () => {
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
-                validateOnChange={true}
-                validateOnBlur={true}
-                validate={(values) => {
-                  try {
-                    validationSchema.validateSync(values, {
-                      abortEarly: false,
-                    });
-                    setFormErrors([]); // เคลียร์ข้อผิดพลาดทั้งหมด
-                  } catch (errors) {
-                    // ส่งข้อผิดพลาดที่ตรวจพบไปยัง handleValidationErrors
-                    handleValidationErrors(errors.inner);
-                  }
-                }}
               >
                 {({
                   values,
@@ -434,17 +421,14 @@ const PostPlayEditContent = () => {
                             labelId="game-select-label"
                             id="game-select"
                             name="nameGames" // ใช้ nameGames จาก Formik
-                            value={
-                              predefinedGames.includes(values.nameGames) // เช็คว่าชื่อบอร์ดเกมอยู่ใน predefinedGames หรือไม่
-                                ? values.nameGames
-                                : "Other" // ถ้าไม่อยู่ในลิสต์ ให้ตั้งค่าเป็น "Other"
-                            }
+                            value={values.nameGames} // เชื่อมต่อกับ Formik
                             onChange={(e) => {
                               const selectedGame = e.target.value;
+                              setGameOption(selectedGame);
                               if (selectedGame === "Other") {
-                                setFieldValue("nameGames", ""); // ถ้าเลือก "Other" ให้ตั้งค่า nameGames เป็นค่าว่าง เพื่อแสดง TextField
+                                setFieldValue("nameGames", ""); // ตั้งค่าเป็นค่าว่างเมื่อเลือก "Other"
                               } else {
-                                setFieldValue("nameGames", selectedGame); // ถ้าเลือกเกมที่อยู่ในลิสต์ ให้ตั้งค่าตามเกมที่เลือก
+                                setFieldValue("nameGames", selectedGame);
                               }
                             }}
                             error={
@@ -458,8 +442,7 @@ const PostPlayEditContent = () => {
                             ))}
                             <MenuItem value="Other">อื่นๆ</MenuItem>
                           </Select>
-
-                          {/* แสดงข้อความแจ้งเตือนเมื่อมีข้อผิดพลาด */}
+                          {/* แสดงคำแจ้งเตือนเมื่อมีข้อผิดพลาด */}
                           {touched.nameGames && errors.nameGames && (
                             <Alert severity="error">{errors.nameGames}</Alert>
                           )}
@@ -467,26 +450,26 @@ const PostPlayEditContent = () => {
                           <br />
 
                           {/* แสดง TextField เมื่อเลือก "Other" */}
-                          {/* {values.nameGames === "" && ( */}
-                          <TextField
-                            required
-                            fullWidth
-                            id="nameGames"
-                            label="ชื่อบอร์ดเกม"
-                            name="nameGames"
-                            value={values.nameGames}
-                            onChange={handleChange} // อัปเดตค่าเมื่อมีการพิมพ์ใน TextField
-                            onBlur={handleBlur}
-                            helperText={`${values.nameGames.length || 0} / 100 ${
-                              touched.nameGames && errors.nameGames
-                                ? ` - ${errors.nameGames}`
-                                : ""
-                            }`}
-                            error={
-                              touched.nameGames && Boolean(errors.nameGames)
-                            }
-                          />
-                          {/* )} */}
+                          {gameOption === "Other" && (
+                            <TextField
+                              required
+                              fullWidth
+                              id="otherNameGames"
+                              label="ชื่อบอร์ดเกม"
+                              name="nameGames"
+                              value={values.nameGames}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              helperText={`${values.nameGames.length} / 100 ${
+                                touched.nameGames && errors.nameGames
+                                  ? ` - ${errors.nameGames}`
+                                  : ""
+                              }`}
+                              error={
+                                touched.nameGames && Boolean(errors.nameGames)
+                              }
+                            />
+                          )}
                         </FormControl>
                       </Grid>
                       <Grid item xs={12}>

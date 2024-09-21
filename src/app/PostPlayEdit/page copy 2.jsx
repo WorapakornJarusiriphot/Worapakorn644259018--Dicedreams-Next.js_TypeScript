@@ -135,19 +135,6 @@ const PostPlayEditContent = () => {
 
   const [fullImageOpen, setFullImageOpen] = useState(false);
 
-  const [formErrors, setFormErrors] = useState([]); // สถานะสำหรับเก็บข้อผิดพลาด
-
-  const handleValidationErrors = (errors) => {
-    // ตรวจสอบว่าข้อผิดพลาดมีค่าหรือไม่และแปลงจาก object ให้เป็น array ของข้อผิดพลาด
-    const errorMessages = errors.map((error) => ({
-      path: error.path,
-      message: error.message,
-    }));
-
-    // ตั้งค่า formErrors ให้เก็บ array ของข้อผิดพลาด
-    setFormErrors(errorMessages);
-  };
-
   const handleGameOptionChange = (event) => {
     const selectedGame = event.target.value;
     setGameOption(selectedGame);
@@ -393,19 +380,6 @@ const PostPlayEditContent = () => {
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
-                validateOnChange={true}
-                validateOnBlur={true}
-                validate={(values) => {
-                  try {
-                    validationSchema.validateSync(values, {
-                      abortEarly: false,
-                    });
-                    setFormErrors([]); // เคลียร์ข้อผิดพลาดทั้งหมด
-                  } catch (errors) {
-                    // ส่งข้อผิดพลาดที่ตรวจพบไปยัง handleValidationErrors
-                    handleValidationErrors(errors.inner);
-                  }
-                }}
               >
                 {({
                   values,
@@ -433,18 +407,15 @@ const PostPlayEditContent = () => {
                           <Select
                             labelId="game-select-label"
                             id="game-select"
-                            name="nameGames" // ใช้ nameGames จาก Formik
-                            value={
-                              predefinedGames.includes(values.nameGames) // เช็คว่าชื่อบอร์ดเกมอยู่ใน predefinedGames หรือไม่
-                                ? values.nameGames
-                                : "Other" // ถ้าไม่อยู่ในลิสต์ ให้ตั้งค่าเป็น "Other"
-                            }
+                            name="gameOption" // ใช้ gameOption แทน nameGames เพื่อการตรวจสอบที่ชัดเจน
+                            value={gameOption} // ใช้ค่าจาก state gameOption
                             onChange={(e) => {
                               const selectedGame = e.target.value;
+                              setGameOption(selectedGame);
                               if (selectedGame === "Other") {
-                                setFieldValue("nameGames", ""); // ถ้าเลือก "Other" ให้ตั้งค่า nameGames เป็นค่าว่าง เพื่อแสดง TextField
+                                setFieldValue("nameGames", ""); // ตั้งค่าเป็นค่าว่างเมื่อเลือก "Other"
                               } else {
-                                setFieldValue("nameGames", selectedGame); // ถ้าเลือกเกมที่อยู่ในลิสต์ ให้ตั้งค่าตามเกมที่เลือก
+                                setFieldValue("nameGames", selectedGame);
                               }
                             }}
                             error={
@@ -458,8 +429,7 @@ const PostPlayEditContent = () => {
                             ))}
                             <MenuItem value="Other">อื่นๆ</MenuItem>
                           </Select>
-
-                          {/* แสดงข้อความแจ้งเตือนเมื่อมีข้อผิดพลาด */}
+                          {/* แสดงคำแจ้งเตือนเมื่อมีข้อผิดพลาด */}
                           {touched.nameGames && errors.nameGames && (
                             <Alert severity="error">{errors.nameGames}</Alert>
                           )}
@@ -467,26 +437,26 @@ const PostPlayEditContent = () => {
                           <br />
 
                           {/* แสดง TextField เมื่อเลือก "Other" */}
-                          {/* {values.nameGames === "" && ( */}
-                          <TextField
-                            required
-                            fullWidth
-                            id="nameGames"
-                            label="ชื่อบอร์ดเกม"
-                            name="nameGames"
-                            value={values.nameGames}
-                            onChange={handleChange} // อัปเดตค่าเมื่อมีการพิมพ์ใน TextField
-                            onBlur={handleBlur}
-                            helperText={`${values.nameGames.length || 0} / 100 ${
-                              touched.nameGames && errors.nameGames
-                                ? ` - ${errors.nameGames}`
-                                : ""
-                            }`}
-                            error={
-                              touched.nameGames && Boolean(errors.nameGames)
-                            }
-                          />
-                          {/* )} */}
+                          {gameOption === "Other" && (
+                            <TextField
+                              required
+                              fullWidth
+                              id="otherNameGames"
+                              label="ชื่อบอร์ดเกม"
+                              name="nameGames"
+                              value={values.nameGames}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              helperText={`${values.nameGames.length} / 100 ${
+                                touched.nameGames && errors.nameGames
+                                  ? ` - ${errors.nameGames}`
+                                  : ""
+                              }`}
+                              error={
+                                touched.nameGames && Boolean(errors.nameGames)
+                              }
+                            />
+                          )}
                         </FormControl>
                       </Grid>
                       <Grid item xs={12}>
@@ -662,22 +632,6 @@ const PostPlayEditContent = () => {
                         </DemoItem>
                       </Grid>
                     </Grid>
-
-                    {/* แสดง Alert สำหรับข้อผิดพลาดทั้งหมด */}
-                    {formErrors.length > 0 && (
-                      <Grid item xs={12}>
-                        {formErrors.map((error, index) => (
-                          <Alert severity="error" key={index} sx={{ mt: 2 }}>
-                            {error.message}
-                          </Alert>
-                        ))}
-                      </Grid>
-                    )}
-
-                    {touched.gamesImage && errors.gamesImage && (
-                      <Alert severity="error">{errors.gamesImage}</Alert>
-                    )}
-
                     <Button
                       type="submit"
                       fullWidth

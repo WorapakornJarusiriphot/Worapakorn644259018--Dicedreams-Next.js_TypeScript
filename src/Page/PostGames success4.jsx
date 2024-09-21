@@ -362,13 +362,11 @@ function PostGames() {
     const accessToken = localStorage.getItem("access_token");
 
     if (!accessToken) {
-      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
-      setSnackbarSeverity("error");
-      setOpenSnackbar(true); // แสดง Snackbar
+      setOpenSnackbar(true);
       setTimeout(() => {
-        router.push("/sign-in"); // เปลี่ยนหน้าไปยังหน้าล็อกอินหลังจาก 2 วินาที
+        router.push("/sign-in");
       }, 2000);
-      return; // ยุติการทำงานของฟังก์ชันเมื่อผู้ใช้ยังไม่เข้าสู่ระบบ
+      return;
     }
 
     router.push(`/PostGameDetail?id=${id}`);
@@ -387,13 +385,11 @@ function PostGames() {
     const accessToken = localStorage.getItem("access_token");
 
     if (!accessToken) {
-      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
-      setSnackbarSeverity("error");
-      setOpenSnackbar(true); // แสดง Snackbar
+      setOpenSnackbar(true);
       setTimeout(() => {
-        router.push("/sign-in"); // เปลี่ยนหน้าไปยังหน้าล็อกอินหลังจาก 2 วินาที
+        router.push("/sign-in");
       }, 2000);
-      return; // ยุติการทำงานของฟังก์ชันเมื่อผู้ใช้ยังไม่เข้าสู่ระบบ
+      return;
     }
 
     router.push(`/profile/${userId}`);

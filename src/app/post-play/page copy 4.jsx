@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import * as React from "react";
-import { Suspense } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -36,9 +35,10 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/firebaseConfig";
 import Snackbar from "@mui/material/Snackbar";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
+// import { FileUpload, FileUploadProps } from '@/components/FileUpload/FileUpload';
 import App from "./App";
 import { renderTimeViewClock } from "@mui/x-date-pickers/timeViewRenderers";
 import locationImage from "./location.png";
@@ -53,6 +53,7 @@ import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { useEffect } from "react";
 import { predefinedGames } from "./constants/gameList";
+import { useRef } from "react";
 
 const darkTheme = createTheme({
   palette: {
@@ -88,6 +89,15 @@ const darkTheme = createTheme({
   },
 });
 
+const initialValues = {
+  nameGames: "",
+  detailPost: "",
+  numPeople: 2,
+  dateMeet: dayjs(),
+  timeMeet: dayjs().add(5, "minute"),
+  gamesImage: "",
+};
+
 const validationSchema = Yup.object().shape({
   nameGames: Yup.string()
     .required("กรุณาเลือกชื่อบอร์ดเกม หรือกรอกชื่อบอร์ดเกม") // เพิ่มการตรวจสอบการเลือกหรือกรอก
@@ -121,31 +131,32 @@ const validationSchema = Yup.object().shape({
   gamesImage: Yup.mixed().required("กรุณาอัพโหลดรูปภาพด้วย"),
 });
 
-const PostPlayEditContent = () => {
-  const searchParams = useSearchParams();
-  const id = searchParams.get("id");
-  const [postData, setPostData] = useState(null);
-  const [formattedTimeMeet, setFormattedTimeMeet] = useState(null);
+const PostPlay = () => {
+  const router = useRouter();
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState("success");
+  const [nameGames, setNameGames] = useState("");
+  const [detailPost, setDetailPost] = useState("");
+  const [numPeople, setNumPeople] = useState(2);
+  const [dateMeet, setDateMeet] = useState(dayjs());
+  const [timeMeet, setTimeMeet] = useState(dayjs());
+  const [gamesImage, setGamesImage] = useState("");
+  const [userId, setUserId] = useState("");
   const [gameOption, setGameOption] = useState("");
 
   const [googleMapLink, setGoogleMapLink] = useState("");
 
   const [fullImageOpen, setFullImageOpen] = useState(false);
 
-  const [formErrors, setFormErrors] = useState([]); // สถานะสำหรับเก็บข้อผิดพลาด
-
-  const handleValidationErrors = (errors) => {
-    // ตรวจสอบว่าข้อผิดพลาดมีค่าหรือไม่และแปลงจาก object ให้เป็น array ของข้อผิดพลาด
-    const errorMessages = errors.map((error) => ({
-      path: error.path,
-      message: error.message,
-    }));
-
-    // ตั้งค่า formErrors ให้เก็บ array ของข้อผิดพลาด
-    setFormErrors(errorMessages);
+  // ref สำหรับการเลื่อนไปยังฟิลด์ที่มีข้อผิดพลาด
+  const errorRefs = {
+    nameGames: useRef(null),
+    detailPost: useRef(null),
+    numPeople: useRef(null),
+    dateMeet: useRef(null),
+    timeMeet: useRef(null),
+    gamesImage: useRef(null),
   };
 
   const handleGameOptionChange = (event) => {
@@ -158,85 +169,38 @@ const PostPlayEditContent = () => {
     }
   };
 
+  const handleNameChange = (event) => {
+    const newText = event.target.value.slice(0, 100);
+    setNameGames(newText);
+  };
+
+  const handleDetailChange = (event) => {
+    const newText = event.target.value.slice(0, 500);
+    setDetailPost(newText);
+  };
+
   useEffect(() => {
-    if (!window.location.hash) {
-      window.location.hash = "loaded";
-      window.location.reload();
+    const token = localStorage.getItem("access_token");
+
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setUserId(decoded.users_id);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    } else {
+      console.error("JWT Token is missing");
     }
   }, []);
 
   useEffect(() => {
-    const fetchPostData = async () => {
-      try {
-        const token = localStorage.getItem("access_token");
-        const response = await axios.get(
-          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.status === 200) {
-          setPostData(response.data);
-          const formattedTime = dayjs(response.data.time_meet, "HH:mm:ss");
-          setFormattedTimeMeet(formattedTime);
-        } else {
-          setAlertMessage("ไม่สามารถดึงข้อมูลโพสต์ได้");
-          setAlertSeverity("error");
-          setOpenSnackbar(true);
-        }
-      } catch (error) {
-        console.error("Error fetching post data:", error);
-        setAlertMessage("ไม่สามารถดึงข้อมูลโพสต์ได้");
-        setAlertSeverity("error");
-        setOpenSnackbar(true);
-      }
-    };
-
-    if (id) {
-      fetchPostData();
+    if (location) {
+      setGoogleMapLink(
+        `https://www.google.com/maps/place/Outcast+Gaming/@13.819525,99.9742148,12z/data=!4m19!1m12!4m11!1m3!2m2!1d100.0641653!2d13.8180247!1m6!1m2!1s0x30e2e58a2b199583:0x4cac0a358181f29!2zNDMgNSDguJYuIOC4o-C4suC4iuC4lOC4s-C5gOC4meC4tOC4mSDguJXguLPguJrguKXguJ7guKPguLDguJvguJDguKHguYDguIjguJTguLXguKLguYwg4LmA4Lih4Li34Lit4LiHIOC4meC4hOC4o-C4m-C4kOC4oSA3MzAwMA!2m2!1d100.0566166!2d13.8195387!3m5!1s0x30e2e58a2b199583:0x4cac0a358181f29!8m2!3d13.8195387!4d100.0566166!16s%2Fg%2F11tt2sj6yd?entry=ttu`
+      );
     }
-  }, [id]);
-
-  useEffect(() => {
-    const fetchPostData = async () => {
-      try {
-        const token = localStorage.getItem("access_token");
-        const response = await axios.get(
-          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.status === 200) {
-          setPostData(response.data);
-          const formattedTime = dayjs(
-            response.data.time_meet,
-            "HH:mm:ss"
-          ).format("hh:mm A");
-          setFormattedTimeMeet(formattedTime);
-        } else {
-          setAlertMessage("ไม่สามารถดึงข้อมูลโพสต์ได้");
-          setAlertSeverity("error");
-          setOpenSnackbar(true);
-        }
-      } catch (error) {
-        console.error("Error fetching post data:", error);
-        setAlertMessage("ไม่สามารถดึงข้อมูลโพสต์ได้");
-        setAlertSeverity("error");
-        setOpenSnackbar(true);
-      }
-    };
-
-    if (id) {
-      fetchPostData();
-    }
-  }, [id]);
+  }, []);
 
   const handleSubmit = async (values, { setSubmitting }) => {
     const token = localStorage.getItem("access_token");
@@ -254,14 +218,14 @@ const PostPlayEditContent = () => {
       num_people: values.numPeople,
       date_meet: values.dateMeet.format("MM/DD/YYYY"),
       time_meet: values.timeMeet.format("HH:mm:ss"),
+      status_post: "active",
+      users_id: userId,
       games_image: values.gamesImage,
     };
 
-    console.log("Submitted data:", data);
-
     try {
-      const response = await axios.put(
-        `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/${id}`,
+      const response = await axios.post(
+        "https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame",
         data,
         {
           headers: {
@@ -271,19 +235,24 @@ const PostPlayEditContent = () => {
         }
       );
 
-      if (response.status === 200) {
-        setAlertMessage("แก้ไขโพสต์สำเร็จ!");
+      if (response.status === 201) {
+        setAlertMessage("สร้างโพสต์สำเร็จ!");
         setAlertSeverity("success");
-        window.location.href = "/";
+        router.push("/");
       } else {
         setAlertMessage(
-          `การแก้ไขโพสต์ไม่สำเร็จ: ได้รับสถานะ ${response.status}`
+          `การสร้างโพสต์ไม่สำเร็จ: ได้รับสถานะ ${response.status}`
         );
         setAlertSeverity("error");
       }
     } catch (error) {
-      console.error("Error updating post:", error);
-      setAlertMessage("การแก้ไขโพสต์ไม่สำเร็จ: เกิดข้อผิดพลาด");
+      if (axios.isAxiosError(error) && error.response) {
+        setAlertMessage(
+          `สร้างโพสต์ไม่สำเร็จ: ${error.response.data.message || "เกิดข้อผิดพลาด"}`
+        );
+      } else {
+        setAlertMessage("สร้างโพสต์ไม่สำเร็จ: เกิดข้อผิดพลาด");
+      }
       setAlertSeverity("error");
     }
     setOpenSnackbar(true);
@@ -308,31 +277,6 @@ const PostPlayEditContent = () => {
     if (reason === "clickaway") return;
     setOpenSnackbar(false);
   };
-
-  if (!postData || !formattedTimeMeet) {
-    return (
-      <ThemeProvider theme={darkTheme}>
-        <Container component="main" maxWidth="xs">
-          <CssBaseline />
-          <Box
-            sx={{
-              marginTop: 8,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Typography component="h1" variant="h5">
-              กำลังโหลด...
-            </Typography>
-          </Box>
-        </Container>
-      </ThemeProvider>
-    );
-  }
-
-  console.log("Post data:", postData);
-  console.log("Formatted time meet:", formattedTimeMeet);
 
   const handleImageClick = () => {
     setFullImageOpen(true);
@@ -379,44 +323,41 @@ const PostPlayEditContent = () => {
                 lineHeight: 1.2, // ปรับระยะห่างบรรทัดให้พอดี
               }}
             >
-              แก้ไขโพสต์นัดเล่น
+              สร้างโพสต์นัดเล่น
             </Typography>
-            <Suspense fallback={<div>Loading...</div>}>
-              <Formik
-                initialValues={{
-                  nameGames: postData.name_games,
-                  detailPost: postData.detail_post,
-                  numPeople: postData.num_people,
-                  dateMeet: dayjs(postData.date_meet),
-                  timeMeet: dayjs().add(5, "minute"),
-                  gamesImage: postData.games_image,
-                }}
-                validationSchema={validationSchema}
-                onSubmit={handleSubmit}
-                validateOnChange={true}
-                validateOnBlur={true}
-                validate={(values) => {
-                  try {
-                    validationSchema.validateSync(values, {
-                      abortEarly: false,
-                    });
-                    setFormErrors([]); // เคลียร์ข้อผิดพลาดทั้งหมด
-                  } catch (errors) {
-                    // ส่งข้อผิดพลาดที่ตรวจพบไปยัง handleValidationErrors
-                    handleValidationErrors(errors.inner);
+            <Formik
+              initialValues={initialValues}
+              validationSchema={validationSchema}
+              onSubmit={handleSubmit}
+            >
+              {({
+                values,
+                errors,
+                touched,
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                setFieldValue,
+                isSubmitting,
+              }) => {
+                // ใช้ useEffect เพื่อตรวจสอบข้อผิดพลาด
+                // ตรวจสอบข้อผิดพลาดหลังการ validation
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                useEffect(() => {
+                  if (Object.keys(errors).length > 0) {
+                    const firstErrorKey = Object.keys(errors)[0]; // ดึง key ของฟิลด์ที่มีข้อผิดพลาดแรก
+                    const errorElement = document.getElementById(firstErrorKey); // ค้นหา element ที่ตรงกับ id
+                    if (errorElement) {
+                      errorElement.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      }); // เลื่อนไปที่ฟิลด์ที่มีข้อผิดพลาด
+                      errorElement.focus(); // ตั้งค่า focus ไปที่ฟิลด์นั้น
+                    }
                   }
-                }}
-              >
-                {({
-                  values,
-                  errors,
-                  touched,
-                  handleChange,
-                  handleBlur,
-                  handleSubmit,
-                  setFieldValue,
-                  isSubmitting,
-                }) => (
+                }, [errors]);
+
+                return (
                   <Box
                     component="form"
                     noValidate
@@ -433,18 +374,15 @@ const PostPlayEditContent = () => {
                           <Select
                             labelId="game-select-label"
                             id="game-select"
-                            name="nameGames" // ใช้ nameGames จาก Formik
-                            value={
-                              predefinedGames.includes(values.nameGames) // เช็คว่าชื่อบอร์ดเกมอยู่ใน predefinedGames หรือไม่
-                                ? values.nameGames
-                                : "Other" // ถ้าไม่อยู่ในลิสต์ ให้ตั้งค่าเป็น "Other"
-                            }
+                            name="gameOption" // ใช้ gameOption แทน nameGames เพื่อการตรวจสอบที่ชัดเจน
+                            value={gameOption} // ใช้ค่าจาก state gameOption
                             onChange={(e) => {
                               const selectedGame = e.target.value;
+                              setGameOption(selectedGame);
                               if (selectedGame === "Other") {
-                                setFieldValue("nameGames", ""); // ถ้าเลือก "Other" ให้ตั้งค่า nameGames เป็นค่าว่าง เพื่อแสดง TextField
+                                setFieldValue("nameGames", ""); // ตั้งค่าเป็นค่าว่างเมื่อเลือก "Other"
                               } else {
-                                setFieldValue("nameGames", selectedGame); // ถ้าเลือกเกมที่อยู่ในลิสต์ ให้ตั้งค่าตามเกมที่เลือก
+                                setFieldValue("nameGames", selectedGame);
                               }
                             }}
                             error={
@@ -458,8 +396,7 @@ const PostPlayEditContent = () => {
                             ))}
                             <MenuItem value="Other">อื่นๆ</MenuItem>
                           </Select>
-
-                          {/* แสดงข้อความแจ้งเตือนเมื่อมีข้อผิดพลาด */}
+                          {/* แสดงคำแจ้งเตือนเมื่อมีข้อผิดพลาด */}
                           {touched.nameGames && errors.nameGames && (
                             <Alert severity="error">{errors.nameGames}</Alert>
                           )}
@@ -467,26 +404,26 @@ const PostPlayEditContent = () => {
                           <br />
 
                           {/* แสดง TextField เมื่อเลือก "Other" */}
-                          {/* {values.nameGames === "" && ( */}
-                          <TextField
-                            required
-                            fullWidth
-                            id="nameGames"
-                            label="ชื่อบอร์ดเกม"
-                            name="nameGames"
-                            value={values.nameGames}
-                            onChange={handleChange} // อัปเดตค่าเมื่อมีการพิมพ์ใน TextField
-                            onBlur={handleBlur}
-                            helperText={`${values.nameGames.length || 0} / 100 ${
-                              touched.nameGames && errors.nameGames
-                                ? ` - ${errors.nameGames}`
-                                : ""
-                            }`}
-                            error={
-                              touched.nameGames && Boolean(errors.nameGames)
-                            }
-                          />
-                          {/* )} */}
+                          {gameOption === "Other" && (
+                            <TextField
+                              required
+                              fullWidth
+                              id="otherNameGames"
+                              label="ชื่อบอร์ดเกม"
+                              name="nameGames"
+                              value={values.nameGames}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              helperText={`${values.nameGames.length} / 100 ${
+                                touched.nameGames && errors.nameGames
+                                  ? ` - ${errors.nameGames}`
+                                  : ""
+                              }`}
+                              error={
+                                touched.nameGames && Boolean(errors.nameGames)
+                              }
+                            />
+                          )}
                         </FormControl>
                       </Grid>
                       <Grid item xs={12}>
@@ -496,7 +433,10 @@ const PostPlayEditContent = () => {
                           label="รายละเอียดของโพสต์"
                           name="detailPost"
                           value={values.detailPost}
-                          onChange={handleChange}
+                          onChange={(e) => {
+                            handleChange(e);
+                            handleDetailChange(e);
+                          }}
                           onBlur={handleBlur}
                           helperText={`${values.detailPost.length} / 500 ${touched.detailPost && errors.detailPost ? ` - ${errors.detailPost}` : ""}`}
                           error={
@@ -565,7 +505,7 @@ const PostPlayEditContent = () => {
                               <TimePicker
                                 name="timeMeet"
                                 id="time_meet"
-                                value={dayjs(values.timeMeet, "hh:mm A")}
+                                value={values.timeMeet}
                                 onChange={(newTime) =>
                                   setFieldValue("timeMeet", newTime)
                                 }
@@ -592,25 +532,11 @@ const PostPlayEditContent = () => {
                         </LocalizationProvider>
                       </Grid>
                       <Grid item xs={12}>
-                        <DemoItem label={"รูปภาพเก่า *"}>
-                          <img
-                            src={values.gamesImage}
-                            alt="Location"
-                            style={{
-                              width: "100%",
-                              cursor: "pointer",
-                              marginTop: "10px",
-                            }}
-                          />
-                        </DemoItem>
-                      </Grid>
-                      <Grid item xs={12}>
-                        <DemoItem label={"รูปภาพใหม่ที่จะอัพโหลด *"}>
+                        <DemoItem label={"รูปภาพ *"}>
                           <App
                             onImageUpload={(file) =>
                               handleImageUpload(file, setFieldValue)
                             }
-                            initialImage={`https://dicedreams-backend-deploy-to-render.onrender.com/images/${values.gamesImage}`} // ส่ง URL ของรูปภาพให้กับ App.js
                           />
                           {touched.gamesImage && errors.gamesImage && (
                             <Alert severity="error">{errors.gamesImage}</Alert>
@@ -662,37 +588,23 @@ const PostPlayEditContent = () => {
                         </DemoItem>
                       </Grid>
                     </Grid>
-
-                    {/* แสดง Alert สำหรับข้อผิดพลาดทั้งหมด */}
-                    {formErrors.length > 0 && (
-                      <Grid item xs={12}>
-                        {formErrors.map((error, index) => (
-                          <Alert severity="error" key={index} sx={{ mt: 2 }}>
-                            {error.message}
-                          </Alert>
-                        ))}
-                      </Grid>
-                    )}
-
-                    {touched.gamesImage && errors.gamesImage && (
-                      <Alert severity="error">{errors.gamesImage}</Alert>
-                    )}
-
                     <Button
                       type="submit"
                       fullWidth
-                      id="Edit-PostGames"
+                      id="PostGames"
                       variant="contained"
                       sx={{
                         mt: 3,
                         mb: 2,
                         color: "white",
                         backgroundColor: "blue",
-                        "&:hover": { backgroundColor: "darkred" },
+                        "&:hover": {
+                          backgroundColor: "darkred",
+                        },
                       }}
                       disabled={isSubmitting}
                     >
-                      แก้ไขโพสต์
+                      สร้างโพสต์นัดเล่น
                     </Button>
                     <Snackbar
                       open={openSnackbar}
@@ -708,9 +620,9 @@ const PostPlayEditContent = () => {
                       </Alert>
                     </Snackbar>
                   </Box>
-                )}
-              </Formik>
-            </Suspense>
+                );
+              }}
+            </Formik>
           </Box>
         </Container>
       </ThemeProvider>
@@ -718,12 +630,4 @@ const PostPlayEditContent = () => {
   );
 };
 
-const PostPlayEdit = () => {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <PostPlayEditContent />
-    </Suspense>
-  );
-};
-
-export default PostPlayEdit;
+export default PostPlay;
