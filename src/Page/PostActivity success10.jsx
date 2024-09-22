@@ -471,21 +471,23 @@ function PostActivity() {
                 <Grid item>
                   <div onClick={() => handleProfileClick(item.store_id)}>
                     <Avatar
-                      alt={`${item.userFirstName} ${item.userLastName}`}
-                      src={item.userProfileImage}
                       sx={{
                         borderRadius: "50%",
                         width: "50px",
                         height: "50px",
                         cursor: "pointer",
-                        backgroundColor: item.userProfileImage
-                          ? "transparent"
-                          : "gray",
                         border: "2px solid white", // เพิ่มกรอบสีขาว
+                        overflow: "hidden", // เพื่อให้รูปภาพถูกครอบภายในวงกลม
                       }}
                     >
-                      {!item.userProfileImage &&
-                        `${item.userFirstName?.[0] ?? ""}${item.userLastName?.[0] ?? ""}`}
+                      <Image
+                        src={item.userProfileImage}
+                        alt={`${item.userFirstName}`}
+                        width={50}
+                        height={50}
+                        layout="fixed"
+                        objectFit="cover" // เพื่อให้รูปภาพถูกครอบอย่างสม่ำเสมอภายใน Avatar
+                      />
                     </Avatar>
                   </div>
                 </Grid>
