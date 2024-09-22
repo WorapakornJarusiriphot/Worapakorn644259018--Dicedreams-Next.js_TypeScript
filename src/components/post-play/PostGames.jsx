@@ -372,7 +372,7 @@ function PostGames() {
         throw new Error("การอัปเดตสถานะโพสต์ล้มเหลว");
       }
 
-      setSnackbarMessage("โพสต์กิจกรรมนี้ได้ถูกลบเป็นที่เรียบร้อยแล้ว");
+      setSnackbarMessage("โพสต์นี้ได้ถูกลบเป็นที่เรียบร้อยแล้ว");
       setSnackbarSeverity("success");
       setOpenSnackbar(true);
 
@@ -494,17 +494,17 @@ function PostGames() {
                     }
                   >
                     <EditIcon sx={{ marginRight: 1 }} />
-                    แก้ไขโพสต์กิจกรรม
+                    แก้ไขโพสต์
                   </MenuItem>
                   <MenuItem onClick={handleDeleteOpen}>
                     <DeleteIcon sx={{ marginRight: 1 }} />
-                    ลบโพสต์กิจกรรม
+                    ลบโพสต์
                   </MenuItem>
                 </Menu>
 
                 {/* Dialog สำหรับแก้ไขโพสต์ */}
                 {/* <Dialog open={editOpen} onClose={handleEditClose}>
-                  <DialogTitle>แก้ไขโพสต์กิจกรรม</DialogTitle>
+                  <DialogTitle>แก้ไขโพสต์</DialogTitle>
                   <DialogActions>
                     <Button onClick={handleEditClose} color="primary">
                       ยกเลิก
