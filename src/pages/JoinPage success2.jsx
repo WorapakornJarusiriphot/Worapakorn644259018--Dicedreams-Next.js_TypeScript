@@ -103,7 +103,7 @@ function JoinPage() {
       console.error("Failed to update status:", error);
     }
 
-    // เคลียร์การเลือกทั้งหมดหลังจากเตะเสร็จ
+    // เคลียร์การเลือกทั้งหมดหลังจากลบเสร็จ
     setSelectedConfirmed([]);
   };
 
@@ -421,7 +421,7 @@ function JoinPage() {
               }
               id="add"
             >
-              เพิ่มผู้เข้าร่วม
+              ADD
             </Button>
           </Box>
 
@@ -576,7 +576,7 @@ function JoinPage() {
               onClick={handleRemoveClick} // เรียกใช้ฟังก์ชันเปิด Dialog
               id="remove"
             >
-              เตะ
+              REMOVE
             </Button>
           </Box>
 
@@ -695,10 +695,10 @@ function JoinPage() {
             open={confirmDialogOpen}
             onClose={() => setConfirmDialogOpen(false)}
           >
-            <DialogTitle>ยืนยันการเตะ</DialogTitle>
+            <DialogTitle>ยืนยันการลบ</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                คุณแน่ใจหรือไม่ที่จะเตะผู้ใช้นี้ออกจากการเข้าร่วม?
+                คุณแน่ใจหรือไม่ที่จะลบผู้ใช้นี้ออกจากการเข้าร่วม?
               </DialogContentText>
             </DialogContent>
             <DialogActions>

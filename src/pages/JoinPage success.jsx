@@ -89,7 +89,9 @@ function JoinPage() {
 
   const handleRemove = async () => {
     const promises = selectedConfirmed.map((name) => {
-      const participant = filteredConfirmed.find((p) => p.user.email === name);
+      const participant = filteredConfirmed.find(
+        (p) => p.user.first_name === name
+      );
       if (participant) {
         return updateParticipantStatus(participant.part_Id, "unActive");
       }
@@ -103,7 +105,7 @@ function JoinPage() {
       console.error("Failed to update status:", error);
     }
 
-    // เคลียร์การเลือกทั้งหมดหลังจากเตะเสร็จ
+    // เคลียร์การเลือกทั้งหมดหลังจากลบเสร็จ
     setSelectedConfirmed([]);
   };
 
@@ -117,7 +119,9 @@ function JoinPage() {
 
   const handleRemoveConfirm = async () => {
     const promises = selectedConfirmed.map((name) => {
-      const participant = filteredConfirmed.find((p) => p.user.email === name);
+      const participant = filteredConfirmed.find(
+        (p) => p.user.first_name === name
+      );
       if (participant) {
         return updateParticipantStatus(participant.part_Id, "unActive");
       }
@@ -148,14 +152,14 @@ function JoinPage() {
   const handleSelectAllClick = (event, type) => {
     if (type === "unconfirmed") {
       if (event.target.checked) {
-        const newSelecteds = filteredUnconfirmed.map((n) => n.user.email);
+        const newSelecteds = filteredUnconfirmed.map((n) => n.user.first_name);
         setSelectedUnconfirmed(newSelecteds);
         return;
       }
       setSelectedUnconfirmed([]);
     } else if (type === "confirmed") {
       if (event.target.checked) {
-        const newSelecteds = filteredConfirmed.map((n) => n.user.email);
+        const newSelecteds = filteredConfirmed.map((n) => n.user.first_name);
         setSelectedConfirmed(newSelecteds);
         return;
       }
@@ -251,7 +255,7 @@ function JoinPage() {
   const filteredUnconfirmed = participants.filter(
     (participant) =>
       participant.participant_status === "unActive" &&
-      (participant.user.email
+      (participant.user.first_name
         .toLowerCase()
         .includes(searchText.toLowerCase()) ||
         participant.user.email.toLowerCase().includes(searchText.toLowerCase()))
@@ -260,7 +264,7 @@ function JoinPage() {
   const filteredConfirmed = participants.filter(
     (participant) =>
       participant.participant_status === "active" &&
-      (participant.user.email
+      (participant.user.first_name
         .toLowerCase()
         .includes(searchText.toLowerCase()) ||
         participant.user.email.toLowerCase().includes(searchText.toLowerCase()))
@@ -412,7 +416,7 @@ function JoinPage() {
               onClick={() =>
                 selectedUnconfirmed.forEach((name) => {
                   const participant = filteredUnconfirmed.find(
-                    (p) => p.user.email === name
+                    (p) => p.user.first_name === name
                   );
                   if (participant) {
                     updateParticipantStatus(participant.part_Id, "active");
@@ -421,7 +425,7 @@ function JoinPage() {
               }
               id="add"
             >
-              เพิ่มผู้เข้าร่วม
+              ADD
             </Button>
           </Box>
 
@@ -462,8 +466,9 @@ function JoinPage() {
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((participant, index) => {
                     const isItemSelected =
-                      selectedUnconfirmed.indexOf(participant.user.email) !==
-                      -1;
+                      selectedUnconfirmed.indexOf(
+                        participant.user.first_name
+                      ) !== -1;
                     return (
                       <TableRow
                         key={index}
@@ -481,7 +486,7 @@ function JoinPage() {
                             onChange={(event) =>
                               handleCheckboxClick(
                                 event,
-                                participant.user.email,
+                                participant.user.first_name,
                                 "unconfirmed"
                               )
                             }
@@ -576,7 +581,7 @@ function JoinPage() {
               onClick={handleRemoveClick} // เรียกใช้ฟังก์ชันเปิด Dialog
               id="remove"
             >
-              เตะ
+              REMOVE
             </Button>
           </Box>
 
@@ -616,7 +621,8 @@ function JoinPage() {
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((participant, index) => {
                     const isItemSelected =
-                      selectedConfirmed.indexOf(participant.user.email) !== -1;
+                      selectedConfirmed.indexOf(participant.user.first_name) !==
+                      -1;
                     return (
                       <TableRow
                         key={index}
@@ -634,7 +640,7 @@ function JoinPage() {
                             onChange={(event) =>
                               handleCheckboxClick(
                                 event,
-                                participant.user.email,
+                                participant.user.first_name,
                                 "confirmed"
                               )
                             }
@@ -695,10 +701,10 @@ function JoinPage() {
             open={confirmDialogOpen}
             onClose={() => setConfirmDialogOpen(false)}
           >
-            <DialogTitle>ยืนยันการเตะ</DialogTitle>
+            <DialogTitle>ยืนยันการลบ</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                คุณแน่ใจหรือไม่ที่จะเตะผู้ใช้นี้ออกจากการเข้าร่วม?
+                คุณแน่ใจหรือไม่ที่จะลบผู้ใช้นี้ออกจากการเข้าร่วม?
               </DialogContentText>
             </DialogContent>
             <DialogActions>
