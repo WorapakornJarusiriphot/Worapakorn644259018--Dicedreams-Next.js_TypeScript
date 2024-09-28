@@ -95,6 +95,7 @@ export function People({ users = [], stores = [], sx }: PeopleProps): React.JSX.
             key={store.store_id}
             sx={{ display: 'flex', alignItems: 'center', marginBottom: 2, padding: 2 }}
             onClick={(event) => handleCardClick(event, store.store_id)}
+            id="Profile-Store"
           >
             <ListItemAvatar>
               <Avatar
@@ -139,6 +140,7 @@ export function People({ users = [], stores = [], sx }: PeopleProps): React.JSX.
                   backgroundColor: '#333', // เปลี่ยนสีเมื่อเอาเมาส์ไปชี้ให้เป็นสีเทาเข้ม
                 },
               }}
+              id="Profile-Store"
             >
               โปรไฟล์ร้านค้า
             </Button>
@@ -153,6 +155,7 @@ export function People({ users = [], stores = [], sx }: PeopleProps): React.JSX.
             key={user.users_id}
             sx={{ display: 'flex', alignItems: 'center', marginBottom: 2, padding: 2 }}
             onClick={(event) => handleCardClick(event, user.users_id)}
+            id="Profile-User"
           >
             <ListItemAvatar>
               <Avatar
@@ -196,6 +199,7 @@ export function People({ users = [], stores = [], sx }: PeopleProps): React.JSX.
                   backgroundColor: '#333', // เปลี่ยนสีเมื่อเอาเมาส์ไปชี้ให้เป็นสีเทาเข้ม
                 },
               }}
+              id="Profile-User"
             >
               โปรไฟล์
             </Button>

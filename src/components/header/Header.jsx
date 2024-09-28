@@ -295,11 +295,15 @@ function Header() {
     <div className="header-wrapper">
       <AppBar position="fixed" sx={{ zIndex: 1300, background: "#FFFFFF" }}>
         <Toolbar>
-          <DrawerMobileNavigation handleDrawerOpen={handleDrawerOpen} />
+          <DrawerMobileNavigation
+            handleDrawerOpen={handleDrawerOpen}
+            id="DrawerMobileNavigation"
+          />
           <Typography
             variant="h6"
             component="div"
             sx={{ flexGrow: 1, textAlign: "left", color: "black" }}
+            id="Home-page"
           >
             <Link href="/" passHref>
               <Avatar src={DiceDreamsUrl} alt="DiceDreams" id="Home-page" />

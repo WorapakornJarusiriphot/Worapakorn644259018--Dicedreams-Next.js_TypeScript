@@ -556,15 +556,20 @@ function PostGames() {
             backgroundColor: "#121212", // Added to match the Figma background
             zIndex: 0, // กำหนดค่า z-index เพื่อให้การ์ดอยู่เหนือ navbar
           }}
+          id="PostGames"
         >
           <Grid
             container
             spacing={2}
             alignItems="center"
             sx={{ marginBottom: "16px" }}
+            id="Profile"
           >
             <Grid item>
-              <div onClick={() => handleProfileClick(item.users_id)}>
+              <div
+                onClick={() => handleProfileClick(item.users_id)}
+                id="Profile"
+              >
                 <Avatar
                   alt={`${item.userFirstName} ${item.userLastName}`}
                   src={item.userProfileImage}
@@ -578,6 +583,7 @@ function PostGames() {
                       : "gray",
                     border: "2px solid white", // เพิ่มกรอบสีขาว
                   }}
+                  id="Profile"
                 >
                   {!item.userProfileImage &&
                     `${item.userFirstName?.[0] ?? ""}${item.userLastName?.[0] ?? ""}`}
@@ -590,6 +596,7 @@ function PostGames() {
                 gutterBottom
                 sx={{ color: "white", cursor: "pointer" }} // เพิ่ม cursor: pointer
                 onClick={() => handleProfileClick(item.users_id)}
+                id="Profile"
               >
                 {item.userFirstName} {item.userLastName}
               </Typography>
@@ -695,6 +702,7 @@ function PostGames() {
               query: { id: item?.post_games_id },
             }}
             onClick={(event) => handleLinkClick2(event, item.post_games_id)}
+            id="PostGames"
           >
             <div
               style={{

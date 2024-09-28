@@ -212,12 +212,24 @@ function Filter({
             label="โพสต์ทั้งหมดและผู้คนและร้านค้า"
             onChange={handleCategoryChange}
           >
-            <MenuItem value="">โพสต์ทั้งหมดและผู้คนและร้านค้า</MenuItem>
-            <MenuItem value="postGames">โพสต์นัดเล่น</MenuItem>
-            <MenuItem value="postActivity">โพสต์กิจกรรม</MenuItem>
-            <MenuItem value="peopleStore">ผู้คนและร้านค้า</MenuItem>
-            <MenuItem value="people">ผู้คน</MenuItem>
-            <MenuItem value="store">ร้านค้า</MenuItem>
+            <MenuItem value="" id="All-posts-people-store">
+              โพสต์ทั้งหมดและผู้คนและร้านค้า
+            </MenuItem>
+            <MenuItem value="postGames" id="postGames">
+              โพสต์นัดเล่น
+            </MenuItem>
+            <MenuItem value="postActivity" id="postActivity">
+              โพสต์กิจกรรม
+            </MenuItem>
+            <MenuItem value="peopleStore" id="peopleStore">
+              ผู้คนและร้านค้า
+            </MenuItem>
+            <MenuItem value="people" id="people">
+              ผู้คน
+            </MenuItem>
+            <MenuItem value="store" id="store">
+              ร้านค้า
+            </MenuItem>
           </Select>
         </FormControl>
 
