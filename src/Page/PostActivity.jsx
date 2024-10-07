@@ -597,7 +597,7 @@ function PostActivity() {
           </Grid>
 
           <Image
-            src={item.post_activity_image}
+            src={item.post_activity_image || "/default.png"} // ถ้าไม่มีรูปภาพจะแสดงรูปภาพ default แทน
             alt={item.name_activity}
             width={526} // กำหนดขนาดที่เหมาะสม
             height={296}
