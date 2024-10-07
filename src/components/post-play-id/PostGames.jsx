@@ -333,7 +333,7 @@ const PostGames = ({ userId }) => {
               src={
                 item.games_image
                   ? item.games_image
-                  : "/images/default-image.png"
+                  : "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"
               }
               alt={item.name_games || "Default Image"}
               width={526}
