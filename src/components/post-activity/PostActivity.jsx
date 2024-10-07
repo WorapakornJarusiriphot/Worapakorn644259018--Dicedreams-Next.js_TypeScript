@@ -462,7 +462,7 @@ function PostActivity() {
                   }}
                 >
                   <Image
-                    src={item.userProfileImage}
+                    src={item.userProfileImage || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"}
                     alt={`${item.userFirstName}`}
                     width={50}
                     height={50}
@@ -563,7 +563,7 @@ function PostActivity() {
 
             <div style={{ position: "relative" }}>
               <Image
-                src={item.post_activity_image}
+                src={item.post_activity_image || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"}
                 alt={item.name_activity}
                 width={526}
                 height={296}

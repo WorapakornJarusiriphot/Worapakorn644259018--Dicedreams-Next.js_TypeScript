@@ -341,7 +341,7 @@ function Participating() {
 
           <div style={{ position: "relative" }}>
             <Image
-              src={item.games_image}
+              src={item.games_image || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"}
               alt={item.name_games}
               width={526}
               height={296}

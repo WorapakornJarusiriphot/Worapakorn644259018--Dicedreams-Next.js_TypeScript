@@ -195,7 +195,7 @@ const PostActivity = () => {
                   }}
                 >
                   <Image
-                    src={item.userProfileImage}
+                    src={item.userProfileImage || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"}
                     alt={`${item.userFirstName}`}
                     width={50}
                     height={50}
