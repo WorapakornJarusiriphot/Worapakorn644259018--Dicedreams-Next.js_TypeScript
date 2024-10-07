@@ -715,7 +715,7 @@ function PostGames() {
               onClick={handleImageClick}
             >
               <Image
-                src={item.games_image}
+                src={item.games_image || "/default.png"} // ถ้าไม่มีรูปภาพจะแสดงรูปภาพ default แทน
                 alt={item.name_games}
                 layout="fill"
                 objectFit="cover"
