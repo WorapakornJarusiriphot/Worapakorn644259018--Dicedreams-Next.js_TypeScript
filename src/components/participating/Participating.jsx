@@ -340,7 +340,7 @@ function Participating() {
           </Grid>
 
           <div style={{ position: "relative" }}>
-            <Image
+            <img
               src={item.games_image || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"}
               alt={item.name_games}
               width={526}

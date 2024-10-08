@@ -702,7 +702,7 @@ function PostGames() {
               }}
               onClick={handleImageClick}
             >
-              <Image
+              <img
                 src={item.games_image}
                 alt={item.name_games}
                 layout="fill"

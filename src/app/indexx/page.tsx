@@ -21,15 +21,15 @@ export default function indexx() {
 
         <ul className={classes.perks}>
           <li>
-            <Image src={mealIcon} alt="A delicious meal" />
+            <img src={mealIcon} alt="A delicious meal" />
             <p>Share & discover recipes</p>
           </li>
           <li>
-            <Image src={communityIcon} alt="A crowd of people, cooking" />
+            <img src={communityIcon} alt="A crowd of people, cooking" />
             <p>Find new friends & like-minded people</p>
           </li>
           <li>
-            <Image
+            <img
               src={eventsIcon}
               alt="A crowd of people at a cooking event"
             />

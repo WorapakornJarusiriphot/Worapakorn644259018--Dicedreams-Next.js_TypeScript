@@ -605,7 +605,7 @@ function PostActivity() {
               cursor: "pointer",
             }}
           >
-            <Image
+            <img
               src={
                 item.post_activity_image ||
                 "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"

@@ -40,7 +40,7 @@ export const ChoosePhotoWidget = (props) => {
         <h5 className="mb-4">{title}</h5>
         <div className="d-xl-flex align-items-center">
           <div className="user-avatar xl-avatar">
-            <Image fluid rounded src={photo} />
+            <img fluid rounded src={photo} />
           </div>
           <div className="file-field">
             <div className="d-flex justify-content-xl-center ms-xl-3">
@@ -179,7 +179,7 @@ export const TeamMembersWidget = () => {
         <Row className="align-items-center">
           <Col className="col-auto">
             <a href="#top" className="user-avatar">
-              <Image src={image} className="rounded-circle" />
+              <img src={image} className="rounded-circle" />
             </a>
           </Col>
           <Col className="ms--2">

@@ -343,7 +343,7 @@ function Participating({ userId }) {
           </Grid>
 
           <div style={{ position: "relative" }}>
-            <Image
+            <img
               src={item.games_image}
               alt={item.name_games}
               width={526}
