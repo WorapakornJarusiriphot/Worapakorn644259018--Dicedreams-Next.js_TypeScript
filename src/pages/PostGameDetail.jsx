@@ -65,8 +65,7 @@ import { JwtPayload } from "jwt-decode";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const BASE_URL =
-  "https://dicedreams-backend-deploy-to-render.onrender.com/images/";
+const BASE_URL = "";
 
 const theme = createTheme({
   palette: {

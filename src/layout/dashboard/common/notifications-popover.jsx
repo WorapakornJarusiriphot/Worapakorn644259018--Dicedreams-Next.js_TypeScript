@@ -509,7 +509,7 @@ function renderContent(
     avatar: notification.data.user_image ? (
       <Avatar
         alt={notification.data.first_name}
-        src={`https://dicedreams-backend-deploy-to-render.onrender.com/images/${notification.data.user_image}`}
+        src={`${notification.data.user_image}`}
       />
     ) : null,
     title,
