@@ -79,7 +79,7 @@ const formatThaiTime = (timeString) => {
   return formattedTime;
 };
 
-function PostActivitySearch() {
+function PostActivity() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -596,29 +596,14 @@ function PostActivitySearch() {
             </Grid>
           </Grid>
 
-          <div
-            style={{
-              width: "100%",
-              paddingBottom: "56.25%", // 16:9 aspect ratio
-              position: "relative",
-              overflow: "hidden",
-              cursor: "pointer",
-            }}
-          >
-            <Image
-              src={
-                item.post_activity_image ||
-                "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"
-              } // ถ้าไม่มีรูปภาพจะแสดงรูปภาพ default แทน
-              alt={item.name_activity}
-              layout="fill"
-              objectFit="cover"
-              style={{
-                transition: "transform 0.3s ease",
-                transform: isFullSize ? "scale(1)" : "scale(1)",
-              }}
-            />
-          </div>
+          <Image
+            src={item.post_activity_image || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"} // ถ้าไม่มีรูปภาพจะแสดงรูปภาพ default แทน
+            alt={item.name_activity}
+            width={526} // กำหนดขนาดที่เหมาะสม
+            height={296}
+            layout="responsive"
+            sx={{ borderRadius: 1, marginBottom: 2 }} // เพิ่มระยะห่างด้านล่าง
+          />
 
           <br />
 
@@ -691,4 +676,4 @@ function PostActivitySearch() {
   );
 }
 
-export default PostActivitySearch;
+export default PostActivity;
