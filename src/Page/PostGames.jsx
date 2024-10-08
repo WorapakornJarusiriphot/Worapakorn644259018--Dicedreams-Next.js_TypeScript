@@ -706,20 +706,25 @@ function PostGames() {
           >
             <div
               style={{
-                width: "100%",
-                paddingBottom: "56.25%", // 16:9 aspect ratio
-                position: "relative",
-                overflow: "hidden",
-                cursor: "pointer",
+                width: "100%", // ปรับความกว้างให้เต็มพื้นที่
+                height: "400px", // กำหนดความสูงตายตัว (เช่น 400px)
+                position: "relative", // สำหรับควบคุมการจัดวางภายใน div
+                overflow: "hidden", // ซ่อนส่วนของรูปที่เกินออกมานอกกรอบ
               }}
               onClick={handleImageClick}
             >
               <img
-                src={item.games_image || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"} // ถ้าไม่มีรูปภาพจะแสดงรูปภาพ default แทน
+                src={
+                  item.games_image ||
+                  "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"
+                } // ถ้าไม่มีรูปภาพจะแสดงรูปภาพ default แทน
                 alt={item.name_games}
                 layout="fill"
                 objectFit="cover"
                 style={{
+                  width: "100%", // ใช้ความกว้างเต็มที่
+                  height: "100%", // ปรับความสูงให้เต็มกรอบ
+                  objectFit: "cover", // ครอบคลุมกรอบโดยไม่เสียสัดส่วนของรูปภาพ
                   transition: "transform 0.3s ease",
                   transform: isFullSize ? "scale(1)" : "scale(1)",
                 }}

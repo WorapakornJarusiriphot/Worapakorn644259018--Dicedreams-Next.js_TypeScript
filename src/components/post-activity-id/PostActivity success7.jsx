@@ -57,7 +57,6 @@ const PostActivity = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isFullSize, setIsFullSize] = useState(false);
 
   useEffect(() => {
     if (!storeId) {
@@ -196,10 +195,7 @@ const PostActivity = () => {
                   }}
                 >
                   <img
-                    src={
-                      item.userProfileImage ||
-                      "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"
-                    }
+                    src={item.userProfileImage || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"}
                     alt={`${item.userFirstName}`}
                     width={50}
                     height={50}
@@ -228,15 +224,7 @@ const PostActivity = () => {
               </Grid>
             </Grid>
 
-            <div
-              style={{
-                position: "relative",
-                width: "100%", // ปรับความกว้างให้เต็มพื้นที่
-                height: "400px", // กำหนดความสูงตายตัว (เช่น 400px)
-                position: "relative", // สำหรับควบคุมการจัดวางภายใน div
-                overflow: "hidden", // ซ่อนส่วนของรูปที่เกินออกมานอกกรอบ
-              }}
-            >
+            <div style={{ position: "relative" }}>
               <img
                 src={item.post_activity_image}
                 alt={item.name_activity}
@@ -246,11 +234,6 @@ const PostActivity = () => {
                 style={{
                   borderRadius: "0%",
                   marginBottom: "16px",
-                  width: "100%", // ใช้ความกว้างเต็มที่
-                  height: "100%", // ปรับความสูงให้เต็มกรอบ
-                  objectFit: "cover", // ครอบคลุมกรอบโดยไม่เสียสัดส่วนของรูปภาพ
-                  transition: "transform 0.3s ease",
-                  transform: isFullSize ? "scale(1)" : "scale(1)",
                 }}
               />
               {item.isPast && (
@@ -283,8 +266,6 @@ const PostActivity = () => {
                 </div>
               )}
             </div>
-
-            <br />
 
             <Typography
               variant="h6"
