@@ -598,11 +598,10 @@ function PostActivitySearch() {
 
           <div
             style={{
-              width: "100%",
-              paddingBottom: "56.25%", // 16:9 aspect ratio
-              position: "relative",
-              overflow: "hidden",
-              cursor: "pointer",
+              width: "100%", // ปรับความกว้างให้เต็มพื้นที่
+              height: "400px", // กำหนดความสูงตายตัว (เช่น 400px)
+              position: "relative", // สำหรับควบคุมการจัดวางภายใน div
+              overflow: "hidden", // ซ่อนส่วนของรูปที่เกินออกมานอกกรอบ
             }}
           >
             <img
@@ -614,6 +613,9 @@ function PostActivitySearch() {
               layout="fill"
               objectFit="cover"
               style={{
+                width: "100%", // ใช้ความกว้างเต็มที่
+                height: "100%", // ปรับความสูงให้เต็มกรอบ
+                objectFit: "cover", // ครอบคลุมกรอบโดยไม่เสียสัดส่วนของรูปภาพ
                 transition: "transform 0.3s ease",
                 transform: isFullSize ? "scale(1)" : "scale(1)",
               }}

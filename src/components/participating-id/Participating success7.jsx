@@ -86,7 +86,6 @@ function Participating({ userId }) {
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
   const [user_id, setUserid] = useState("");
-  const [isFullSize, setIsFullSize] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -343,30 +342,16 @@ function Participating({ userId }) {
             </Grid>
           </Grid>
 
-          <div
-            style={{
-              position: "relative",
-              width: "100%", // ปรับความกว้างให้เต็มพื้นที่
-              height: "400px", // กำหนดความสูงตายตัว (เช่น 400px)
-              position: "relative", // สำหรับควบคุมการจัดวางภายใน div
-              overflow: "hidden", // ซ่อนส่วนของรูปที่เกินออกมานอกกรอบ
-            }}
-          >
+          <div style={{ position: "relative" }}>
             <img
-              src={
-                item.games_image ||
-                "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"
-              }
+              src={item.games_image || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"}
               alt={item.name_games}
               width={526}
               height={296}
               layout="responsive"
               style={{
-                width: "100%", // ใช้ความกว้างเต็มที่
-                height: "100%", // ปรับความสูงให้เต็มกรอบ
-                objectFit: "cover", // ครอบคลุมกรอบโดยไม่เสียสัดส่วนของรูปภาพ
-                transition: "transform 0.3s ease",
-                transform: isFullSize ? "scale(1)" : "scale(1)",
+                borderRadius: "0%",
+                marginBottom: "16px",
               }}
             />
             {item.isPast && (
@@ -399,8 +384,6 @@ function Participating({ userId }) {
               </div>
             )}
           </div>
-
-          <br />
 
           <div className="text-left">
             <Typography

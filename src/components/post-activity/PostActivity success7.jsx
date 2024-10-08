@@ -17,15 +17,13 @@ import {
   Alert,
 } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
-import Header from "../components/header/Header";
 import InputLabel from "@mui/material/InputLabel";
 import InputAdornment from "@mui/material/InputAdornment";
 import FormHelperText from "@mui/material/FormHelperText";
 import FormControl from "@mui/material/FormControl";
-import Filter from "../components/Filter";
 import SearchIcon from "@mui/icons-material/Search";
-import CommentIcon from "@mui/icons-material/Comment"; // สำหรับปุ่มพูดคุย
-import LoginIcon from "@mui/icons-material/Login"; // สำหรับปุ่มเข้าสู่ระบบ
+import CommentIcon from "@mui/icons-material/Comment";
+import LoginIcon from "@mui/icons-material/Login";
 import * as React from "react";
 import InputBase from "@mui/material/InputBase";
 import Divider from "@mui/material/Divider";
@@ -33,16 +31,15 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import DirectionsIcon from "@mui/icons-material/Directions";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
-import CustomizedMenus from "../components/CustomizedMenus";
 import Image from "next/image";
 import { jwtDecode } from "jwt-decode";
-import { JwtPayload } from "jwt-decode";
 import { useEffect, useState } from "react";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, isBefore, isValid } from "date-fns";
 import { th } from "date-fns/locale";
+import { Avatar } from "@mui/material";
+import { JwtPayload } from "jwt-decode";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Avatar from "@mui/material/Avatar";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import Dialog from "@mui/material/Dialog";
@@ -51,12 +48,12 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import CloseIcon from "@mui/icons-material/Close";
-import { StorePopover } from "./store-popover";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 const formatDateTime = (dateString) => {
   const date = parseISO(dateString);
+  if (!isValid(date)) return "วันที่ไม่ถูกต้อง";
   const formattedDate = format(
     date,
     "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'",
@@ -69,14 +66,24 @@ const formatDateTime = (dateString) => {
 
 const formatThaiDate = (dateString) => {
   const date = parseISO(dateString);
+  if (!isValid(date)) return "วันที่ไม่ถูกต้อง";
   const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy", { locale: th });
   return formattedDate;
 };
 
 const formatThaiTime = (timeString) => {
+  if (!timeString) return "Invalid time";
   const [hours, minutes] = timeString.split(":");
   const formattedTime = `เวลา ${hours}.${minutes} น.`;
   return formattedTime;
+};
+
+const isPastDateTime = (date, time) => {
+  if (!date || !time) return false;
+  const [hours, minutes] = time.split(":");
+  const eventDate = new Date(date);
+  eventDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
+  return isBefore(eventDate, new Date());
 };
 
 function PostActivity() {
@@ -131,7 +138,6 @@ function PostActivity() {
   // เปิด/ปิด Dialog สำหรับลบ
   const handleDeleteOpen = () => {
     setDeleteOpen(true);
-
     setAnchorEl(null); // ปิดเมนูเมื่อเปิดการลบ
   };
 
@@ -155,10 +161,10 @@ function PostActivity() {
       try {
         if (accessToken) {
           const decoded = jwtDecode(accessToken);
-          setUserId(decoded.store_id);
+          setUserId(decoded.users_id);
 
           const postsResponse = await fetch(
-            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/search`,
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/store/${decoded.store_id}`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -170,7 +176,7 @@ function PostActivity() {
           const postsData = await postsResponse.json();
 
           const storesResponse = await fetch(
-            `https://dicedreams-backend-deploy-to-render.onrender.com/api/store`,
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/store/${decoded.store_id}`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -178,49 +184,48 @@ function PostActivity() {
               },
             }
           );
-          if (!storesResponse.ok) throw new Error("Failed to fetch stores");
-          const storesData = await storesResponse.json();
-
-          const now = new Date();
+          if (!storesResponse.ok) throw new Error("Failed to fetch store");
+          const storeData = await storesResponse.json(); // คาดว่าข้อมูลนี้เป็น Object
 
           const postsWithStores = postsData
             .filter((post) => post.status_post !== "unActive")
-            .filter((post) => {
-              const postDate = parseISO(post.date_activity);
-              return postDate >= now;
-            })
             .map((post) => {
-              const postStore = storesData.find(
-                (store) => store.store_id === post.store_id
-              );
+              const postStore = storeData; // ใช้ storeData แทน storesData.find
 
               const rawCreationDate = parseISO(post.creation_date);
-              if (isNaN(rawCreationDate)) {
+              if (!isValid(rawCreationDate)) {
                 console.error("Invalid date format:", post.creation_date);
               }
+
+              const isPast = isPastDateTime(
+                post.date_activity,
+                post.time_activity
+              );
 
               return {
                 ...post,
                 userFirstName: postStore ? postStore.name_store : "Unknown",
                 userProfileImage: postStore
-                  ? postStore.store_image
+                  ? postStore.store_image.replace("http}", "http") // แก้ไข URL ของรูปภาพให้ถูกต้อง
                   : "/images/default-profile.png",
                 rawCreationDate: rawCreationDate,
                 creation_date: formatDateTime(post.creation_date),
                 date_activity: formatThaiDate(post.date_activity),
                 time_activity: formatThaiTime(post.time_activity),
-                store_id: post.store_id ? post.store_id : "Unknown",
+                isPast: isPast,
               };
             });
 
-          const sortedPosts = postsWithStores.sort(
-            (a, b) => b.rawCreationDate - a.rawCreationDate
-          );
+          const sortedPosts = postsWithStores.sort((a, b) => {
+            if (a.isPast && !b.isPast) return 1;
+            if (!a.isPast && b.isPast) return -1;
+            return b.rawCreationDate - a.rawCreationDate;
+          });
 
           setItems(sortedPosts);
         } else {
           const postsResponse = await fetch(
-            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity/search` // ดึงโพสต์ทั้งหมดโดยไม่ต้องใช้ accessToken
+            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postActivity`
           );
           if (!postsResponse.ok) throw new Error("Failed to fetch posts");
           const postsData = await postsResponse.json();
@@ -231,46 +236,47 @@ function PostActivity() {
           if (!storesResponse.ok) throw new Error("Failed to fetch stores");
           const storesData = await storesResponse.json();
 
-          const now = new Date();
-
           const postsWithStores = postsData
             .filter((post) => post.status_post !== "unActive")
-            .filter((post) => {
-              const postDate = parseISO(post.date_activity);
-              return postDate >= now;
-            })
             .map((post) => {
               const postStore = storesData.find(
                 (store) => store.store_id === post.store_id
               );
 
               const rawCreationDate = parseISO(post.creation_date);
-              if (isNaN(rawCreationDate)) {
+              if (!isValid(rawCreationDate)) {
                 console.error("Invalid date format:", post.creation_date);
               }
+
+              const isPast = isPastDateTime(
+                post.date_activity,
+                post.time_activity
+              );
 
               return {
                 ...post,
                 userFirstName: postStore ? postStore.name_store : "Unknown",
                 userProfileImage: postStore
-                  ? postStore.store_image
+                  ? postStore.store_image.replace("http}", "http:") // แก้ไข URL ของรูปภาพให้ถูกต้อง
                   : "/images/default-profile.png",
                 rawCreationDate: rawCreationDate,
                 creation_date: formatDateTime(post.creation_date),
                 date_activity: formatThaiDate(post.date_activity),
                 time_activity: formatThaiTime(post.time_activity),
-                store_id: post.store_id ? post.store_id : "Unknown",
+                isPast: isPast,
               };
             });
 
-          const sortedPosts = postsWithStores.sort(
-            (a, b) => b.rawCreationDate - a.rawCreationDate
-          );
+          const sortedPosts = postsWithStores.sort((a, b) => {
+            if (a.isPast && !b.isPast) return 1;
+            if (!a.isPast && b.isPast) return -1;
+            return b.rawCreationDate - a.rawCreationDate;
+          });
 
           setItems(sortedPosts);
         }
       } catch (error) {
-        setError("Failed to load data: " + error.message);
+        console.error("Failed to load data: " + error.message);
       } finally {
         setLoading(false);
       }
@@ -278,27 +284,6 @@ function PostActivity() {
 
     fetchUserAndPosts();
   }, []);
-
-  if (loading)
-    return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
-  if (error) return <Typography sx={{ color: "white" }}>{error}</Typography>;
-
-  const handleProfileClick = (userId) => {
-    event.preventDefault();
-    const accessToken = localStorage.getItem("access_token");
-
-    if (!accessToken) {
-      setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
-      setSnackbarSeverity("error");
-      setOpenSnackbar(true); // แสดง Snackbar
-      setTimeout(() => {
-        router.push("/sign-in"); // เปลี่ยนหน้าไปยังหน้าล็อกอินหลังจาก 2 วินาที
-      }, 2000);
-      return; // ยุติการทำงานของฟังก์ชันเมื่อผู้ใช้ยังไม่เข้าสู่ระบบ
-    }
-
-    router.push(`/profile/${userId}`);
-  };
 
   const handleLinkClick = async (event, postId, postOwnerId) => {
     event.preventDefault();
@@ -355,11 +340,8 @@ function PostActivity() {
     if (!accessToken) {
       setSnackbarMessage("กรุณาเข้าสู่ระบบก่อน");
       setSnackbarSeverity("error");
-      setOpenSnackbar(true); // แสดง Snackbar
-      setTimeout(() => {
-        router.push("/sign-in"); // เปลี่ยนหน้าไปยังหน้าล็อกอินหลังจาก 2 วินาที
-      }, 2000);
-      return; // ยุติการทำงานของฟังก์ชันเมื่อผู้ใช้ยังไม่เข้าสู่ระบบ
+      setOpenSnackbar(true);
+      return;
     }
 
     try {
@@ -413,15 +395,15 @@ function PostActivity() {
             : item
         )
       );
-
-      // รีเฟรชหน้าเว็บ
-      window.location.reload();
     } catch (error) {
       setSnackbarMessage(error.message);
       setSnackbarSeverity("error");
       setOpenSnackbar(true);
     } finally {
       setDeleteOpen(false); // ปิด Dialog
+
+      // รีเฟรชหน้าเว็บ
+      window.location.reload();
     }
   };
 
@@ -439,107 +421,98 @@ function PostActivity() {
     }
   };
 
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
-  };
+  if (loading)
+    return <Typography sx={{ color: "white" }}>กำลังโหลดโพสต์...</Typography>;
+  // ไม่แสดงผลข้อผิดพลาดให้ผู้ใช้เห็น
+  // if (error) return <Typography sx={{ color: "white" }}>{error}</Typography>;
 
   return (
     <div>
-      {items.map((item) => (
-        <Box
-          key={item.post_activity_id}
-          sx={{
-            borderColor: "grey.800",
-            borderWidth: 1,
-            borderStyle: "solid",
-            borderRadius: 2,
-            marginTop: 3,
-            color: "white",
-            padding: "16px",
-            marginBottom: "16px",
-            backgroundColor: "#424242",
-          }}
-        >
-          <Grid
-            container
-            spacing={2}
-            alignItems="center"
-            sx={{ marginBottom: "16px" }}
+      {items.length > 0 ? (
+        items.map((item) => (
+          <Box
+            key={item.post_activity_id}
+            sx={{
+              borderColor: "grey.800",
+              borderWidth: 1,
+              borderStyle: "solid",
+              borderRadius: 2,
+              marginTop: 3,
+              color: "white",
+              padding: "16px",
+              marginBottom: "16px",
+              backgroundColor: "#424242",
+            }}
           >
-            <Grid item>
-              <div onClick={() => handleProfileClick(item.store_id)}>
-                <Grid item>
-                  <div onClick={() => handleProfileClick(item.store_id)}>
-                    <Avatar
-                      alt={`${item.userFirstName} ${item.userLastName}`}
-                      src={item.userProfileImage}
-                      sx={{
-                        borderRadius: "50%",
-                        width: "50px",
-                        height: "50px",
-                        cursor: "pointer",
-                        backgroundColor: item.userProfileImage
-                          ? "transparent"
-                          : "gray",
-                        border: "2px solid white", // เพิ่มกรอบสีขาว
-                      }}
-                    >
-                      {!item.userProfileImage &&
-                        `${item.userFirstName?.[0] ?? ""}${item.userLastName?.[0] ?? ""}`}
-                    </Avatar>
-                  </div>
-                </Grid>
-              </div>
-            </Grid>
-            <Grid item xs>
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-                onClick={() => handleProfileClick(item.store_id)}
-                style={{ cursor: "pointer" }} // เพิ่ม cursor: pointer
-              >
-                {item.userFirstName}
-              </Typography>
-              <Typography variant="body2" sx={{ color: "white" }}>
-                {item.creation_date}
-              </Typography>
-            </Grid>
-            <Grid item>
-              <div>
-                {/* ปุ่มเปิด Pop Up ตัวเลือก */}
-                <IconButton
-                  sx={{ color: "white" }}
-                  id="MoreVertOutlinedIcon"
-                  aria-label="settings"
-                  onClick={(event) =>
-                    handleMenuClick(event, item.post_activity_id, item)
-                  } // ส่ง item (ข้อมูลโพสต์) ไปด้วย
+            <Grid
+              container
+              spacing={2}
+              alignItems="center"
+              sx={{ marginBottom: "16px" }}
+            >
+              <Grid item>
+                <Avatar
+                  sx={{
+                    borderRadius: "50%",
+                    width: "50px",
+                    height: "50px",
+                    cursor: "pointer",
+                    border: "2px solid white", // เพิ่มกรอบสีขาว
+                    overflow: "hidden", // เพื่อให้รูปภาพถูกครอบภายในวงกลม
+                  }}
                 >
-                  <MoreVertOutlinedIcon />
-                </IconButton>
-
-                <Menu
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleMenuClose}
-                >
-                  <MenuItem
+                  <img
+                    src={item.userProfileImage || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"}
+                    alt={`${item.userFirstName}`}
+                    width={50}
+                    height={50}
+                    layout="fixed"
+                    objectFit="cover" // เพื่อให้รูปภาพถูกครอบอย่างสม่ำเสมอภายใน Avatar
+                  />
+                </Avatar>
+              </Grid>
+              <Grid item xs>
+                <Typography variant="subtitle1" gutterBottom>
+                  {item.userFirstName}
+                </Typography>
+                <Typography variant="body2" sx={{ color: "white" }}>
+                  {item.creation_date}
+                </Typography>
+              </Grid>
+              <Grid item>
+                <div>
+                  {/* ปุ่มเปิด Pop Up ตัวเลือก */}
+                  <IconButton
+                    sx={{ color: "white" }}
+                    aria-label="settings"
                     onClick={(event) =>
-                      handleLinkClick(event, selectedPostId, item.store_id)
-                    }
-                    id="Edit-PostActivity"
+                      handleMenuClick(event, item.post_activity_id, item)
+                    } // ส่ง item (ข้อมูลโพสต์) ไปด้วย
                   >
-                    <EditIcon sx={{ marginRight: 1 }} />
-                    แก้ไขโพสต์กิจกรรม
-                  </MenuItem>
-                  <MenuItem onClick={handleDeleteOpen} id="Delete-PostActivity">
-                    <DeleteIcon sx={{ marginRight: 1 }} />
-                    ลบโพสต์กิจกรรม
-                  </MenuItem>
-                </Menu>
+                    <MoreVertOutlinedIcon />
+                  </IconButton>
 
-                {/* Dialog สำหรับแก้ไขโพสต์ */}
-                {/* <Dialog open={editOpen} onClose={handleEditClose}>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                  >
+                    <MenuItem
+                      onClick={(event) =>
+                        handleLinkClick(event, selectedPostId, item.store_id)
+                      }
+                    >
+                      <EditIcon sx={{ marginRight: 1 }} />
+                      แก้ไขโพสต์กิจกรรม
+                    </MenuItem>
+                    <MenuItem onClick={handleDeleteOpen}>
+                      <DeleteIcon sx={{ marginRight: 1 }} />
+                      ลบโพสต์กิจกรรม
+                    </MenuItem>
+                  </Menu>
+
+                  {/* Dialog สำหรับแก้ไขโพสต์ */}
+                  {/* <Dialog open={editOpen} onClose={handleEditClose}>
                   <DialogTitle>แก้ไขโพสต์กิจกรรม</DialogTitle>
                   <DialogActions>
                     <Button onClick={handleEditClose} color="primary">
@@ -551,142 +524,126 @@ function PostActivity() {
                   </DialogActions>
                 </Dialog> */}
 
-                {/* Dialog ยืนยันการลบโพสต์ */}
-                <Dialog open={deleteOpen} onClose={handleDeleteClose}>
-                  <DialogTitle>คุณต้องการลบโพสต์นี้ใช่ไหม?</DialogTitle>
-                  <DialogActions>
-                    <Button
-                      onClick={handleDeleteClose}
-                      id="cancel"
-                      color="primary"
-                    >
-                      ยกเลิก
-                    </Button>
-                    <Button
-                      onClick={handleUpdateStatus}
-                      id="Delete-Post"
-                      color="error"
-                    >
-                      ลบโพสต์
-                    </Button>
-                  </DialogActions>
-                </Dialog>
+                  {/* Dialog ยืนยันการลบโพสต์ */}
+                  <Dialog open={deleteOpen} onClose={handleDeleteClose}>
+                    <DialogTitle>คุณต้องการลบโพสต์นี้ใช่ไหม?</DialogTitle>
+                    <DialogActions>
+                      <Button onClick={handleDeleteClose} color="primary">
+                        ยกเลิก
+                      </Button>
+                      <Button onClick={handleUpdateStatus} color="error">
+                        ลบโพสต์
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
 
-                {/* Snackbar สำหรับแสดงข้อความ */}
-                <Snackbar
-                  open={openSnackbar}
-                  autoHideDuration={6000}
-                  onClose={handleSnackbarClose}
-                >
-                  <Alert
+                  {/* Snackbar สำหรับแสดงข้อความ */}
+                  <Snackbar
+                    open={openSnackbar}
+                    autoHideDuration={6000}
                     onClose={handleSnackbarClose}
-                    severity={snackbarSeverity}
-                    sx={{ width: "100%" }}
                   >
-                    {snackbarMessage}
-                  </Alert>
-                </Snackbar>
-              </div>
-              {/* <StorePopover
+                    <Alert
+                      onClose={handleSnackbarClose}
+                      severity={snackbarSeverity}
+                      sx={{ width: "100%" }}
+                    >
+                      {snackbarMessage}
+                    </Alert>
+                  </Snackbar>
+                </div>
+                {/* <StorePopover
                 userId={user.userId}
                 anchorEl={userPopover.anchorRef.current}
                 onClose={userPopover.handleClose}
                 open={userPopover.open}
               /> */}
+              </Grid>
             </Grid>
-          </Grid>
 
-          <div
-            style={{
-              width: "100%", // ปรับความกว้างให้เต็มพื้นที่
-              height: "400px", // กำหนดความสูงตายตัว (เช่น 400px)
-              position: "relative", // สำหรับควบคุมการจัดวางภายใน div
-              overflow: "hidden", // ซ่อนส่วนของรูปที่เกินออกมานอกกรอบ
-            }}
-          >
-            <img
-              src={
-                item.post_activity_image ||
-                "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"
-              }
-              layout="fill"
-              objectFit="cover"
-              style={{
-                width: "100%", // ใช้ความกว้างเต็มที่
-                height: "100%", // ปรับความสูงให้เต็มกรอบ
-                objectFit: "cover", // ครอบคลุมกรอบโดยไม่เสียสัดส่วนของรูปภาพ
-                transition: "transform 0.3s ease",
-                transform: isFullSize ? "scale(1)" : "scale(1)",
+            <div style={{ position: "relative" }}>
+              <img
+                src={item.post_activity_image || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"}
+                alt={item.name_activity}
+                width={526}
+                height={296}
+                layout="responsive"
+                style={{
+                  borderRadius: "0%",
+                  marginBottom: "16px",
+                }}
+              />
+              {item.isPast && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    backgroundColor: "rgba(0, 0, 0, 0.65)",
+                    borderRadius: "50%",
+                    width: "70%", // คงขนาดวงกลมเท่าเดิม
+                    height: "70%", // คงขนาดวงกลมเท่าเดิม
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    color: "white",
+                    fontSize: "2.5vw", // ใช้ vw เพื่อให้ขนาดยืดหยุ่นตามหน้าจอ
+                    fontWeight: 600,
+                    whiteSpace: "normal", // อนุญาตให้ข้อความแบ่งบรรทัดได้
+                    wordBreak: "break-word", // ทำให้การตัดคำเกิดขึ้นที่ขอบคำ
+                    maxWidth: "90%", // ให้ความกว้างของข้อความไม่เกินคอนเทนเนอร์
+                    lineHeight: 1.2, // ปรับระยะห่างบรรทัดให้พอดี
+                    textAlign: "center", // ทำให้ข้อความจัดชิดกลางในแนวตั้ง
+                    padding: "10px", // เพิ่ม padding เพื่อไม่ให้ข้อความชนขอบ
+                    zIndex: 20,
+                  }}
+                >
+                  โพสต์กิจกรรมนี้ได้สิ้นสุดลงแล้ว
+                </div>
+              )}
+            </div>
+
+            <Typography
+              variant="h6"
+              sx={{
+                wordWrap: "break-word", // จัดให้ตัดคำเมื่อข้อความยาวเกินกรอบ
+                overflowWrap: "break-word", // บังคับให้ตัดคำเมื่อคำยาวเกินไป
+                whiteSpace: "normal", // อนุญาตให้ข้อความถูกตัดและย้ายไปบรรทัดถัดไป
               }}
-            />
-          </div>
+              component="h3"
+              gutterBottom
+            >
+              {item.name_activity}
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              วันที่กิจกรรมสิ้นสุด: {item.date_activity}
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              เวลาที่กิจกรรมสิ้นสุด: {item.time_activity}
+            </Typography>
 
-          <br />
+            <br />
 
-          <Typography variant="h6" component="h3" gutterBottom>
-            {item.name_activity}
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            วันที่กิจกรรมสิ้นสุด: {item.date_activity}
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            เวลาที่กิจกรรมสิ้นสุด: {item.time_activity}
-          </Typography>
-
-          <br />
-
-          <Typography variant="body1" gutterBottom>
-            {item.detail_post}
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            สถานที่: 43/5 ถนนราชดำเนิน (ถนนต้นสน)
-            ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง
-          </Typography>
-        </Box>
-      ))}
-      {items.length === 0 && <Typography sx={{ color: "white" }}></Typography>}
-      {/* <Snackbar
-        open={openSnackbar}
-        autoHideDuration={2000}
-        onClose={handleCloseSnackbar}
-      >
-        <MuiAlert
-          onClose={handleCloseSnackbar}
-          severity="warning"
-          sx={{ width: "100%" }}
-        >
-          กรุณาเข้าสู่ระบบก่อน
-        </MuiAlert>
-      </Snackbar> */}
-      {errorMessage && (
-        <Snackbar
-          open={true}
-          autoHideDuration={6000}
-          onClose={() => setErrorMessage("")}
-        >
-          <MuiAlert
-            onClose={() => setErrorMessage("")}
-            severity="error"
-            sx={{ width: "100%" }}
-          >
-            {errorMessage}
-          </MuiAlert>
-        </Snackbar>
-      )}
-      {successMessage && (
-        <Snackbar
-          open={true}
-          autoHideDuration={6000}
-          onClose={handleCloseSuccessSnackbar}
-        >
-          <MuiAlert
-            onClose={handleCloseSuccessSnackbar}
-            severity="success"
-            sx={{ width: "100%" }}
-          >
-            {successMessage}
-          </MuiAlert>
-        </Snackbar>
+            <Typography
+              variant="body1"
+              sx={{
+                wordWrap: "break-word", // จัดให้ตัดคำเมื่อข้อความยาวเกินกรอบ
+                overflowWrap: "break-word", // บังคับให้ตัดคำเมื่อคำยาวเกินไป
+                whiteSpace: "normal", // อนุญาตให้ข้อความถูกตัดและย้ายไปบรรทัดถัดไป
+              }}
+              gutterBottom
+            >
+              {item.detail_post}
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              สถานที่: 43/5 ถนนราชดำเนิน (ถนนต้นสน)
+              ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง
+            </Typography>
+          </Box>
+        ))
+      ) : (
+        <Typography sx={{ color: "white" }}></Typography>
       )}
     </div>
   );

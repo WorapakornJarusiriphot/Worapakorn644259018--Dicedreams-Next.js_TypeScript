@@ -45,25 +45,29 @@ import { Avatar } from "@mui/material";
 import { useRouter } from "next/navigation";
 
 const formatDateTime = (dateString) => {
+  if (!dateString) return "Invalid date";
   const date = parseISO(dateString);
+  if (isNaN(date)) return "Invalid date";
   const formattedDate = format(
     date,
     "วันEEEE ที่ d MMMM yyyy 'เวลา' HH:mm 'น.'",
-    {
-      locale: th,
-    }
+    { locale: th }
   );
   return formattedDate;
 };
 
 const formatThaiDate = (dateString) => {
+  if (!dateString) return "Invalid date";
   const date = parseISO(dateString);
+  if (isNaN(date)) return "Invalid date";
   const formattedDate = format(date, "วันEEEE ที่ d MMMM yyyy", { locale: th });
   return formattedDate;
 };
 
 const formatThaiTime = (timeString) => {
+  if (!timeString) return "Invalid time";
   const [hours, minutes] = timeString.split(":");
+  if (!hours || !minutes) return "Invalid time";
   const formattedTime = `เวลา ${hours}.${minutes} น.`;
   return formattedTime;
 };
@@ -75,7 +79,7 @@ const isPastDateTime = (date, time) => {
   return eventDate < new Date();
 };
 
-function Participating({ userId }) {
+const PostGames = ({ userId }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -85,11 +89,9 @@ function Participating({ userId }) {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
-  const [user_id, setUserid] = useState("");
-  const [isFullSize, setIsFullSize] = useState(false);
 
   useEffect(() => {
-    async function fetchData() {
+    const fetchUserAndPosts = async () => {
       const accessToken = localStorage.getItem("access_token");
       if (!accessToken) {
         setError("Access token is not available.");
@@ -98,9 +100,34 @@ function Participating({ userId }) {
       }
 
       const decoded = jwtDecode(accessToken);
+      console.log("LoggedIn User ID:", decoded.users_id); // ตรวจสอบค่า loggedInUserId
       setLoggedInUserId(decoded.users_id);
 
       try {
+        const userResponse = await fetch(
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (!userResponse.ok) throw new Error("Failed to fetch user details");
+        const userData = await userResponse.json();
+
+        const postsResponse = await fetch(
+          `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/user/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (!postsResponse.ok) throw new Error("Failed to fetch posts");
+        const postsData = await postsResponse.json();
+
         const participantsResponse = await fetch(
           `https://dicedreams-backend-deploy-to-render.onrender.com/api/participate`,
           {
@@ -112,65 +139,40 @@ function Participating({ userId }) {
         );
         if (!participantsResponse.ok)
           throw new Error("Failed to fetch participants");
-        const participants = await participantsResponse.json();
+        const participantsData = await participantsResponse.json();
 
-        const myParticipations = participants.filter(
-          (part) =>
-            part.user_id === userId && part.participant_status !== "unActive"
+        // กรองโพสต์ที่มีสถานะเป็น unActive
+        const activePosts = postsData.filter(
+          (post) => post.status_post !== "unActive"
         );
 
-        const postPromises = myParticipations.map(async (participation) => {
-          const postResponse = await fetch(
-            `https://dicedreams-backend-deploy-to-render.onrender.com/api/postGame/${participation.post_games_id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-              },
-            }
+        const postsWithParticipants = activePosts.map((post) => {
+          console.log("Post Owner ID:", post.users_id); // ตรวจสอบค่า post.users_id
+          const postParticipants = participantsData.filter(
+            (participant) =>
+              participant.post_games_id === post.post_games_id &&
+              participant.participant_status !== "unActive"
           );
-          if (!postResponse.ok) throw new Error("Failed to fetch post");
-          const post = await postResponse.json();
-
-          if (!post.users_id) {
-            throw new Error("Post does not have users_id");
-          }
-
-          const userResponse = await fetch(
-            `https://dicedreams-backend-deploy-to-render.onrender.com/api/users/${post.users_id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-          if (!userResponse.ok) throw new Error("Failed to fetch user");
-          const user = await userResponse.json();
-
-          const postParticipants = participants.filter(
-            (p) => p.post_games_id === post.post_games_id
-          );
-
           return {
             ...post,
-            participants: postParticipants.length + 1,
-            userProfileImage: user.user_image || "/images/default-user.png", // ตรวจสอบ userProfileImage
-            userFirstName: user.first_name,
-            userLastName: user.last_name,
-            hasParticipated: postParticipants.some(
-              (p) => p.user_id === decoded.users_id
-            ),
-            isOwner: post.users_id === loggedInUserId, // เพิ่มเงื่อนไขเช็คเจ้าของโพสต์
+            participants: postParticipants.length + 1, // Adding 1 to the count of participants
+            userFirstName: userData.first_name,
+            userLastName: userData.last_name,
+            userProfileImage: userData.user_image || "/images/default-user.png", // ตรวจสอบ userProfileImage
+            creation_date: post.creation_date,
             formattedCreationDate: formatDateTime(post.creation_date),
             date_meet: post.date_meet,
             time_meet: post.time_meet,
             isPast: isPastDateTime(post.date_meet, post.time_meet),
+            hasParticipated: postParticipants.some(
+              (p) => p.user_id === loggedInUserId
+            ),
+            isOwner: post.users_id === loggedInUserId, // เพิ่มการตรวจสอบว่าเป็นเจ้าของโพสต์หรือไม่
           };
         });
 
-        const posts = await Promise.all(postPromises);
-        const sortedPosts = posts.sort((a, b) => {
+        // เรียงลำดับโพสต์ตามวันที่สร้างโพสต์ และแยกโพสต์ที่เลยนัดเล่นไปแล้วไปด้านล่าง
+        const sortedPosts = postsWithParticipants.sort((a, b) => {
           if (a.isPast && !b.isPast) return 1;
           if (!a.isPast && b.isPast) return -1;
           return compareDesc(
@@ -181,28 +183,14 @@ function Participating({ userId }) {
 
         setItems(sortedPosts);
       } catch (error) {
-        setError(error.message);
+        setError("Failed to load data: " + error.message);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }
+    };
 
-    fetchData();
-  }, [loggedInUserId, userId]);
-
-  const handleProfileClick = (user_id) => {
-    event.preventDefault();
-    const accessToken = localStorage.getItem("access_token");
-
-    if (!accessToken) {
-      setOpenSnackbar(true);
-      setTimeout(() => {
-        router.push("/sign-in");
-      }, 2000);
-      return;
-    }
-
-    router.push(`/profile/${user_id}`);
-  };
+    fetchUserAndPosts();
+  }, [userId]);
 
   const handleButtonClick = (event, id) => {
     event.preventDefault();
@@ -297,35 +285,32 @@ function Participating({ userId }) {
             sx={{ marginBottom: "16px" }}
           >
             <Grid item>
-              <div onClick={() => handleProfileClick(item.users_id)}>
-                <Avatar
-                  alt={`${item.userFirstName} ${item.userLastName}`}
-                  src={item.userProfileImage}
-                  sx={{
-                    borderRadius: "50%",
-                    width: "50px",
-                    height: "50px",
-                    cursor: "pointer",
-                    backgroundColor: item.userProfileImage
-                      ? "transparent"
-                      : "gray",
-                    border: "2px solid white", // เพิ่มกรอบสีขาว
-                    color: "white", // ตั้งค่าสีตัวอักษรเป็นสีขาว
-                  }}
-                >
-                  {!item.userProfileImage &&
-                    `${item.userFirstName?.[0] ?? ""}${item.userLastName?.[0] ?? ""}`}
-                </Avatar>
-              </div>
+              <Avatar
+                alt={`${item.userFirstName} {item.userLastName}`}
+                src={item.userProfileImage}
+                sx={{
+                  borderRadius: "50%",
+                  width: "50px",
+                  height: "50px",
+                  cursor: "pointer",
+                  backgroundColor: item.userProfileImage
+                    ? "transparent"
+                    : "gray",
+                  border: "2px solid white", // เพิ่มกรอบสีขาว
+                  color: "white", // ตั้งค่าสีตัวอักษรเป็นสีขาว
+                }}
+              >
+                {!item.userProfileImage &&
+                  `${item.userFirstName?.[0] ?? ""}${item.userLastName?.[0] ?? ""}`}
+              </Avatar>
             </Grid>
             <Grid item xs>
               <Typography
                 variant="subtitle1"
                 gutterBottom
                 sx={{ color: "white" }}
-                onClick={() => handleProfileClick(item.users_id)}
               >
-                {`${item.userFirstName} ${item.userLastName}`}
+                {item.userFirstName} {item.userLastName}
               </Typography>
               <Typography variant="body2" sx={{ color: "white" }}>
                 {item.formattedCreationDate}
@@ -343,33 +328,23 @@ function Participating({ userId }) {
             </Grid>
           </Grid>
 
-          <div
-            style={{
-              position: "relative",
-              width: "100%", // ปรับความกว้างให้เต็มพื้นที่
-              height: "400px", // กำหนดความสูงตายตัว (เช่น 400px)
-              position: "relative", // สำหรับควบคุมการจัดวางภายใน div
-              overflow: "hidden", // ซ่อนส่วนของรูปที่เกินออกมานอกกรอบ
-            }}
-          >
+          <div style={{ position: "relative" }}>
             <img
               src={
-                item.games_image ||
-                "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"
+                item.games_image
+                  ? item.games_image
+                  : "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"
               }
-              alt={item.name_games}
+              alt={item.name_games || "Default Image"}
               width={526}
               height={296}
               layout="responsive"
               style={{
-                width: "100%", // ใช้ความกว้างเต็มที่
-                height: "100%", // ปรับความสูงให้เต็มกรอบ
-                objectFit: "cover", // ครอบคลุมกรอบโดยไม่เสียสัดส่วนของรูปภาพ
-                transition: "transform 0.3s ease",
-                transform: isFullSize ? "scale(1)" : "scale(1)",
+                borderRadius: "0%",
+                marginBottom: "16px",
               }}
             />
-            {item.isPast && (
+            {item.isPast ? (
               <div
                 style={{
                   position: "absolute",
@@ -397,10 +372,36 @@ function Participating({ userId }) {
               >
                 โพสต์นี้เลยนัดเล่นไปแล้ว
               </div>
-            )}
+            ) : item.participants >= item.num_people ? (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  backgroundColor: "rgba(0, 0, 0, 0.65)",
+                  borderRadius: "50%",
+                  width: "70%", // คงขนาดวงกลมเท่าเดิม
+                  height: "70%", // คงขนาดวงกลมเท่าเดิม
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "white",
+                  fontSize: "2.5vw", // ใช้ vw เพื่อให้ขนาดยืดหยุ่นตามหน้าจอ
+                  fontWeight: 600,
+                  whiteSpace: "normal", // อนุญาตให้ข้อความแบ่งบรรทัดได้
+                  wordBreak: "break-word", // ทำให้การตัดคำเกิดขึ้นที่ขอบคำ
+                  maxWidth: "90%", // ให้ความกว้างของข้อความไม่เกินคอนเทนเนอร์
+                  lineHeight: 1.2, // ปรับระยะห่างบรรทัดให้พอดี
+                  textAlign: "center", // ทำให้ข้อความจัดชิดกลางในแนวตั้ง
+                  padding: "10px", // เพิ่ม padding เพื่อไม่ให้ข้อความชนขอบ
+                  zIndex: 20,
+                }}
+              >
+                โพสต์นี้คนเต็มแล้ว
+              </div>
+            ) : null}
           </div>
-
-          <br />
 
           <div className="text-left">
             <Typography
@@ -417,6 +418,9 @@ function Participating({ userId }) {
             <Typography sx={{ color: "white" }}>
               วันที่เจอกัน: {formatThaiDate(item.date_meet)}
             </Typography>
+            <Typography sx={{ color: "white" }}>
+              เวลาที่เจอกัน: {formatThaiTime(item.time_meet)}
+            </Typography>
             <br />
             <Typography
               sx={{
@@ -428,7 +432,6 @@ function Participating({ userId }) {
             >
               {item.detail_post}
             </Typography>
-
             <Typography sx={{ color: "white" }}>
               สถานที่ : 43/5 ถนนราชดำเนิน (ถนนต้นสน)
               ประตูองค์พระปฐมเจดีย์ฝั่งตลาดโต้รุ่ง
@@ -436,58 +439,61 @@ function Participating({ userId }) {
             <Typography sx={{ color: "white" }}>
               จำนวนคนจะไป : {item.participants}/{item.num_people}
             </Typography>
-
             <br />
-
-            <Grid container spacing={2} justifyContent="center">
-              {/* {!item.isOwner && !item.hasParticipated && !item.isPast && (
-                <Grid item xs={12} sm={6}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    startIcon={<LoginIcon />}
-                    sx={{
-                      backgroundColor: "red",
-                      color: "white",
-                      "&:hover": {
-                        backgroundColor: "darkred",
-                      },
-                    }}
-                    onClick={() => handleJoinClick(item)}
-                  >
-                    เข้าร่วม
-                  </Button>
-                </Grid>
-              )} */}
-              {!item.isPast && (
-                <Grid item xs={12} sm={6}>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    startIcon={<CommentIcon />}
-                    sx={{
-                      backgroundColor: "black",
-                      color: "white",
-                      border: "1px solid white",
-                      "&:hover": { backgroundColor: "#333333" },
-                      zIndex: 0,
-                    }}
-                    onClick={(event) =>
-                      handleButtonClick(event, item.post_games_id)
-                    }
-                  >
-                    พูดคุย
-                  </Button>
+            {console.log("Is Owner:", item.isOwner)}{" "}
+            {/* ตรวจสอบว่า isOwner เป็นจริงหรือไม่ */}
+            {!item.isOwner &&
+              !item.hasParticipated &&
+              item.participants < item.num_people &&
+              !item.isPast && (
+                <Grid container spacing={2} justifyContent="center">
+                  {/* {!item.hasParticipated && !item.isPast && (
+                    <Grid item xs={12} sm={6}>
+                      <Button
+                        variant="contained"
+                        fullWidth
+                        startIcon={<LoginIcon />}
+                        sx={{
+                          backgroundColor: "red",
+                          color: "white",
+                          "&:hover": {
+                            backgroundColor: "darkred",
+                          },
+                        }}
+                        onClick={() => handleJoinClick(item)}
+                      >
+                        เข้าร่วม
+                      </Button>
+                    </Grid>
+                  )} */}
+                  {!item.isPast && (
+                    <Grid item xs={12} sm={6}>
+                      <Button
+                        variant="contained"
+                        fullWidth
+                        startIcon={<CommentIcon />}
+                        sx={{
+                          backgroundColor: "black",
+                          color: "white",
+                          border: "1px solid white",
+                          "&:hover": { backgroundColor: "#333333" },
+                          zIndex: 0,
+                        }}
+                        onClick={(event) =>
+                          handleButtonClick(event, item.post_games_id)
+                        }
+                      >
+                        พูดคุย
+                      </Button>
+                    </Grid>
+                  )}
                 </Grid>
               )}
-            </Grid>
           </div>
         </Box>
       ))}
       {items.length === 0 && (
-        <Typography sx={{ color: "white" }}>
-          ไม่พบโพสต์นัดเล่นที่เคยเข้าร่วม
-        </Typography>
+        <Typography sx={{ color: "white" }}>ไม่พบโพสต์ที่เคยโพสต์</Typography>
       )}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>ยืนยันการเข้าร่วม</DialogTitle>
@@ -533,6 +539,6 @@ function Participating({ userId }) {
       </Snackbar>
     </div>
   );
-}
+};
 
-export default Participating;
+export default PostGames;
