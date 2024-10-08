@@ -714,7 +714,7 @@ function PostGames() {
               }}
               onClick={handleImageClick}
             >
-              <Image
+              <img
                 src={item.games_image || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"} // ถ้าไม่มีรูปภาพจะแสดงรูปภาพ default แทน
                 alt={item.name_games}
                 layout="fill"

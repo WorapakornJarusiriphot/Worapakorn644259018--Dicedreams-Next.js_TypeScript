@@ -253,7 +253,7 @@ function PostActivity() {
                     overflow: "hidden", // เพื่อให้รูปภาพถูกครอบภายในวงกลม
                   }}
                 >
-                  <Image
+                  <img
                     src={item.userProfileImage}
                     alt={`${item.userFirstName}`}
                     width={50}
@@ -284,7 +284,7 @@ function PostActivity() {
             </Grid>
 
             <div style={{ position: "relative" }}>
-              <Image
+              <img
                 src={item.post_activity_image}
                 alt={item.name_activity}
                 width={526}

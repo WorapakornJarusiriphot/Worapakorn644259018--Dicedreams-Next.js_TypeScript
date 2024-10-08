@@ -278,7 +278,7 @@ function PostGames() {
           </Grid>
 
           <div style={{ position: "relative" }}>
-            <Image
+            <img
               src={
                 item.games_image
                   ? item.games_image

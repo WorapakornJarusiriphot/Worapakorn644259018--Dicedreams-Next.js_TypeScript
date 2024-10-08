@@ -461,7 +461,7 @@ function PostActivity() {
                     overflow: "hidden", // เพื่อให้รูปภาพถูกครอบภายในวงกลม
                   }}
                 >
-                  <Image
+                  <img
                     src={item.userProfileImage || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"}
                     alt={`${item.userFirstName}`}
                     width={50}
@@ -562,7 +562,7 @@ function PostActivity() {
             </Grid>
 
             <div style={{ position: "relative" }}>
-              <Image
+              <img
                 src={item.post_activity_image || "https://raw.githubusercontent.com/WorapakornJarusiriphot/Worapakorn644259018--Dicedreams-Next.js_TypeScript/refs/heads/main/src/Page/default.png"}
                 alt={item.name_activity}
                 width={526}
