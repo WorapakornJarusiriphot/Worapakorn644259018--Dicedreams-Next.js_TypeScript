@@ -491,7 +491,7 @@ function JoinPage() {
                           <Box sx={{ display: "flex", alignItems: "center" }}>
                             <Avatar
                               alt={participant.user.first_name}
-                              src={`https://dicedreams-backend-deploy-to-render.onrender.com/images/${participant.user.user_image}`}
+                              src={`${participant.user.user_image}`}
                               sx={{ marginRight: "10px" }}
                             />
                             <Typography sx={{ color: "white" }}>
@@ -645,7 +645,7 @@ function JoinPage() {
                           <Box sx={{ display: "flex", alignItems: "center" }}>
                             <Avatar
                               alt={participant.user.first_name}
-                              src={`https://dicedreams-backend-deploy-to-render.onrender.com/images/${participant.user.user_image}`}
+                              src={`${participant.user.user_image}`}
                               sx={{ marginRight: "10px" }}
                             />
                             <Typography sx={{ color: "white" }}>

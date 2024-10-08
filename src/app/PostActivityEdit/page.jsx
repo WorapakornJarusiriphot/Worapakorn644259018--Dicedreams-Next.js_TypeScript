@@ -527,7 +527,7 @@ const PostActivityEditContent = () => {
                             onImageUpload={(file) =>
                               handleImageUpload(file, setFieldValue)
                             }
-                            initialImage={`https://dicedreams-backend-deploy-to-render.onrender.com/images/${values.postActivityImage}`} // ส่ง URL ของรูปภาพให้กับ App.js
+                            initialImage={`${values.postActivityImage}`} // ส่ง URL ของรูปภาพให้กับ App.js
                           />
                           {touched.postActivityImage &&
                             errors.postActivityImage && (

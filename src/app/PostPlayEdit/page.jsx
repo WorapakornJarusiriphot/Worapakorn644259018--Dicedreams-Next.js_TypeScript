@@ -610,7 +610,7 @@ const PostPlayEditContent = () => {
                             onImageUpload={(file) =>
                               handleImageUpload(file, setFieldValue)
                             }
-                            initialImage={`https://dicedreams-backend-deploy-to-render.onrender.com/images/${values.gamesImage}`} // ส่ง URL ของรูปภาพให้กับ App.js
+                            initialImage={`${values.gamesImage}`} // ส่ง URL ของรูปภาพให้กับ App.js
                           />
                           {touched.gamesImage && errors.gamesImage && (
                             <Alert severity="error">{errors.gamesImage}</Alert>
