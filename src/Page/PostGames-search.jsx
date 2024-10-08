@@ -88,7 +88,7 @@ const formatThaiTime = (timeString) => {
   return formattedTime;
 };
 
-function PostGames() {
+function PostGamesSearch() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -915,4 +915,4 @@ function PostGames() {
   );
 }
 
-export default PostGames;
+export default PostGamesSearch;
